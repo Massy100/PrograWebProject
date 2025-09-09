@@ -11,3 +11,4 @@ class EmailNotification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     sent = models.BooleanField(default=False)
     report = models.ForeignKey(Report, on_delete=models.CASCADE, blank=True, null=True)
+    is_active = models.BooleanField(default=True)

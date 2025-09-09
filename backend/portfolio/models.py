@@ -9,6 +9,7 @@ class Portfolio(models.Model):
     average_price = models.DecimalField(max_digits=10, decimal_places=2)
     total_inversion = models.DecimalField(max_digits=10, decimal_places=2)
     current_value = models.DecimalField(max_digits=10, decimal_places=2)
+    is_active = models.BooleanField(default=True)
 
 class Investment(models.Model):
     portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
@@ -16,3 +17,4 @@ class Investment(models.Model):
     quantity = models.IntegerField()
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
     purchased_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)

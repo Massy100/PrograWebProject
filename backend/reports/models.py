@@ -9,3 +9,4 @@ class Report(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     file_url = models.URLField(max_length=200, blank=True, null=True)
     content = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
