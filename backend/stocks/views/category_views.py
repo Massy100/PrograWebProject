@@ -1,8 +1,9 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
-from .category_services import *
-from .serializers import *
+from ..services.category_services import *
+from ..services.stock_services import *
+from ..serializers import *
 
 # Create your views here.
 @api_view(['GET'])

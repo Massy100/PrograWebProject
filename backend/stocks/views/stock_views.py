@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .stock_services import *
-from .serializers import *
+from ..services.stock_services import *
+from ..serializers import *
 
 # Create your views here.
 

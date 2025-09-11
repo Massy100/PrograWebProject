@@ -1,7 +1,7 @@
 from django.urls import path
 
-from .stock_views import *
-from .category_views import *
+from .views.stock_views import *
+from .views.category_views import *
 
 urlpatterns = [
   
