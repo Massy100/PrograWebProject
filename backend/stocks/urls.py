@@ -16,6 +16,6 @@ urlpatterns = [
 
     path('categories/', list_active_categories, name='list_active_categories'),
     path('categories/detail/', category_detail_by_name, name='category_detail_by_name'), # Query param: ?name=CategoryName
-    path('categories/save/', create_category, name='create_category'), # POST with JSON body {"name": "NewCategory"}
+    path('categories/save/', create_new_category, name='create_category'), # POST with JSON body {"name": "NewCategory"}
     path('categories/delete/', delete_category_by_id, name='delete_category_by_id'), # Query param: ?id=1
 ]

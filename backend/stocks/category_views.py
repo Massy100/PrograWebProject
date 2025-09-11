@@ -1,6 +1,5 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from django.views.decorators.csrf import csrf_exempt
 
 from .category_services import *
 from .serializers import *
@@ -23,12 +22,13 @@ def category_detail_by_name(request):
 
 @api_view(['POST'])
 def create_new_category(request):
-    name = request.data.get('name', None)
-    if name:
-        category = create_category(name, True)
-        serializer = CategorySerializer(category)
-        return Response(serializer.data, status=201)
-    return Response({"error": "Name is required"}, status=400)
+    name = request.data.get("name")  
+    if not name:
+        return Response({"error": "Name is required"}, status=400)
+
+    category = create_category(name, True)
+    serializer = CategorySerializer(category)
+    return Response(serializer.data, status=201)
 
 @api_view(['DELETE'])
 def delete_category_by_id(request):

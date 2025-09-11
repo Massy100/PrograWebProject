@@ -21,9 +21,9 @@ def get_category_by_name(name):
 # POST
 
 def create_category(name, is_active=True):
-    category = Category(name=name, is_active=is_active)
-    category.save()
+    category = Category.objects.create(name=name, is_active=is_active)
     return category
+
 
 # DELETE
 

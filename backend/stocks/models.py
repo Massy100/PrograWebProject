@@ -16,5 +16,5 @@ class StockPrice(models.Model):
     recorded_at = models.DateTimeField(auto_now_add=True)
 
 class Category(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
