@@ -1,0 +1,117 @@
+.popular-stocks-card{
+  background:#FFFFFF;
+  border-radius:12px;
+  padding:16px;
+}
+
+.popular-stocks-card-title{
+  margin:0 0 8px 0;
+  color:#13151C;
+  font-weight:700;
+  font-size:20px;
+}
+
+
+.popular-stocks-card-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:8px 0;
+  color:#6A6C75;
+  font-size:12px;
+  font-weight:600;
+}
+.popular-stocks-card-header .hdr-left{ 
+    flex:1 1 50%; 
+}
+
+.popular-stocks-card-header .hdr-mid{ 
+    flex:0 0 32%; text-align:right; 
+}
+
+.popular-stocks-card-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+
+.popular-stocks-card-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 0;
+  border-top:1px solid #E5E7EB;
+  gap:12px; 
+}
+
+.popular-stocks-card-item:first-child{
+  border-top:none;
+}
+
+.popular-stocks-card-item-left{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  flex:1 1 50%;
+  min-width:0; /* evita desbordes de texto */
+}
+
+.popular-stocks-card-item-symbol{
+  color:#13151C;
+  font-weight:700;
+  font-size:18px;
+}
+
+.popular-stocks-card-item-name{
+  color:#6A6C75;
+  font-size:14px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+
+.popular-stocks-card-item-right{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  text-align:right;
+  justify-content:flex-end;
+  flex:0 0 32%;
+}
+
+.popular-stocks-card-item-price{
+  color:#13151C;
+  font-weight:700;
+  font-size:14px;
+}
+
+.popular-stocks-card-item-change{ 
+    font-size:14px; 
+}
+.popular-stocks-text-positive{ 
+    color:#1AC963; 
+}
+.popular-stocks-text-negative{ 
+    color:#F8191E; 
+}
+
+
+.popular-stocks-card-item-investors{
+  flex:0 0 18%;
+  text-align:right;
+  font-size:14px;
+  font-weight:600;
+  color:#13151C;
+}
+
+
+
+@media (max-width:480px){
+  .popular-stocks-card-header .hdr-mid,
+  .popular-stocks-card-item-right{ flex-basis:40%; }
+  .popular-stocks-card-header .hdr-right,
+  .popular-stocks-card-item-investors{ flex-basis:20%; }
+  .popular-stocks-card-item{ padding:10px 0; }
+  .popular-stocks-card-item-price{ font-size:13px; }
+}
