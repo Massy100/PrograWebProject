@@ -1,20 +1,15 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import Header from '../components/Header';
 import StocksRecommendationsTable, { StockItem } from '@/components/stocksTable';
 import PopularStocksCard, { PopularStock } from '@/components/popularCardStocks';
 import '@/app/page.css'
+import SearchResults from '@/components/searchResults';
+
 
 export default function Home() {
   const router = useRouter();
   
-
-  // info para el header
-  const isLoggedIn = false;
-  const marketOpen = false;
-  const totalAmount = 100;
-
   // info para la tabla de stocks
   // en last30d se pone el precio de la acciones en los ultimos dias y con eso hace la grafica
   const demoRows: StockItem[] = [
@@ -39,10 +34,9 @@ export default function Home() {
 
   return (
     <main className='landingPage'>
-      <Header
-        isLoggedIn={isLoggedIn}
-        marketOpen={marketOpen}
-        totalAmount={totalAmount}
+       <SearchResults
+        headerProps={{ isLoggedIn: true, marketOpen: true, totalAmount: 100 }}
+        title="Resultados de la búsqueda"
       />
 
       <section className="div-initial">
