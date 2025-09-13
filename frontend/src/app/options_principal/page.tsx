@@ -4,9 +4,9 @@ import Link from "next/link";
 import styles from "./sidebar.module.css";
 
 const options = [
-	{ name: "Gestión de usuarios", icon: <FaUsers />, href: "/users" },
-	{ name: "Catálogo de acciones", icon: <FaChartLine />, href: "/stocks" },
-	{ name: "Transacciones", icon: <FaExchangeAlt />, href: "/transactions" },
+	{ name: "User management", icon: <FaUsers />, href: "/users" },
+	{ name: "Stock catalog", icon: <FaChartLine />, href: "/stocks" },
+	{ name: "Transactions", icon: <FaExchangeAlt />, href: "/transactions" },
 	{ name: "Dashboard", icon: <FaTachometerAlt />, href: "/dashboard" },
 ];
 
