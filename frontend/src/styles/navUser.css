@@ -1,0 +1,106 @@
+.optionsContainer{
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0 5rem;              
+  box-sizing: border-box;
+  height: 5rem;
+  background: transparent;
+}
+
+.carousel{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;     
+  gap: 20px;                   
+  min-height: 140px;
+  width: 100%;                 
+  margin: 0 auto;               
+  transition: transform .4s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+  overflow: hidden;
+}
+
+
+.optionCard{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity .4s cubic-bezier(.4,0,.2,1),
+  transform .4s cubic-bezier(.4,0,.2,1);
+}
+
+.optionCard.slide-out{
+  opacity: 0;
+  transform: translateX(-60px);
+}
+.optionCard.slide-in{
+  opacity: 1;
+  transform: translateX(60px);
+}
+
+.optionLink{ 
+  text-decoration: none; 
+}
+
+.optionButton{
+  /* background: #232733; */
+  background-color: transparent;
+  border: none;
+  padding: 14px 20px;
+  /* box-shadow: 0 2px 8px rgba(0,0,0,.08);          */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;                   
+  font-size: 18px;
+  /* color: #fff; */
+  color: #13151C;
+  border-radius: 10px;
+  transition: background .2s, color .2s, transform .2s;
+}
+
+.optionButton:hover{
+  /* background: #F2F3F7;
+  color: #13151C; */
+  background-color: #232733;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+
+.arrowButton{
+  position: absolute;           
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg,#232733 60%,#6A6C75 100%);
+  border: none;
+  cursor: pointer;
+  margin: 0 4rem;
+  padding: 10px 12px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(35,39,51,.15);
+  transition: transform .2s, opacity .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+.arrowButton:active{ transform: translateY(-50%) scale(.92); }
+.arrowButton:disabled{ opacity: .35; cursor: not-allowed; }
+
+.arrowButton:first-of-type{ left: 8px; }
+.arrowButton:last-of-type{  right: 8px; }
+
+.arrowIcon{
+  color: #fff;
+  font-size: 22px;
+  filter: drop-shadow(0 2px 4px #23273355);
+}
+

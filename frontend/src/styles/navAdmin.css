@@ -1,0 +1,52 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 80px;
+  background: #232733;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 40px;
+  gap: 32px;
+  z-index: 10;
+}
+.iconLink {
+  text-decoration: none;
+}
+.iconWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  color: white;
+  font-size: 32px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.iconWrapper:hover {
+  color: #FFA318;
+}
+.tooltip {
+  position: absolute;
+  left: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #232733;
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 15px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, left 0.2s;
+}
+.iconWrapper:hover .tooltip {
+  opacity: 1;
+  left: 70px;
+}
