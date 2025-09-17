@@ -17,6 +17,18 @@ class TransactionViewSet(viewsets.ModelViewSet):
             return FullTransactionSerializer
         return TransactionSerializer
     
+    @action(detail=False, methods=['get'], url_path='bought')
+    def bought(self, request):
+        qs = self.get_queryset().filter(transaction_type='buy')
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'], url_path='sold')
+    def sold(self, request):
+        qs = self.get_queryset().filter(transaction_type='sell')
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
+    
     @action(detail=False, methods=['get'], url_path='summary')
     def summary(self, request):
         qs = self.get_queryset()

@@ -12,4 +12,6 @@ created urls:
 /api/transactions/ 
 /api/transactions/{pk}/ 
 /api/transactions/summary/ params: start-date, end-date
+/api/transactions/bought/
+/api/transactions/sold/
 """
