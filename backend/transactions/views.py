@@ -17,18 +17,16 @@ class TransactionViewSet(viewsets.ModelViewSet):
             return FullTransactionSerializer
         return TransactionSerializer
     
-    @action(detail=False, methods=['get'], utl_path='summary')
+    @action(detail=False, methods=['get'], url_path='summary')
     def summary(self, request):
         qs = self.get_queryset()
 
         start_date = request.query_params.get('start-date')
         end_date = request.query_params.get('end-date')
 
-        if not start_date or not end_date:
-            return Response({"error": "start-date and end-date are required."}, status=400)
+        if start_date and end_date:
+            qs = qs.filter(created_at__date__gte=start_date, created_at__date__lte=end_date)
         
-        qs = qs.filter(created_at__date__gte=start_date, created_at__date__lte=end_date)
-
         transactions_count = qs.count()
         buy_count = qs.filter(transaction_type='buy').count()
         sell_count = qs.filter(transaction_type='sell').count()

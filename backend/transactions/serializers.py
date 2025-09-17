@@ -7,16 +7,16 @@ class TransactionDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TransactionDetail
-        fields = ['stock_name', 'quantity', 'unit_price']
+        fields = ['stock', 'quantity', 'unit_price']
 
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = ['code', 'transaction_type', 'total_amount', 'created_at', 'is_active']
+        fields = ['id', 'code', 'transaction_type', 'total_amount', 'created_at', 'is_active']
 
 class FullTransactionSerializer(serializers.ModelSerializer):
-    details = TransactionDetailSerializer(many=True, read_only=True)
+    details = TransactionDetailSerializer(many=True, read_only=True, source='transactiondetail_set')
 
     class Meta:
         model = Transaction
-        fields = ['code', 'transaction_type', 'total_amount', 'created_at', 'is_active', 'details']
+        fields = ['id', 'code', 'transaction_type', 'total_amount', 'created_at', 'is_active', 'details']
