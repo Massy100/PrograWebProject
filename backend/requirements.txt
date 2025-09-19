@@ -1,10 +1,11 @@
-asgiref==3.9.1
-dj-database-url==3.0.1
 Django==5.2.5
-django-cors-headers==4.7.0
+asgiref==3.9.1
+sqlparse==0.5.3
 djangorestframework==3.16.1
 psycopg==3.2.9
 psycopg-binary==3.2.9
+django-cors-headers==4.7.0
+dj-database-url==3.0.1
 python-dotenv==1.1.1
-sqlparse==0.5.3
 typing_extensions==4.15.0
+django-filter==23.3
