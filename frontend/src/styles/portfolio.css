@@ -54,6 +54,27 @@
   flex-direction: column;
 }
 
+
+.stockCard.large {
+  font-size: 14px;
+  padding: 15px;
+}
+
+
+.stockCard.small {
+  font-size: 12px;
+  padding: 8px 12px;
+}
+
+.stockCard.small .stockHeader h3 {
+  font-size: 14px;
+}
+
+.stockCard.small .stockBody p {
+  font-size: 12px;
+  margin: 2px 0;
+}
+
 .stockHeader h3 {
   margin: 0;
   font-size: 16px;
@@ -72,6 +93,18 @@
   color: #13151C;
 }
 
+.stockRow {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;           
+}
+
+.changeText {
+  font-size: 18px; 
+  font-weight: bold; 
+}
+
+
 .positive {
   color: #1AC963;
   font-weight: bold;
@@ -86,7 +119,6 @@
   color: #FFA318;
   font-weight: bold;
 }
-
 
 .modalOverlay {
   position: fixed;
