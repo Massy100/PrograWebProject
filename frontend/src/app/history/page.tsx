@@ -7,23 +7,11 @@ import TxTable from "@/components/tableTrasactions";
 import KpiCard from "@/components/KpiCard";
 import ChartSwitcher from "@/components/ChartSwitcher";
 import PortfolioList from "@/components/PortfolioList";
+import FilterDate from '@/components/filterDate';
 
 
 export default function History() {
 
-  // the things for the filter
-const options = ['Día', 'Semana', 'Mes', 'Año', 'Fecha libre'];
-const [selected, setSelected] = useState('Mes'); // por defecto "Mes"
-const [open, setOpen] = useState(false);
-
-const handleSelect = (opt: string) => {
-    setSelected(opt);
-    setOpen(false);
-  };
-
-  const clearFilter = () => {
-    setSelected('');
-  };
 
 const rows = [
   {
@@ -57,37 +45,7 @@ const rows = [
       />
 
       <div className="info-purchaseSale">
-         <div className="filter-date-div">
-          {/* Botón */}
-          <button className="filterBtn" onClick={() => setOpen(!open)}>
-            <span>Select Date</span>
-            <span className="chevron">▾</span>
-          </button>
-
-          {/* Dropdown */}
-          {open && (
-            <ul className="filterMenu">
-              {options.map((opt) => (
-                <li 
-                  key={opt} 
-                  className={opt === selected ? 'active' : ''} 
-                  onClick={() => handleSelect(opt)}
-                >
-                  {opt}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* Chip con selección */}
-          {selected && (
-            <div className="filter-chip-date">
-              {selected}
-              <button className="chip-close-date" onClick={clearFilter}>✕</button>
-            </div>
-          )}
-        </div>
-
+        <FilterDate/>
         <div className="summary-div-transactions">
           <KpiCard
             title="Earned Total"

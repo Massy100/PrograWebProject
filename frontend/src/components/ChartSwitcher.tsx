@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../styles/chartSwitcher.css';
 import BarChart from '@/components/BarChart';
 import Donut from '@/components/donutGrafic';
@@ -10,88 +10,86 @@ export default function ChartSwitcher() {
   type Tab = 'bars' | 'donut' | 'line' | 'top';
   const [tab, setTab] = useState<Tab>('bars');
 
-  // ====== DATA ESTÁTICA PARA PROBAR ======
-  const barsData = [
-    { label: 'Jan', value: 5200 },
-    { label: 'Feb', value: 4600 },
-    { label: 'Mar', value: 8200 },
-    { label: 'Apr', value: 4300 },
-    { label: 'May', value: 7600 },
-    { label: 'Jun', value: 2400 },
-  ];
+  const [barsData, setBarsData] = useState<{ label: string; value: number }[]>([]);
+  const [donutCount, setDonutCount] = useState<{ label: string; value: number }[]>([]);
+  const [plTx, setPlTx] = useState<any[]>([]);
+  const [topData, setTopData] = useState<{ name: string; amount: number }[]>([]);
 
-  const donutCount = [
-    { label: 'Buy', value: 34 },
-    { label: 'Sell', value: 21 },
-  ];
+useEffect(() => {
+  async function fetchSummary() {
+    try {
+      const res = await fetch('http://localhost:8000/api/transactions/summary/');
+      const data = await res.json();
 
-  const plTx = [
-    { date: '2025-01-10', type: 'buy'  as const, amount: 1800 },
-    { date: '2025-01-22', type: 'sell' as const, amount: 2600 },
-    { date: '2025-02-05', type: 'buy'  as const, amount: 900 },
-    { date: '2025-02-20', type: 'sell' as const, amount: 1600 },
-    { date: '2025-03-04', type: 'sell' as const, amount: 2100 },
-    { date: '2025-03-18', type: 'buy'  as const, amount: 700 },
-    { date: '2025-04-08', type: 'sell' as const, amount: 1500 },
-  ];
 
-  const topData = [
-    { name: 'MSFT', amount: 18200 },
-    { name: 'AAPL', amount: 16500 },
-    { name: 'GOOGL', amount: 12400 },
-    { name: 'NVDA', amount: 9300 },
-    { name: 'AMZN', amount: 7200 },
-    { name: 'TSLA', amount: 6100 },
-  ];
-  // =======================================
+      // Bars (neto por mes)
+      const grouped = data.transactions.reduce((acc: any, t: any) => {
+        const month = new Date(t.created_at).toLocaleString('en-US', { month: 'short' });
+        acc[month] = (acc[month] || 0) + Number(t.total_amount);
+        return acc;
+      }, {});
+      setBarsData(
+        Object.entries(grouped).map(([label, value]) => ({
+          label,
+          value: value as number,
+        }))
+      );
 
-  return (
+      // Donut (Invested vs Earned)
+      setDonutCount([
+        { label: 'Invested', value: data.invested_total },
+        { label: 'Earned', value: data.earned_total },
+      ]);
+
+      // Line P&L
+      setPlTx(
+        data.transactions.map((t: any) => ({
+          date: t.created_at,
+          type: t.transaction_type,
+          amount: t.total_amount,
+        }))
+      );
+
+      // Top 5 (stocks más altos)
+      const stockGrouped = data.transactions.reduce((acc: any, t: any) => {
+        acc[t.stock_symbol] = (acc[t.stock_symbol] || 0) + Number(t.total_amount);
+        return acc;
+      }, {});
+      const sorted = Object.entries(stockGrouped)
+        .map(([name, amount]) => ({ name, amount: amount as number }))
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 5);
+      setTopData(sorted);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+    }
+  }
+
+  fetchSummary();
+}, []);
+
+   return (
     <section className="chartPanel">
       <nav className="chartMenu">
-        <button
-          className={`chartBtnOption ${tab === 'bars' ? 'chartBtnActive' : ''}`}
-          aria-pressed={tab === 'bars'}
-          onClick={() => setTab('bars')}
-        >
-          Bars
-        </button>
-
-        <button
-          className={`chartBtnOption ${tab === 'donut' ? 'chartBtnActive' : ''}`}
-          aria-pressed={tab === 'donut'}
-          onClick={() => setTab('donut')}
-        >
-          Donut
-        </button>
-
-        <button
-          className={`chartBtnOption ${tab === 'line' ? 'chartBtnActive' : ''}`}
-          aria-pressed={tab === 'line'}
-          onClick={() => setTab('line')}
-        >
-          Line P&L
-        </button>
-
-        <button
-          className={`chartBtnOption ${tab === 'top' ? 'chartBtnActive' : ''}`}
-          aria-pressed={tab === 'top'}
-          onClick={() => setTab('top')}
-        >
-          Top 5
-        </button>
+        {(['bars', 'donut', 'line', 'top'] as Tab[]).map((key) => (
+          <button
+            key={key}
+            className={`chartBtnOption ${tab === key ? 'chartBtnActive' : ''}`}
+            onClick={() => setTab(key)}
+          >
+            {key === 'bars' && 'Bars'}
+            {key === 'donut' && 'Donut'}
+            {key === 'line' && 'Line P&L'}
+            {key === 'top' && 'Top 5'}
+          </button>
+        ))}
       </nav>
 
       <div className="chartArea">
-        {tab === 'bars' && (
-          <BarChart title="Net by Month" data={barsData} highlightIndex={2} />
-        )}
-        {tab === 'donut' && (
-          <Donut title="Transactions (count)" data={donutCount} />
-        )}
+        {tab === 'bars' && <BarChart title="Net by Month" data={barsData} highlightIndex={2} />}
+        {tab === 'donut' && <Donut title="Invested vs Earned" data={donutCount} /> }
         {tab === 'line' && <LinePL title="Cumulative P&L" data={plTx} />}
-        {tab === 'top' && (
-          <TopBars title="Top 5 by Amount" data={topData} limit={5} />
-        )}
+        {tab === 'top' && <TopBars title="Top 5 by Amount" data={topData} limit={5} />}
       </div>
     </section>
   );

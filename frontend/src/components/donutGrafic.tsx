@@ -3,32 +3,48 @@ import '../styles/donutGrafic.css';
 
 type Slice = { label: string; value: number };
 
-export default function Donut({ title = 'By Type', data }: { title?: string; data: Slice[] }) {
+export default function Donut({
+  title = 'Invested vs Earned',
+  data,
+}: {
+  title?: string;
+  data: Slice[];
+}) {
   const total = data.reduce((a, b) => a + (b.value || 0), 0) || 1;
-  const perc = data.map(d => (d.value / total) * 100);
+  const perc = data.map((d) => (d.value / total) * 100);
 
-  // colores simples: verde buy, gris/negro sell
-  const colors = ['#1ac963', '#1b2029'];
+  // colores: azul = invertido, verde = ganado
+  const colors = ['#1b2029', '#1ac963'];
 
   // construimos el conic-gradient
   let accum = 0;
-  const stops = perc.map((p, i) => {
-    const start = accum;
-    accum += p;
-    return `${colors[i % colors.length]} ${start}% ${accum}%`;
-  }).join(', ');
+  const stops = perc
+    .map((p, i) => {
+      const start = accum;
+      accum += p;
+      return `${colors[i % colors.length]} ${start}% ${accum}%`;
+    })
+    .join(', ');
 
   return (
     <section className="donutCard">
       <header className="donutHead">{title}</header>
       <div className="donutWrap">
-        <div className="donut" style={{ background: `conic-gradient(${stops})` }}>
-          <div className="donutHole">{Math.round(perc[0] || 0)}%</div>
+        <div
+          className="donut"
+          style={{ background: `conic-gradient(${stops})` }}
+        >
+          <div className="donutHole">
+            {Math.round((perc[1] || 0))}%{/* % de lo ganado */}
+          </div>
         </div>
         <ul className="donutLegend">
           {data.map((d, i) => (
             <li key={i}>
-              <span className="dot" style={{ background: colors[i % colors.length] }} />
+              <span
+                className="dot"
+                style={{ background: colors[i % colors.length] }}
+              />
               {d.label} — {d.value}
             </li>
           ))}
