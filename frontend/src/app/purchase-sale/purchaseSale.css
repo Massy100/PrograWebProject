@@ -1,0 +1,55 @@
+.div-purchaseSale {
+    min-height: 100vh;
+}
+
+.info-purchaseSale {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 2rem;
+}
+    
+.summary-div-transactions{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 95%;
+}
+
+.div-grafics-portfolio {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 2rem;
+    height: 70vh;
+    padding: 1rem;
+}
+
+.div-grafics {
+    height: 100%;
+    width: 60%;
+}
+
+.div-portfolio {
+    height: 100%;
+    width: 35%;
+    margin: 0 1rem;
+}
+
+.title-purchaseSale {
+    font-weight: 500;
+}
+
+.div-portfolio{ 
+    display: flex;
+    align-self: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.title_transactions {
+    font-size: 22px;
+    font-weight: 500;
+    margin-top: 2rem;
+}
+
+
