@@ -1,0 +1,25 @@
+.div-portfolio-list {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 100%;
+  width: 100%;
+  color: #13151C;
+}
+
+.showMoreBtn {
+    align-self: self-end;
+    width: 7rem;
+  margin-top: 16px;
+  padding: 10px 16px;
+  background:#13151C;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  transition: background 0.2s ease;
+}
+
+.showMoreBtn:hover {
+  background:#333;
+}

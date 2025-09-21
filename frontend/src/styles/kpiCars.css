@@ -1,0 +1,60 @@
+.infoCard {
+    display: flex;
+    flex-direction: column;
+    height: 5rem;
+    width: 13rem;
+    border-radius: 16px;
+    padding: 18px 20px;
+    gap: 8px;
+    border: 1px solid #e6e8ef;
+    color: #13151C;
+    background: #fff;
+    text-align: left;
+    transition: transform .08s ease, box-shadow .18s ease;
+    text-decoration: none;
+    box-shadow: 0 16px 28px -22px rgba(53, 53, 53, 0.22);
+}
+
+.infoCard:active {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  color: #fff;
+  background-color: #13151C;
+}
+
+.infoCardDark {
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  color: #fff;
+  background-color: #13151C;
+}
+
+.infoCardDark:active {
+  transform: translateY(-2px);
+    border: 1px solid #e6e8ef;
+    color: #13151C;
+    background: #fff;
+    text-align: left;
+    transition: transform .08s ease, box-shadow .18s ease;
+    text-decoration: none;
+    box-shadow: 0 16px 28px -22px rgba(53, 53, 53, 0.22);
+}
+
+.infoTitle {
+  font-size: 15px;
+  font-weight: 400;
+  opacity: 0.9;
+  margin: 0;
+  color: #A3A3A3;
+}
+
+.infoValue {
+  font-size: 32px;     
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+/* Responsive sencillo para el número grande */
+@media (max-width: 768px) { .infoValue { font-size: 26px; } }
+@media (min-width: 1200px) { .infoValue { font-size: 36px; } }

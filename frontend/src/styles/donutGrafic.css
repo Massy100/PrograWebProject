@@ -1,0 +1,66 @@
+.donutCard{ 
+  background:#fff; 
+  border-radius:16px; 
+  /* padding:clamp(12px, 2vw, 24px);  */
+}
+
+.donutHead{ 
+  font-weight:700; 
+  margin-bottom:10px; 
+  color:#1b2029; 
+  font-size:clamp(16px, 2vw, 22px);
+}
+
+.donutWrap{ 
+  display:flex; 
+  align-items:center; 
+  justify-content:center;
+  flex-wrap:wrap; 
+  gap:clamp(12px, 2vw, 24px); 
+}
+
+.donut{
+  width:clamp(200px, 20vw, 300px); 
+  height:clamp(200px, 20vw, 300px); 
+  border-radius:50%;
+  display:grid; 
+  place-items:center; 
+  position:relative;
+  flex-shrink:0;
+}
+
+.donutHole{
+  width:70%; 
+  height:70%; 
+  border-radius:50%; 
+  background:#fff;
+  display:grid; 
+  place-items:center; 
+  font-weight:800; 
+  color:#1b2029;
+  font-size:clamp(14px, 2vw, 20px);
+}
+
+.donutLegend{ 
+  list-style:none; 
+  margin:0; 
+  padding:0; 
+  color:#555; 
+  font-size:clamp(12px, 1.5vw, 16px); 
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  flex:1 1 auto;
+}
+
+.donutLegend .dot{ 
+  width:10px; 
+  height:10px; 
+  border-radius:50%; 
+  display:inline-block; 
+  margin-right:8px; 
+}
+
+@media (max-width:600px){ 
+  .donutWrap{ flex-direction:column; align-items:center; } 
+}
