@@ -1,4 +1,6 @@
-import FolderCard from "@/components/portfolioAccesePS";
+'use client';
+
+import { useState } from 'react';
 import SearchResults from "@/components/searchResults";
 import './purchaseSale.css'
 import TxTable from "@/components/tableTrasactions";
@@ -8,6 +10,20 @@ import PortfolioList from "@/components/PortfolioList";
 
 
 export default function Purchasesale() {
+
+  // the things for the filter
+const options = ['Día', 'Semana', 'Mes', 'Año', 'Fecha libre'];
+const [selected, setSelected] = useState('Mes'); // por defecto "Mes"
+const [open, setOpen] = useState(false);
+
+const handleSelect = (opt: string) => {
+    setSelected(opt);
+    setOpen(false);
+  };
+
+  const clearFilter = () => {
+    setSelected('');
+  };
 
 const rows = [
   {
@@ -41,6 +57,36 @@ const rows = [
       />
 
       <div className="info-purchaseSale">
+         <div className="filter-date-div">
+          {/* Botón */}
+          <button className="filterBtn" onClick={() => setOpen(!open)}>
+            <span>Select Date</span>
+            <span className="chevron">▾</span>
+          </button>
+
+          {/* Dropdown */}
+          {open && (
+            <ul className="filterMenu">
+              {options.map((opt) => (
+                <li 
+                  key={opt} 
+                  className={opt === selected ? 'active' : ''} 
+                  onClick={() => handleSelect(opt)}
+                >
+                  {opt}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Chip con selección */}
+          {selected && (
+            <div className="filter-chip-date">
+              {selected}
+              <button className="chip-close-date" onClick={clearFilter}>✕</button>
+            </div>
+          )}
+        </div>
 
         <div className="summary-div-transactions">
           <KpiCard
