@@ -1,0 +1,66 @@
+.chartPanel{
+  display: flex;
+  flex-direction: column;
+  min-height: 95%;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #e6e8ef;
+  color: #13151C;
+  background: #fff;
+  text-align: left;
+  transition: transform .08s ease, box-shadow .18s ease;
+  text-decoration: none;
+}
+
+/* Menú vertical simple */
+.chartMenu{
+  display:flex;
+  align-items: center;
+  justify-content: start;
+  height: 3rem;
+}
+
+.chartBtnOption{
+  display:inline-flex; 
+  align-items:center; 
+  margin: 0 .2rem;
+  padding:6px 10px; 
+  border-radius:999px; 
+  font-size:12px;
+  background:#F2F3F7; 
+  color:#525f74; 
+  border:1px solid #e5eaf1;
+}
+.chartBtnOption:hover{
+  transform: translateY(-1px);
+}
+.chartBtnActive{
+  background:#1b2029;
+  color:#fff;
+  border-color:#1b2029;
+}
+
+.chartBtnActive:hover{
+  transform: translateY(-1px);
+}
+
+/* Contenedor para la gráfica seleccionada */
+.chartArea{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  margin:.5rem  1rem  0 1rem;
+}
+
+/* Responsive: menú abajo como fila */
+@media (max-width: 720px){
+  .chartPanel{
+    grid-template-columns: 1fr;
+  }
+  .chartMenu{
+    flex-direction:row;
+    flex-wrap:wrap;
+  }
+  .chartBtn{ flex:1; min-width: 120px; }
+}

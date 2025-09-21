@@ -1,0 +1,127 @@
+/* Contenedor de la tarjeta */
+.chartCard{ 
+  height: 95%;
+  width: 95%; 
+  background:#ffffff; 
+  border-radius:16px; 
+}
+
+/* Encabezado */
+.chartHead{ 
+  display:flex; 
+  align-items:center; 
+  justify-content:space-between; 
+  margin-bottom:clamp(6px, 1vw, 12px); 
+}
+
+.chartTitle{ 
+  margin:0; 
+  font-size:clamp(14px, 2vw, 20px); 
+  font-weight:700; 
+  color:#1b2029; 
+}
+
+.chartBtn{ 
+  width:clamp(28px, 4vw, 36px); 
+  height:clamp(28px, 4vw, 36px); 
+  border-radius:50%; 
+  border:none; 
+  background:#f1f3f6; 
+  cursor:pointer; 
+  flex-shrink:0; 
+}
+
+.chartBtn:hover{ 
+  background:#e7eaf0; 
+}
+
+/* Cuerpo: eje Y + barras */
+.chartBody{ 
+  display:flex; 
+  gap:clamp(6px, 1vw, 12px); 
+}
+
+/* Eje Y */
+.yAxis{ 
+  list-style:none; 
+  margin:0; 
+  padding:0 clamp(6px, 1vw, 12px) 0 0; 
+  display:flex; 
+  flex-direction:column; 
+  justify-content:space-between; 
+  align-items:flex-end; 
+  width:clamp(36px, 6vw, 56px); 
+  color:#8c929c; 
+  font-size:clamp(11px, 1.5vw, 14px); 
+}
+
+.yTick{ 
+  line-height:1; 
+}
+
+/* Zona de barras */
+.barsWrap{ 
+  flex:1; 
+  display:flex; 
+  align-items:flex-end; 
+  justify-content:center;             /* centra el grupo de barras */
+  gap:clamp(12px, 2vw, 20px); 
+  padding:clamp(6px, 1vw, 12px) clamp(6px, 1vw, 12px) 0 0; 
+  min-height:clamp(150px, 30vh, 220px); 
+  overflow-x:auto; 
+  -webkit-overflow-scrolling:touch; 
+}
+
+/* Cada barra */
+
+.barItem{ 
+  flex:0 0 auto;                     /* ya no se estiran */
+  width:clamp(24px, 4vw, 40px);      /* ancho fijo y responsivo */
+  display:flex; 
+  flex-direction:column; 
+  align-items:center;
+  margin: 0 1rem; 
+  gap:clamp(6px, 1vw, 10px); 
+}
+
+.bar{ 
+  height:clamp(120px, 25vh, 160px); 
+  width:100%; 
+  background:transparent; 
+  display:flex; 
+  align-items:flex-end; 
+  border-radius:8px;                 /* bordes menos redondeados, más “rectos” */
+}
+
+
+/* Relleno de la barra */
+.barFill{ 
+  width:100%; 
+  border-radius:12px; 
+  background:#1b2029; 
+  opacity:.9; 
+  transition:height 0.3s ease; 
+}
+
+.barActive{ 
+  background:#9a9ba1; 
+}
+
+/* Label bajo la barra */
+.barLabel{ 
+  font-size:clamp(11px, 1.5vw, 14px); 
+  color:#8c929c; 
+}
+
+.barLabelActive{ 
+  color:#1b2029; 
+  font-weight:700; 
+}
+
+/* Responsivo simple */
+@media (max-width: 640px){ 
+  .barsWrap{ 
+    gap:clamp(8px, 2vw, 14px); 
+    min-height:clamp(130px, 28vh, 180px); 
+  } 
+}

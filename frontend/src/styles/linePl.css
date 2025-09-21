@@ -1,0 +1,61 @@
+.lineCard{
+    height: 95%;
+    width: 95%; 
+    background:#fff; 
+    border-radius:16px; 
+    box-shadow:0 12px 24px -18px rgba(0,0,0,.18); 
+}
+
+.lineHead{ 
+  display:flex; 
+  justify-content:space-between; 
+  align-items:center; 
+  margin-bottom:clamp(6px, 1vw, 12px); 
+}
+
+.lineTitle{ 
+  margin:0; 
+  font-weight:700; 
+  color:#1b2029; 
+  font-size:clamp(16px, 2vw, 22px);
+}
+
+.lineWrap{ 
+  width:100%; 
+  overflow:auto; 
+  -webkit-overflow-scrolling:touch; 
+}
+
+.lineSvg{ 
+  width:100%; 
+  height:auto; 
+  display:block; 
+  max-height:clamp(200px, 40vh, 400px);
+}
+
+.gridLine{ 
+  stroke:#e8ebf0; 
+  stroke-width:1; 
+}
+
+.yText{ 
+  font-size:clamp(10px, 1.5vw, 14px); 
+  fill:#8c929c; 
+}
+
+.xText{ 
+  font-size:clamp(10px, 1.5vw, 14px); 
+  fill:#8c929c; 
+  text-anchor:middle; 
+}
+
+.plLine{ 
+  fill:none; 
+  stroke:#1b2029; 
+  stroke-width:clamp(2px, 0.4vw, 3px); 
+}
+
+.plDot{ 
+  fill:#1b2029; 
+  r:clamp(3px, 0.5vw, 5px); 
+}
