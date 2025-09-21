@@ -1,0 +1,109 @@
+/* Tabla fluida y alineada */
+.tx__wrap{ 
+  width:100%; 
+  overflow-x:auto; 
+}
+
+.tx__table{
+  width:min(100%, 80rem);           /* fluido, sin px duros */
+  margin-inline:auto;
+  border-collapse:separate;
+  border-spacing:0 .75rem;
+  table-layout:fixed;               /* respeta colgroup */
+  font-size:0.95rem;
+}
+
+/* Head */
+.tx__table thead th{
+  color:#6A6C75;
+  font-size:.75rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  text-align:left;
+  padding:.5rem .75rem;
+  white-space:nowrap;
+}
+
+/* Filas */
+.tx__table tbody tr{
+  background:#fff;
+  transition:background .15s ease, box-shadow .15s ease, transform .06s ease;
+}
+.tx__table tbody tr:hover{ background:#F2F3F7; box-shadow:0 6px 18px rgba(0,0,0,.06); transform:translateY(-1px); }
+
+.tx__table td{
+  padding: .9rem .75rem;
+  vertical-align:middle;
+  overflow:hidden;
+}
+
+
+/* Píldora tipo */
+.tx__pill{
+  display:inline-flex; 
+  align-items:center; 
+  justify-content:center;
+  font-weight:700; 
+  font-size:.82rem;
+  border-radius: 50%; 
+  min-width:3rem; 
+  min-height:3rem;
+  color:#fff;
+}
+.tx__pill.is-buy{ background:#F8191E; }   /* rojo */
+.tx__pill.is-sell{ background:#1AC963; }  /* verde */
+
+/* Activo / inactivo */
+.tx__dot{ display:inline-block; 
+  width:.65rem; 
+  height:.65rem; 
+  border-radius:50%; 
+  margin: 0 1.5rem;
+}
+.tx__dot.ok{ background:#1AC963; }
+.tx__dot.off{ background:#F8191E; }
+
+
+.tx__assetTitle{ 
+  font-weight:600; 
+  color:#13151C; 
+  font-size:1rem; 
+  overflow:hidden;
+  text-overflow:ellipsis; 
+  white-space:nowrap;  
+}
+
+.tx__assetCode{ 
+  margin-top:.15rem; 
+  font-size:.75rem; 
+  color:#6A6C75; 
+  letter-spacing:.04em; 
+  overflow:hidden; 
+  text-overflow:ellipsis; 
+  white-space:nowrap; 
+}
+
+
+.tx__table col:nth-child(1){ 
+  width: 7% !important; 
+}
+
+.tx__table col:nth-child(2){ 
+  width:28% !important; 
+}
+
+/* Importes */
+.is-gain{ color:#1AC963; font-weight:600; }
+.is-loss{ color:#F8191E; font-weight:600; }
+
+/* Responsivo: reajusta proporciones sin px */
+@media (max-width: 62rem){ /* ~992px */
+  /* Un poco más de ancho para "Acción" en pantallas medianas */
+  .tx__table col:nth-child(2){ width:34% !important; }
+  .tx__table col:nth-child(5),
+  .tx__table col:nth-child(6){ width:13% !important; }
+}
+@media (max-width: 48rem){ /* ~768px */
+  .tx__table{ width:100%; }
+  .tx__table col:nth-child(2){ width:40% !important; }
+}

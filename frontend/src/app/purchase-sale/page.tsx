@@ -1,3 +1,4 @@
-export default function Purchasesale() {
-  return <h1> --- Hola estoy en Purchasesale--</h1>;
+export default function PurchaseSale() {
+  // cuando se creen componente ponerle otros nombre y que no sea relacionados con purchaseSale
+  return <h1> --- compra y venta-</h1>;
 }
