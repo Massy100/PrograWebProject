@@ -8,7 +8,7 @@ type Props = {
 };
 
 export default function FilterDate({ onFilterChange }: Props) {
-  const options = ['Day', 'Week', 'Month', 'Year', 'Custom'];
+  const options = ['Today', 'Week', 'Month', 'Year', 'Custom'];
   const [selected, setSelected] = useState('Month'); // default is Month
   const [open, setOpen] = useState(false);
 
@@ -18,7 +18,7 @@ export default function FilterDate({ onFilterChange }: Props) {
     let end: Date = today;
 
     switch (opt) {
-      case 'Day':
+      case 'Today':
         start = new Date(today);
         break;
       case 'Week':
