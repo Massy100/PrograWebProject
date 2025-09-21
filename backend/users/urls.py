@@ -1,7 +1,9 @@
 from django.urls import path
+from .views import UserViewSet
+from rest_framework.routers import SimpleRouter
 
-from .views.user_auth_views import *
+router = SimpleRouter()
+router.register(r'', UserViewSet, basename='user')
 
-urlpatterns = [
-  path('logged-user/', get_loggedin_user_profile, name='get_loggedin_user_profile'), # Query param: ?user_id=1
-]
+urlpatterns = router.urls
+
