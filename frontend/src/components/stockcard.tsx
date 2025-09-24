@@ -10,6 +10,7 @@ type StockCardProps = {
   purchasePrice: number;
   currentValue?: number; 
   change?: number;  
+  category?: string; 
   variant?: "small" | "large";    
 };
 
@@ -20,6 +21,7 @@ export default function StockCard({
   purchasePrice,
   currentValue,
   change,
+  category,  
   variant = "large",
 }: StockCardProps) {
   let changeClass = "neutral";
@@ -32,24 +34,26 @@ export default function StockCard({
         <h3>
           {name} <span className="stockSymbol">({symbol})</span>
         </h3>
+        {category && <span className="stockCategory">{category}</span>}
       </div>
 
       <div className="stockBody">
         {variant === "large" ? (
-          <>
-            <p>Quantity: {quantity}</p>
-            <p>Purchase Price: Q{purchasePrice.toFixed(2)}</p>
+          <div className="stockInfoContainer">
+            <div className="stockInfoRow">
+              <p>Quantity: {quantity}</p>
+              <p>Purchase Price: Q{purchasePrice.toFixed(2)}</p>
+              <p>Current Value: Q{currentValue?.toFixed(2)}</p>
+            </div>
+
             {currentValue !== undefined && (
-              <div className="stockRow">
-                <span>Current Value: Q{currentValue.toFixed(2)}</span>
-                <span className={`${changeClass} changeText`}>
-                  {change! > 0 && "↑ "}  
-                  {change! < 0 && "↓ "}   
-                  {Math.abs(change!).toFixed(2)}%
-                </span>
-              </div>
+              <span className={`${changeClass} changeText`}>
+                {change! > 0 && "↑ "}
+                {change! < 0 && "↓ "}
+                {Math.abs(change!).toFixed(2)}%
+              </span>
             )}
-          </>
+          </div>
         ) : (
           <>
             {currentValue !== undefined && (
@@ -60,6 +64,10 @@ export default function StockCard({
             )}
           </>
         )}
+
+
+
+
       </div>
     </div>
   );

@@ -100,8 +100,10 @@
 }
 
 .changeText {
-  font-size: 18px; 
-  font-weight: bold; 
+  position: absolute;        
+  right: 15px;
+  font-weight: bold;
+  font-size: 14px;
 }
 
 
@@ -188,3 +190,40 @@
   background: #232733;
   color: #fff;
 }
+
+.backButton {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: black;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.backButton:hover {
+  color: black;
+}
+
+
+.stockInfoContainer {
+  display: flex;
+  justify-content: center;   
+  align-items: center;       
+  width: 100%;
+  position: relative;       
+}
+
+.stockInfoRow {
+  display: flex;              
+  justify-content: center;    
+  align-items: center;
+  gap: 30px;                  
+}
+
+.stockInfoRow p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #13151C;
+}
+
