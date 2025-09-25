@@ -1,0 +1,13 @@
+.div-userAdmin {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: .3rem 2rem 2rem 4.5rem;
+}
+
+
+.title-user-admin {
+    font-size: 22px;
+    font-weight: 500;
+    margin-top: 1rem;
+}
