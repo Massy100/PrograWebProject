@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, AdminProfile, ClientProfile
+from .models import User, AdminProfile, ClientProfile, AdminPermissionsRequest
 
 class ClientProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -61,3 +61,16 @@ class UserDetailSerializer(serializers.ModelSerializer):
             'admin_profile',
             'client_profile'
         ]
+
+class BasicUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'name', 'email')
+
+class AdminPermissionsRequestSerialzer(serializers.ModelSerializer):
+    user = BasicUserSerializer(read_only=True)
+    reviewer = BasicUserSerializer(read_only=True)
+
+    class Meta:
+        model = AdminPermissionsRequest
+        fields = '__all__'
