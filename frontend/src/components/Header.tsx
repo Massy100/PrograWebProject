@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import '../styles/header.css';
+import CartSidebar from './CartSidebar';
 
 const CATEGORIES = [
   '', 'Tecnología', 'Finanzas', 'Salud'
@@ -37,6 +38,8 @@ export default function Header({
   const [name, setName] = useState('');
   // popover total
   const [showTotal, setShowTotal] = useState(false);
+
+  const [showCart, setShowCart] = useState(false);
 
   // filtros
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -226,7 +229,7 @@ export default function Header({
         </div>
       )}
 
-      {/* derecha: estado mercado + total */}
+      {/* derecha: estado mercado + total + carrito */}
       <div className="header-rightSection">
         <div className={`header-marketStatus ${marketOpen ? 'header-marketStatus--open' : 'header-marketStatus--closed'}`}>
           <span className="header-marketDot" />
@@ -234,18 +237,36 @@ export default function Header({
         </div>
 
         {isLoggedIn && (
-          <div className="header-totalContainer">
-            <button type="button" className="header-totalButton" onClick={() => setShowTotal(v => !v)}>
-              Total
-            </button>
-            {showTotal && (
-              <div className="header-totalPopover">
-                <strong>Total: </strong> Q.{totalAmount}
-              </div>
-            )}
-          </div>
+          <>
+        
+            <div className="header-totalContainer">
+              <button type="button" className="header-totalButton" onClick={() => setShowTotal(v => !v)}>
+                Total
+              </button>
+              {showTotal && (
+                <div className="header-totalPopover">
+                  <strong>Total: </strong> Q.{totalAmount}
+                </div>
+              )}
+            </div>
+
+       
+            <div className="header-cartContainer">
+              <button type="button" className="header-cartButton" onClick={() => setShowCart(v => !v)}>
+                🛒
+              </button>
+            </div>
+          </>
         )}
       </div>
+
+ 
+      {showCart && <CartSidebar show={showCart} onClose={() => setShowCart(false)} />}
+
     </header>
+
+    
+
+    
   );
 }
