@@ -1,0 +1,145 @@
+.cartSidebar {
+  width: 20rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #F2F3F7;
+  height: 96vh;
+  background-color: #FFFFFF;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1000;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.cartSidebar.show {
+  transform: translateX(0);
+}
+
+.cartHeader {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #13151C;
+}
+
+.cartCloseBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #6A6C75;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.cartCloseBtn:hover {
+  color: #232733;
+}
+
+.cartTotal {
+  font-weight: bold;
+  font-size: 1.125rem;
+  color: #1AC963;
+  margin-bottom: 0.5rem;
+}
+
+.cartFinishBtn {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: bold;
+  color: white;
+  background-color: #232733;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+}
+
+.cartFinishBtn:hover {
+  background-color: #1f2029;
+}
+
+.cartFinishBtn:disabled {
+  background-color: #6A6C75;
+  cursor: not-allowed;
+}
+
+.cartList {
+  flex: 1; 
+  min-height: 200px; 
+  overflow-y: scroll; 
+  border: 1px solid #F2F3F7;
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+  background-color: #F2F3F7;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+
+.cartList::-webkit-scrollbar {
+  width: 12px; 
+}
+
+.cartList::-webkit-scrollbar-track {
+  background: #F2F3F7;
+  border-radius: 4px;
+}
+
+.cartList::-webkit-scrollbar-thumb {
+  background-color: #6A6C75;
+  border-radius: 4px;
+  border: 2px solid #F2F3F7;
+}
+
+.cartItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #F2F3F7;
+  padding-bottom: 0.5rem;
+  color: #13151C;
+}
+
+.cartItemButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6A6C75;
+}
+
+.cartBtn {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background-color: #232733;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.cartBtn:hover {
+  background-color: #1f2029;
+}
+
+.cartBtnRemove {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background-color: #F8191E;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.cartBtnRemove:hover {
+  background-color: #d7151b;
+}
+
+.cartEmpty {
+  text-align: center; 
+  color: #6A6C75;
+}
