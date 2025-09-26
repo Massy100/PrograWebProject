@@ -77,7 +77,7 @@ export default function TableUserAdministration() {
         </thead>
         <tbody>
           {users.map(u => {
-            const href = `/users/${u.id}`;
+            const href = `/user-administration/${u.id}`;
             return (
               <tr key={u.id}>
                 <td className="div-table-cell">

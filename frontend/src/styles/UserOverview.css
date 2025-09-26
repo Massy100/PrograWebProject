@@ -1,0 +1,110 @@
+/* Grid contenedor de las dos cards */
+.div-content-grid {
+  width: 100%;
+  max-width: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* En desktop: dos columnas equilibradas sin dejar hueco */
+@media (min-width: 900px) {
+  .div-content-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Card base */
+.div-card {
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header de cada card */
+.div-card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  background: #fcfcfc;
+}
+
+.div-card-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 500;
+}
+
+/* Cuerpo de cada card */
+.div-card-body {
+  padding: 16px 20px;
+}
+
+/* Filas etiqueta/valor */
+.div-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+
+.div-field-label {
+  color: #555;
+  font-weight: 600;
+}
+
+.div-field-value {
+  color: #111;
+  text-align: right;
+  word-break: break-word;
+}
+
+/* Chip para Yes/No */
+.div-field-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f2f2f2;
+  border: 1px solid #e5e5e5;
+  font-weight: 700;
+}
+
+/* Separadores tipo “eras line” entre grupos */
+.div-divider {
+  height: 1px;
+  margin: 8px 0;
+  background: repeating-linear-gradient(
+    to right,
+    #e8e8e8 0px,
+    #e8e8e8 12px,
+    transparent 12px,
+    transparent 18px
+  );
+}
+
+/* Total en Wallet */
+.div-total-row {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #e2e2e2;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.div-total-label {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.div-total-value {
+  font-size: 20px;
+  font-weight: 900;
+}
+
+h2 {
+    font-size: 22px;
+    font-weight: 500;
+    margin-top: 1rem;
+}

@@ -1,0 +1,21 @@
+.div-user-sigle-admin {
+    padding: .3rem 2rem 2rem 4.5rem;
+}
+
+.title-user-single-admin {
+    font-size: 22px;
+    font-weight: 500;
+    margin-top: 1rem;
+}
+
+
+.summary-div-transactions-user{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 95%;
+}
+
+.info-user {
+    margin-top: 1.5rem;
+}
