@@ -54,3 +54,26 @@ class ClientProfile(models.Model):
     
     def __str__(self):
         return f"Client Profile: {self.user.username}"
+    
+class AdminPermissionsRequest(models.Model):
+
+    STATUS_PENDING = 'pending'
+    STATUS_APPROVED = 'approved'
+    STATUS_REJECTED = 'rejected'
+    
+    STATUS_CHOICES = (
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_APPROVED, 'Approved'),
+        (STATUS_REJECTED, 'Rejected'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='to_admin_request')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='review', null=True)
+    reviewed_at = models.DateTimeField(null=True)
+    issued_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Review posted by: {self.user.username}"
+
+
