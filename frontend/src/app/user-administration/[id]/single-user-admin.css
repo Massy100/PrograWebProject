@@ -1,13 +1,12 @@
 .div-user-sigle-admin {
-    padding: .3rem 2rem 2rem 4.5rem;
+    padding: .3rem 2rem 2rem 5rem;
 }
 
 .title-user-single-admin {
     font-size: 22px;
     font-weight: 500;
-    margin-top: 1rem;
+    margin-top: .1rem;
 }
-
 
 .summary-div-transactions-user{
     display: flex;
@@ -17,5 +16,17 @@
 }
 
 .info-user {
+    margin-top: 2rem;
+}
+
+.div-transactions {
+    margin-top: 2rem;
+}
+
+.btn-return {
     margin-top: 1.5rem;
+    font-size: 35px;
+    text-decoration: none;
+    cursor: pointer;
+    color: #232733;
 }

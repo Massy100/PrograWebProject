@@ -37,8 +37,6 @@ export default function UserOverview({
     }
   };
 
-  const formatCurrency = (n: number) =>
-    new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(n);
 
   const balance_total = wallet.balance_available + wallet.balance_blocked;
 
@@ -66,8 +64,6 @@ export default function UserOverview({
             <span className="div-field-value">{user.last_ip || "—"}</span>
           </div>
 
-          <div className="div-divider" />
-
           <div className="div-field-row">
             <span className="div-field-label">Referral Code</span>
             <span className="div-field-value">{user.referral_code || "—"}</span>
@@ -76,8 +72,6 @@ export default function UserOverview({
             <span className="div-field-label">Referral Used</span>
             <span className="div-field-chip">{user.referral_used ? "Yes" : "No"}</span>
           </div>
-
-          <div className="div-divider" />
 
           <div className="div-field-row">
             <span className="div-field-label">Created At</span>
@@ -108,15 +102,15 @@ export default function UserOverview({
 
           <div className="div-field-row">
             <span className="div-field-label">Balance Available</span>
-            <span className="div-field-value">{formatCurrency(wallet.balance_available)}</span>
+            <span className="div-field-value">Q.{wallet.balance_available}</span>
           </div>
           <div className="div-field-row">
             <span className="div-field-label">Balance Blocked</span>
-            <span className="div-field-value">{formatCurrency(wallet.balance_blocked)}</span>
+            <span className="div-field-value">Q.{wallet.balance_blocked}</span>
           </div>
           <div className="div-total-row">
             <span className="div-total-label">Total Balance</span>
-            <span className="div-total-value">{formatCurrency(balance_total)}</span>
+            <span className="div-total-value">Q.{balance_total}</span>
           </div>
         </div>
       </div>

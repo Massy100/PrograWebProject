@@ -32,9 +32,10 @@
 }
 
 .div-card-title {
-    margin: 0;
-    font-size: 17px;
-    font-weight: 500;
+  margin: 0;
+  font-size: 17px;
+  font-weight: 500;
+  color: #232733;
 }
 
 /* Cuerpo de cada card */
@@ -51,12 +52,12 @@
 }
 
 .div-field-label {
-  color: #555;
-  font-weight: 600;
+  color: #6A6C75;
+  font-weight: 400;
 }
 
 .div-field-value {
-  color: #111;
+  color: #13151C;
   text-align: right;
   word-break: break-word;
 }
@@ -67,44 +68,32 @@
   border-radius: 999px;
   background: #f2f2f2;
   border: 1px solid #e5e5e5;
-  font-weight: 700;
 }
 
-/* Separadores tipo “eras line” entre grupos */
-.div-divider {
-  height: 1px;
-  margin: 8px 0;
-  background: repeating-linear-gradient(
-    to right,
-    #e8e8e8 0px,
-    #e8e8e8 12px,
-    transparent 12px,
-    transparent 18px
-  );
-}
 
 /* Total en Wallet */
 .div-total-row {
   margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px dashed #e2e2e2;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
 }
 
 .div-total-label {
-  font-size: 15px;
-  font-weight: 800;
+  font-size: 17px;
+  font-weight: 600;
+  color: #232733;
 }
 
 .div-total-value {
-  font-size: 20px;
-  font-weight: 900;
+  font-size: 17px;
+  font-weight: 600;
+  color: #232733;
 }
 
 h2 {
-    font-size: 22px;
-    font-weight: 500;
-    margin-top: 1rem;
+  font-size: 22px;
+  font-weight: 500;
+  margin-top: 1rem;
 }

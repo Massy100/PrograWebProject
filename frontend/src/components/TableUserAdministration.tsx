@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import '../styles/TableUserAdministration.css';
 
 type UserRow = {
@@ -15,6 +15,7 @@ type UserRow = {
   balance_blocked: number;
 };
 
+// 🔹 Datos estáticos (para pruebas mientras no haya back)
 const staticUsers: UserRow[] = [
   {
     id: 1,
@@ -52,15 +53,44 @@ const staticUsers: UserRow[] = [
 ];
 
 export default function TableUserAdministration() {
-  const [users, setUsers] = useState(staticUsers);
+  const [users, setUsers] = useState<UserRow[]>(staticUsers);
+
+  // 🔹 Aquí iría la request real al back con Django REST
+  /*
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const res = await fetch('http://localhost:8000/api/users/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-store', // para que Next no guarde en cache
+        });
+        if (!res.ok) throw new Error('Error fetching users');
+        const data: UserRow[] = await res.json();
+        setUsers(data);
+      } catch (err) {
+        console.error('Error al obtener usuarios', err);
+      }
+    }
+    fetchUsers();
+  }, []);
+  */
 
   const deactivate = (id: number) => {
     setUsers(prev =>
       prev.map(u => (u.id === id ? { ...u, is_active: false } : u))
     );
+    // 🔹 Aquí podrías también hacer un PATCH a Django:
+    /*
+    fetch(`http://localhost:8000/api/users/${id}/deactivate/`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    */
   };
 
- 
   return (
     <div className="div-table-container">
       <table className="div-table">
