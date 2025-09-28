@@ -331,6 +331,20 @@
     transition:.2s;
 }
 
+.header-rightSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem; 
+}
+
+.header-cartButton {
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+
 .switch-wrap input:checked + .switch-slider{ background:#1AC963; }
 .switch-wrap input:checked + .switch-slider:after{ transform:translateX(18px); }
 
@@ -341,3 +355,5 @@
 @media (max-width:600px){
   .header-filtersPopover{ left:16px; right:16px; transform:none; }
 }
+
+

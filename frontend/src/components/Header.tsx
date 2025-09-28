@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSession } from '@/components/SessionProvider';
 import '../styles/header.css';
+import CartSidebar from './CartSidebar';
 
 const CATEGORIES = ['', 'Technology', 'Finance', 'Health'];
 
@@ -42,6 +43,8 @@ export default function Header({
   const [name, setName] = useState('');
   // total popover
   const [showTotal, setShowTotal] = useState(false);
+  // cart sidebar
+  const [showCart, setShowCart] = useState(false);
 
   // filters
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -100,7 +103,7 @@ export default function Header({
           aria-label={isLoggedIn ? user?.email : 'Open login'}
         >
           <span className="header-userIcon" aria-hidden="true">
-            <svg stroke="currentColor" fill="currentColor" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+            <svg stroke="currentColor" fill="currentColor" viewBox="0 0 16 16" height="1em" width="1em">
               <path fillRule="evenodd" d="M14 1H2a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V2a1 1 0 00-1-1zM2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2z" clipRule="evenodd"></path>
               <path fillRule="evenodd" d="M2 15v-1c0-1 1-4 6-4s6 3 6 4v1H2zm6-6a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd"></path>
             </svg>
@@ -177,68 +180,7 @@ export default function Header({
         )}
       </div>
 
-      {filtersOpen && (
-        <div className="header-filtersPopover" id="filters-popover" ref={popRef}>
-          {/* filters */}
-          <div className="f-row switch">
-            <label className="f-label">Active only</label>
-            <label className="switch-wrap">
-              <input
-                type="checkbox"
-                checked={filters.activeOnly}
-                onChange={(e) => setFilters((f) => ({ ...f, activeOnly: e.target.checked }))}
-              />
-              <span className="switch-slider" />
-            </label>
-          </div>
-
-          <div className="f-row">
-            <label className="f-label">Category</label>
-            <select
-              className="f-input"
-              value={filters.category}
-              onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c || 'all'} value={c}>
-                  {c ? c : 'All'}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="f-grid2">
-            <div className="f-row">
-              <label className="f-label">Min price</label>
-              <input
-                className="f-input"
-                type="number"
-                inputMode="decimal"
-                placeholder="0"
-                value={filters.priceMin}
-                onChange={(e) => setFilters((f) => ({ ...f, priceMin: e.target.value }))}
-              />
-            </div>
-            <div className="f-row">
-              <label className="f-label">Max price</label>
-              <input
-                className="f-input"
-                type="number"
-                inputMode="decimal"
-                placeholder="∞"
-                value={filters.priceMax}
-                onChange={(e) => setFilters((f) => ({ ...f, priceMax: e.target.value }))}
-              />
-            </div>
-          </div>
-
-          <div className="f-actions">
-            <button type="button" className="btn-ghost" onClick={clearAll}>Clear</button>
-            <button type="button" className="btn-primary" onClick={() => handleSubmit()}>Apply filters</button>
-          </div>
-        </div>
-      )}
-
+      {/* right: market status + total (user) + cart (logged in) */}
       <div className="header-rightSection">
         <div className={`header-marketStatus ${marketOpen ? 'header-marketStatus--open' : 'header-marketStatus--closed'}`}>
           <span className="header-marketDot" />
@@ -264,7 +206,26 @@ export default function Header({
             )}
           </div>
         )}
+
+        {/* Shopping cart button (visible when logged in) */}
+        {isLoggedIn && (
+          <div className="header-cartContainer">
+            <button
+              type="button"
+              className="header-cartButton"
+              onClick={() => setShowCart((v) => !v)}
+              aria-expanded={showCart}
+              aria-controls="cart-sidebar"
+              title="Shopping cart"
+            >
+              🛒
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Cart sidebar */}
+      {showCart && <CartSidebar show={showCart} onClose={() => setShowCart(false)} />}
     </header>
   );
 }
