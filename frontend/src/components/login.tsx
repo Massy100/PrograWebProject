@@ -1,82 +1,64 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useSession } from "@/components/SessionProvider";
 import "../styles/login.css";
 
 type LoginProps = {
   open: boolean;
   onClose?: () => void;
+  onSuccess?: (role: 'admin' | 'user') => void; // 👈 nuevo
 };
 
-export default function Login({ open, onClose }: LoginProps) {
+export default function Login({ open, onClose, onSuccess }: LoginProps) {
   const [showLogin, setShowLogin] = useState(true);
-  const router = useRouter();
+  const { login } = useSession();
 
-  if (!open) return null; // <-- si no está abierto, no renderiza nada
+  if (!open) return null;
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const data = {
-      email: formData.get("email"),
-      password: formData.get("password"),
-    };
+    const email = String(formData.get("email"));
+    const password = String(formData.get("password"));
 
-    try {
-      const res = await fetch("http://localhost:3000/api/users/login/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-      if (res.ok) {
-        alert("Login exitoso");
-        onClose?.();           // cierra modal si hay handler
-        router.push("/dashboard");
-      } else {
-        alert("Error: " + result.message);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error al conectar con el backend");
+    const success = await login(email, password);
+    if (success) {
+      // ------- Simulación (mock) -------
+      // lee el rol desde localStorage (mockUsers). 
+      // Eliminar cuando conectes con el back.
+      const auth = localStorage.getItem('auth');
+      const role = (auth ? JSON.parse(auth).role : 'user') as 'admin' | 'user';
+      // ---------------------------------
+
+      // ------- Descomentar con backend -------
+      // const me = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/me/`, {
+      //   credentials: 'include',
+      //   cache: 'no-store',
+      // });
+      // const data = await me.json();
+      // const role = data.role as 'admin' | 'user';
+      // ---------------------------------------
+
+      onClose?.();
+      onSuccess?.(role); // notifica a Home para que redirija por rol
+    } else {
+      alert("Credenciales incorrectas ❌");
     }
   };
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      username: formData.get("name"),
-      email: formData.get("email"),
-      password: formData.get("password"),
-      phone: formData.get("phone"),
-      referred_code: formData.get("referred_code"),
-    };
-
-    try {
-      const res = await fetch("http://localhost:3000/api/users/register/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-      if (res.ok) {
-        alert("Registro exitoso");
-        setShowLogin(true);
-      } else {
-        alert("Error: " + result.message);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error al conectar con el backend");
-    }
+    alert("Registro simulado (pendiente backend)");
+    setShowLogin(true);
   };
 
   return (
     <div className="modalOverlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <button className="closeButton" aria-label="Cerrar" onClick={onClose}><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><g><path fill="none" d="M0 0h24v24H0z"></path><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z"></path></g></svg></button>
+        <button className="closeButton" aria-label="Cerrar" onClick={onClose}>
+          <svg stroke="currentColor" fill="currentColor" viewBox="0 0 24 24" height="1em" width="1em"><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z"></path></svg>
+        </button>
 
         {showLogin ? (
           <>

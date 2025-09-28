@@ -24,6 +24,7 @@
 }
 
 .btn-return {
+    display: flex;
     margin-top: 1.5rem;
     font-size: 35px;
     text-decoration: none;
