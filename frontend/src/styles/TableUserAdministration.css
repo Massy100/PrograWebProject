@@ -1,0 +1,70 @@
+.div-table-container {
+  overflow-x: auto;
+}
+
+.div-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.div-table-header {
+  padding: 12px;
+  border-bottom: 2px solid #111827;
+  text-align: left;
+  background-color: #fff;
+}
+
+.div-table-cell {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.div-a {
+  text-decoration: none;
+  color: #111827;
+  display: inline-block;
+  width: 100%;
+}
+
+.div-a.userId {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.9rem;
+    width: 1.9rem;
+    border-radius: 50%;
+    font-size: 18px;
+    background-color: #111827;
+    color: #fff;
+    margin-right: 0;
+}
+
+.div-a:hover .div-user-name {
+  text-decoration: underline;
+}
+
+.div-user-name {
+  font-weight: bold;
+  color: #111827;
+}
+
+.div-user-username {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.div-button-deactivate {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background: #b91c1c;
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.div-button-deactivate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -1,14 +1,14 @@
 .header {
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 90;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 16px;
-    padding: 16px 24px;
+    padding: .5rem 1rem;
     background: #ffffff;
-    border-bottom: 1px solid #e5eaf1;
+    /* border-bottom: 1px solid #e5eaf1; */
 }
 
 

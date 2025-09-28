@@ -1,0 +1,2 @@
+python manage.py cleanup_sessions
+python manage.py runserserver

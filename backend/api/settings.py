@@ -55,6 +55,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    'users.middleware.SessionCleanupMiddleware',
 ]
 
 ROOT_URLCONF = 'api.urls'
@@ -136,7 +137,29 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]  
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
+# Sesions configuration
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # 'django.contrib.sessions.backends.cached_db'
+SESSION_COOKIE_NAME = 'tradingapp_sessionid'
+SESSION_COOKIE_AGE = 1209600  
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False  
+SESSION_COOKIE_SAMESITE = 'Lax' 
 
-LOGIN_URL = None
+# CORS configuration
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+# Cookies CSRF
+CSRF_COOKIE_NAME = 'tradingapp_csrftoken'
+CSRF_COOKIE_HTTPONLY = False  
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_USE_SESSIONS = False
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]

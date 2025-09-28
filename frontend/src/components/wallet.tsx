@@ -3,8 +3,12 @@
 import { useEffect, useState } from 'react';
 import '../styles/wallet.css';
 
-export default function WalletPage() {
-  const [isOpen, setIsOpen] = useState(false);
+type WalletProps = {
+  open: boolean;
+  onClose: () => void;
+};
+
+export default function Wallet({ open, onClose }: WalletProps) {
   const [balance, setBalance] = useState<number | null>(null);
   const [banks, setBanks] = useState<string[]>([]);
   const [newBank, setNewBank] = useState('');
@@ -13,23 +17,22 @@ export default function WalletPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingDeposit, setPendingDeposit] = useState<{ bank: string; amount: number } | null>(null);
 
-  // Obtener saldo desde el backend
+  // Fetch balance when opening
   useEffect(() => {
-    const fetchBalance = async () => {
+    if (!open) return;
+    (async () => {
       try {
-        const res = await fetch('/api/wallet/balance', { // BACKEND: endpoint para obtener saldo
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`, // BACKEND: token de autenticación
-          },
+        const res = await fetch('/api/wallet/balance', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          cache: 'no-store',
         });
         const data = await res.json();
-        setBalance(data.balance); // BACKEND: guardar saldo recibido
-      } catch (error) {
-        console.error(error);
+        setBalance(data.balance);
+      } catch (err) {
+        console.error(err);
       }
-    };
-    if (isOpen) fetchBalance();
-  }, [isOpen]);
+    })();
+  }, [open]);
 
   const handleSaveBank = () => {
     if (!newBank.trim()) return;
@@ -37,59 +40,47 @@ export default function WalletPage() {
     setNewBank('');
   };
 
-  // Preparar datos para depósito (no envía aún)
   const handleDeposit = () => {
-    if (!selectedBank || !amount) return alert('Completa todos los campos');
-
-    setPendingDeposit({
-      bank: selectedBank,  // BACKEND: nombre del banco a enviar
-      amount: parseFloat(amount), // BACKEND: monto a enviar
-    });
-    setShowConfirm(true); // UI: mostrar modal de confirmación
+    if (!selectedBank || !amount) return alert('Please complete all fields');
+    setPendingDeposit({ bank: selectedBank, amount: parseFloat(amount) });
+    setShowConfirm(true);
   };
 
-  // Confirmar y enviar depósito al backend
   const confirmDeposit = async () => {
     if (!pendingDeposit) return;
-
     try {
-      const res = await fetch('/api/wallet/deposit', { // BACKEND: endpoint para enviar depósito
+      const res = await fetch('/api/wallet/deposit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // BACKEND: token de autenticación
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify(pendingDeposit), // BACKEND: datos del depósito
+        body: JSON.stringify(pendingDeposit),
       });
-
-      if (!res.ok) throw new Error('Error al depositar');
-
+      if (!res.ok) throw new Error('Deposit failed');
       const result = await res.json();
-      alert(`Depósito exitoso: Q${result.newBalance}`);
-      setBalance(result.newBalance); // BACKEND: actualizar saldo con respuesta
+      alert(`Deposit successful: Q${result.newBalance}`);
+      setBalance(result.newBalance);
       setAmount('');
       setSelectedBank('');
       setShowConfirm(false);
       setPendingDeposit(null);
-    } catch (error) {
-      console.error(error);
-      alert('Hubo un problema al depositar');
+    } catch (err) {
+      console.error(err);
+      alert('There was a problem processing the deposit');
     }
   };
 
+  if (!open) return null;
+
   return (
     <>
-      <button className="wallet-toggle" onClick={() => setIsOpen(true)}>
-        Open Wallet
-      </button>
-
-      {isOpen && <div className="wallet-overlay" onClick={() => setIsOpen(false)} />}
-
+      <div className="wallet-overlay" onClick={onClose} />
       {showConfirm && pendingDeposit && (
         <div className="wallet-modal">
           <div className="wallet-modal-content">
             <h3>Confirm deposit?</h3>
-            <p><strong>BanK:</strong> {pendingDeposit.bank}</p>
+            <p><strong>Bank:</strong> {pendingDeposit.bank}</p>
             <p><strong>Amount:</strong> Q{pendingDeposit.amount.toFixed(2)}</p>
             <div className="wallet-modal-actions">
               <button className="wallet-button" onClick={() => setShowConfirm(false)}>Cancel</button>
@@ -99,13 +90,13 @@ export default function WalletPage() {
         </div>
       )}
 
-      <div className={`wallet-sidebar ${isOpen ? 'open' : ''}`}>
-        <button className="wallet-close" onClick={() => setIsOpen(false)}>✕</button>
+      <div className={`wallet-sidebar open`}>
+        <button className="wallet-close" onClick={onClose}>✕</button>
 
         <header className="wallet-header">
           <h2 className="wallet-title">Your Wallet</h2>
           <div className="wallet-balance">
-            Current balance: {balance !== null ? `Q${balance.toFixed(2)}` : 'Cargando...'}
+            Current balance: {balance !== null ? `Q${balance.toFixed(2)}` : 'Loading...'}
           </div>
         </header>
 
@@ -131,10 +122,8 @@ export default function WalletPage() {
             onChange={(e) => setSelectedBank(e.target.value)}
           >
             <option value="">-- Choose one --</option>
-            {banks.map((bank, index) => (
-              <option key={index} value={bank}>
-                {bank}
-              </option>
+            {banks.map((bank, idx) => (
+              <option key={idx} value={bank}>{bank}</option>
             ))}
           </select>
         </div>
