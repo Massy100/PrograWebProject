@@ -20,8 +20,8 @@ function toRow(s: Stock) {
   };
 }
 
+
 type HeaderPublicProps = {
-  isLoggedIn: boolean;
   marketOpen: boolean;
   totalAmount?: number;
 };
@@ -29,10 +29,12 @@ type HeaderPublicProps = {
 export default function SearchResults({
   headerProps,
   title = 'Resultados de la búsqueda',
-}: {
-  headerProps: HeaderPublicProps;
-  title?: string;
-}) {
+  onOpenLogin, //la recibimos desde Home
+  }: {
+    headerProps: HeaderPublicProps;
+    title?: string;
+    onOpenLogin?: () => void; // la definimos opcional
+  }) {
   const [rows, setRows] = useState<
     { symbol: string; name: string; price: number }[]
   >([]);
@@ -100,13 +102,15 @@ export default function SearchResults({
     }
   }
 
+  
+
   return (
     <>
       <Header
-        isLoggedIn={headerProps.isLoggedIn}
         marketOpen={headerProps.marketOpen}
         totalAmount={headerProps.totalAmount ?? 0}
         onSearch={onSearch}
+        onOpenLogin={onOpenLogin} // se la pasamos al Header
       />
 
       {open && hasSearched && (

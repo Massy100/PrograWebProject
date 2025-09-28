@@ -1,14 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useSession } from '@/components/SessionProvider';
 import '../styles/header.css';
 
-const CATEGORIES = [
-  '', 'Tecnología', 'Finanzas', 'Salud'
-]; 
+const CATEGORIES = ['', 'Tecnología', 'Finanzas', 'Salud'];
 
 type HeaderProps = {
-  isLoggedIn: boolean;
   marketOpen: boolean;
   totalAmount?: number;
   onSearch?: (params: {
@@ -18,6 +16,7 @@ type HeaderProps = {
     priceMin?: string;
     priceMax?: string;
   }) => void;
+  onOpenLogin?: () => void; // abre modal de login cuando no hay sesión
 };
 
 type Filters = {
@@ -28,11 +27,17 @@ type Filters = {
 };
 
 export default function Header({
-  isLoggedIn,
   marketOpen,
   totalAmount = 0,
   onSearch,
+  onOpenLogin,
 }: HeaderProps) {
+  const { user } = useSession();
+  const role = user?.role; // 'admin' | 'user' | undefined
+  const isUser = role === 'user';
+  const isAdmin = role === 'admin';
+  const isLoggedIn = Boolean(user);
+
   // nombre/símbolo
   const [name, setName] = useState('');
   // popover total
@@ -75,7 +80,6 @@ export default function Header({
       priceMax: filters.priceMax || undefined,
     });
     setFiltersOpen(false);
-    console.log('Buscar:', { name, ...filters });
   };
 
   const clearAll = () =>
@@ -86,17 +90,26 @@ export default function Header({
 
   return (
     <header className="header">
-      {/* icono usuario */}
-      <div className="header-userRegister" title="Cuenta">
-        <span className="header-userIcon">
-          <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M14 1H2a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V2a1 1 0 00-1-1zM2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2z" clip-rule="evenodd"></path><path fill-rule="evenodd" d="M2 15v-1c0-1 1-4 6-4s6 3 6 4v1H2zm6-6a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path></svg>
-        </span>
-      </div>
+      {(!isAdmin) && (
+        <div
+          className="header-userRegister"
+          title={isLoggedIn ? user?.email : 'Inicia sesión'}
+          onClick={() => {
+            if (!isLoggedIn) onOpenLogin?.();
+          }}
+        >
+          <span className="header-userIcon">
+            <svg stroke="currentColor" fill="currentColor" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+              <path fillRule="evenodd" d="M14 1H2a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V2a1 1 0 00-1-1zM2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2z" clipRule="evenodd"></path>
+              <path fillRule="evenodd" d="M2 15v-1c0-1 1-4 6-4s6 3 6 4v1H2zm6-6a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd"></path>
+            </svg>
+          </span>
+        </div>
+      )}
 
-      {/* centro: buscador + botón filtros (afuera) y chips debajo */}
+      {/* centro: buscador + filtros */}
       <div className="header-centerStack">
         <div className="header-searchRow">
-          {/* buscador (como tu dibujo) */}
           <form className="header-searchBox" onSubmit={handleSubmit}>
             <span className="header-searchIcon">
               <svg stroke="currentColor" fill="currentColor" viewBox="0 0 1024 1024" height="1em" width="1em">
@@ -114,7 +127,6 @@ export default function Header({
             <button type="submit" className="header-searchBtn">Buscar</button>
           </form>
 
-          {/* botón filtros (afuera) */}
           <button
             type="button"
             className="header-filtersBtn"
@@ -130,33 +142,20 @@ export default function Header({
           </button>
         </div>
 
-        {/* chips debajo */}
         {hasActiveFilters && (
           <div className="header-activeChips">
             {filters.activeOnly && (
-              <button
-                type="button"
-                className="chip"
-                onClick={() => setFilters((f) => ({ ...f, activeOnly: false }))}
-              >
+              <button type="button" className="chip" onClick={() => setFilters((f) => ({ ...f, activeOnly: false }))}>
                 Solo activas <span className="chip-x">×</span>
               </button>
             )}
             {filters.category && (
-              <button
-                type="button"
-                className="chip"
-                onClick={() => setFilters((f) => ({ ...f, category: '' }))}
-              >
+              <button type="button" className="chip" onClick={() => setFilters((f) => ({ ...f, category: '' }))}>
                 Categoría: {filters.category} <span className="chip-x">×</span>
               </button>
             )}
             {(filters.priceMin || filters.priceMax) && (
-              <button
-                type="button"
-                className="chip"
-                onClick={() => setFilters((f) => ({ ...f, priceMin: '', priceMax: '' }))}
-              >
+              <button type="button" className="chip" onClick={() => setFilters((f) => ({ ...f, priceMin: '', priceMax: '' }))}>
                 Precio: {filters.priceMin || '0'}–{filters.priceMax || '∞'} <span className="chip-x">×</span>
               </button>
             )}
@@ -164,9 +163,9 @@ export default function Header({
         )}
       </div>
 
-      {/* popover filtros */}
       {filtersOpen && (
         <div className="header-filtersPopover" id="filters-popover" ref={popRef}>
+          {/* filtros */}
           <div className="f-row switch">
             <label className="f-label">Solo activas</label>
             <label className="switch-wrap">
@@ -178,7 +177,6 @@ export default function Header({
               <span className="switch-slider" />
             </label>
           </div>
-
           <div className="f-row">
             <label className="f-label">Categoría</label>
             <select
@@ -193,7 +191,6 @@ export default function Header({
               ))}
             </select>
           </div>
-
           <div className="f-grid2">
             <div className="f-row">
               <label className="f-label">Precio mín.</label>
@@ -218,7 +215,6 @@ export default function Header({
               />
             </div>
           </div>
-
           <div className="f-actions">
             <button type="button" className="btn-ghost" onClick={clearAll}>Limpiar</button>
             <button type="button" className="btn-primary" onClick={() => handleSubmit()}>Aplicar filtros</button>
@@ -226,16 +222,16 @@ export default function Header({
         </div>
       )}
 
-      {/* derecha: estado mercado + total */}
       <div className="header-rightSection">
         <div className={`header-marketStatus ${marketOpen ? 'header-marketStatus--open' : 'header-marketStatus--closed'}`}>
           <span className="header-marketDot" />
           <span className="header-marketText">Mercado {marketOpen ? 'Abierto' : 'Cerrado'}</span>
         </div>
 
-        {isLoggedIn && (
+        {/* Total SOLO si el rol es user */}
+        {isUser && (
           <div className="header-totalContainer">
-            <button type="button" className="header-totalButton" onClick={() => setShowTotal(v => !v)}>
+            <button type="button" className="header-totalButton" onClick={() => setShowTotal((v) => !v)}>
               Total
             </button>
             {showTotal && (

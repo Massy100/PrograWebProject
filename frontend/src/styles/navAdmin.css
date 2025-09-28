@@ -52,3 +52,14 @@
   opacity: 1;
   left: 70px;
 }
+
+.logoutButton {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  border: none;
+  background-color: transparent;
+  color: #fff;
+  /* font-size: 28px; */
+  padding: .2rem;
+}

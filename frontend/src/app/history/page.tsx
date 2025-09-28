@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import SearchResults from "@/components/searchResults";
 import './history.css'
 import KpiCard from "@/components/KpiCard";
 import ChartSwitcher from "@/components/ChartSwitcher";
@@ -74,10 +73,6 @@ export default function History() {
 
   return (
     <div className="div-purchaseSale">
-      <SearchResults
-        headerProps={{ isLoggedIn: true, marketOpen: true, totalAmount: 100 }}
-        title="Resultados de la búsqueda"
-      />
 
       <div className="info-purchaseSale">
         <FilterDate

@@ -1,4 +1,7 @@
 "use client";
+
+import { useRouter } from "next/navigation";
+import { useSession } from "@/components/SessionProvider";
 import { FaUsers, FaChartLine, FaExchangeAlt, FaTachometerAlt } from "react-icons/fa";
 import Link from "next/link";
 import '../styles/navAdmin.css';
@@ -19,6 +22,9 @@ const options = [
 // ];
 
 export default function SidebarOptions() {
+  const router = useRouter();
+  const { user, logout } = useSession();
+
   return (
     <div className="sidebar">
       {options.map((option) => (
@@ -29,6 +35,26 @@ export default function SidebarOptions() {
           </div>
         </Link>
       ))}
+
+      {/* ---- Botón de Logout ---- */}
+      {user && (
+        <button
+          type="button"
+          className="iconLink logoutButton"
+          onClick={() => {
+            logout();
+            router.push("/");
+          }}
+          aria-label="Cerrar sesión"
+          title="Cerrar sesión"
+        >
+          <div className="iconWrapper">
+            {/* ícono simple de “power” */}
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M16 13L16 11 7 11 7 8 2 12 7 16 7 13z"></path><path d="M20,3h-9C9.897,3,9,3.897,9,5v4h2V5h9v14h-9v-4H9v4c0,1.103,0.897,2,2,2h9c1.103,0,2-0.897,2-2V5C22,3.897,21.103,3,20,3z"></path></svg>
+            <span className="tooltip">Logout</span>
+          </div>
+        </button>
+      )}
     </div>
   );
 }

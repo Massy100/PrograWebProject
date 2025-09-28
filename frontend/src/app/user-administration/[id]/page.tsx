@@ -2,8 +2,6 @@
 import KpiCard from '@/components/KpiCard';
 import { notFound } from 'next/navigation';
 import "./single-user-admin.css";
-import SidebarOptions from '@/components/navAdmin';
-import SearchResults from '@/components/searchResults';
 import UserOverview, { User, Wallet } from '@/components/UserOverview';
 import TransactionsTable, { TxRow } from '@/components/tableTrasactions';
 import Link from 'next/link';
@@ -175,12 +173,6 @@ export default async function UserPage({ params }: PageProps) {
 
   return (
     <>
-      <SidebarOptions />
-      <SearchResults
-        headerProps={{ isLoggedIn: true, marketOpen: true, totalAmount: 100 }}
-        title="Resultados de la búsqueda"
-      />
-
       <div className="div-user-sigle-admin">
         <Link href="/user-administration" className="btn-return" aria-label="Regresar">
           <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">

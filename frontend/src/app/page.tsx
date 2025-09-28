@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from '@/components/SessionProvider';
 import StocksRecommendationsTable, { StockItem } from '@/components/stocksTable';
 import PopularStocksCard, { PopularStock } from '@/components/popularCardStocks';
 import '@/app/page.css';
-import SearchResults from '@/components/searchResults';
 import Login from '@/components/login';
 
 export default function Home() {
   const router = useRouter();
   const [loginOpen, setLoginOpen] = useState(false);
+  const { user, logout } = useSession(); 
 
   const demoRows: StockItem[] = [
     { symbol: 'NIO',  name: 'Nio Inc.-ADR', currentPrice: 6.04,  changePct: -0.48, last30d: [9,8,7,6.5,6.7,6.6], targetPrice: 61.75,  recommendation: 'COMPRA FUERTE' },
@@ -26,19 +27,18 @@ export default function Home() {
     changePct: r.changePct,
   }));
 
-  const handleSeeMore = () => {
-    setLoginOpen(true); // <-- abre el modal de Login
-  };
-
   return (
-    <main className='landingPage'>
-      <SearchResults
-        headerProps={{ isLoggedIn: true, marketOpen: true, totalAmount: 100 }}
-        title="Resultados de la búsqueda"
-      />
-
+    <main className="landingPage">
       {/* Modal de Login controlado por estado */}
-      <Login open={loginOpen} onClose={() => setLoginOpen(false)} />
+      <Login
+        open={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onSuccess={(role) => {
+          // redirección por rol
+          if (role === 'admin') router.push('/dashboard-admin');
+          else router.push('/dashboard-user');
+        }}
+      />
 
       <section className="div-initial">
         <div className="info">
@@ -46,10 +46,19 @@ export default function Home() {
           <p className="home-text">
             Aquí tienes el pulso del mercado y las acciones recomendadas de esta semana.
           </p>
-          <button type="button" className="see-more-btn" onClick={handleSeeMore}>
-            Ver más
-          </button>
+
+          {/* Si no hay sesión, mostramos botón para login */}
+          {!user && (
+            <button
+              type="button"
+              className="see-more-btn"
+              onClick={() => setLoginOpen(true)}
+            >
+              Ver más
+            </button>
+          )}
         </div>
+
         <div className="stocks-card">
           <PopularStocksCard items={popularItems} />
         </div>
