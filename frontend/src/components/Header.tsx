@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSession } from '@/components/SessionProvider';
 import '../styles/header.css';
-import CartSidebar from './CartSidebar';
+import CartSidebar from './CartSidebar'; 
 
 const CATEGORIES = ['', 'Technology', 'Finance', 'Health'];
 
@@ -17,7 +17,7 @@ type HeaderProps = {
     priceMin?: string;
     priceMax?: string;
   }) => void;
-  onOpenLogin?: () => void; // opens login modal when there is no session
+  onOpenLogin?: () => void;
 };
 
 type Filters = {
@@ -43,7 +43,7 @@ export default function Header({
   const [name, setName] = useState('');
   // total popover
   const [showTotal, setShowTotal] = useState(false);
-  // cart sidebar
+
   const [showCart, setShowCart] = useState(false);
 
   // filters
@@ -103,7 +103,7 @@ export default function Header({
           aria-label={isLoggedIn ? user?.email : 'Open login'}
         >
           <span className="header-userIcon" aria-hidden="true">
-            <svg stroke="currentColor" fill="currentColor" viewBox="0 0 16 16" height="1em" width="1em">
+            <svg stroke="currentColor" fill="currentColor" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
               <path fillRule="evenodd" d="M14 1H2a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V2a1 1 0 00-1-1zM2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2z" clipRule="evenodd"></path>
               <path fillRule="evenodd" d="M2 15v-1c0-1 1-4 6-4s6 3 6 4v1H2zm6-6a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd"></path>
             </svg>
@@ -180,7 +180,68 @@ export default function Header({
         )}
       </div>
 
-      {/* right: market status + total (user) + cart (logged in) */}
+      {filtersOpen && (
+        <div className="header-filtersPopover" id="filters-popover" ref={popRef}>
+          {/* filters */}
+          <div className="f-row switch">
+            <label className="f-label">Active only</label>
+            <label className="switch-wrap">
+              <input
+                type="checkbox"
+                checked={filters.activeOnly}
+                onChange={(e) => setFilters((f) => ({ ...f, activeOnly: e.target.checked }))}
+              />
+              <span className="switch-slider" />
+            </label>
+          </div>
+
+          <div className="f-row">
+            <label className="f-label">Category</label>
+            <select
+              className="f-input"
+              value={filters.category}
+              onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c || 'all'} value={c}>
+                  {c ? c : 'All'}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="f-grid2">
+            <div className="f-row">
+              <label className="f-label">Min price</label>
+              <input
+                className="f-input"
+                type="number"
+                inputMode="decimal"
+                placeholder="0"
+                value={filters.priceMin}
+                onChange={(e) => setFilters((f) => ({ ...f, priceMin: e.target.value }))}
+              />
+            </div>
+            <div className="f-row">
+              <label className="f-label">Max price</label>
+              <input
+                className="f-input"
+                type="number"
+                inputMode="decimal"
+                placeholder="∞"
+                value={filters.priceMax}
+                onChange={(e) => setFilters((f) => ({ ...f, priceMax: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div className="f-actions">
+            <button type="button" className="btn-ghost" onClick={clearAll}>Clear</button>
+            <button type="button" className="btn-primary" onClick={() => handleSubmit()}>Apply filters</button>
+          </div>
+        </div>
+      )}
+
       <div className="header-rightSection">
         <div className={`header-marketStatus ${marketOpen ? 'header-marketStatus--open' : 'header-marketStatus--closed'}`}>
           <span className="header-marketDot" />
@@ -189,43 +250,45 @@ export default function Header({
 
         {/* Total ONLY for user role */}
         {isUser && (
-          <div className="header-totalContainer">
-            <button
-              type="button"
-              className="header-totalButton"
-              onClick={() => setShowTotal((v) => !v)}
-              aria-expanded={showTotal}
-              aria-controls="total-popover"
-            >
-              Total
-            </button>
-            {showTotal && (
-              <div className="header-totalPopover" id="total-popover" role="dialog" aria-label="Total amount">
-                <strong>Total: </strong> Q.{totalAmount}
-              </div>
-            )}
-          </div>
-        )}
+          <>
+            <div className="header-totalContainer">
+              <button
+                type="button"
+                className="header-totalButton"
+                onClick={() => setShowTotal((v) => !v)}
+                aria-expanded={showTotal}
+                aria-controls="total-popover"
+              >
+                Total
+              </button>
+              {showTotal && (
+                <div className="header-totalPopover" id="total-popover" role="dialog" aria-label="Total amount">
+                  <strong>Total: </strong> Q.{totalAmount}
+                </div>
+              )}
+            </div>
 
-        {/* Shopping cart button (visible when logged in) */}
-        {isLoggedIn && (
-          <div className="header-cartContainer">
-            <button
-              type="button"
-              className="header-cartButton"
-              onClick={() => setShowCart((v) => !v)}
-              aria-expanded={showCart}
-              aria-controls="cart-sidebar"
-              title="Shopping cart"
-            >
-              🛒
-            </button>
-          </div>
+            {/* Cart ONLY for user role */}
+            <div className="header-cartContainer">
+              <button
+                type="button"
+                className="header-cartButton"
+                onClick={() => setShowCart((v) => !v)}
+                aria-expanded={showCart}
+                aria-controls="cart-sidebar"
+                title="Shopping cart"
+              >
+                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 576 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M528.12 301.319l47.273-208C578.806 78.301 567.391 64 551.99 64H159.208l-9.166-44.81C147.758 8.021 137.93 0 126.529 0H24C10.745 0 0 10.745 0 24v16c0 13.255 10.745 24 24 24h69.883l70.248 343.435C147.325 417.1 136 435.222 136 456c0 30.928 25.072 56 56 56s56-25.072 56-56c0-15.674-6.447-29.835-16.824-40h209.647C430.447 426.165 424 440.326 424 456c0 30.928 25.072 56 56 56s56-25.072 56-56c0-22.172-12.888-41.332-31.579-50.405l5.517-24.276c3.413-15.018-8.002-29.319-23.403-29.319H218.117l-6.545-32h293.145c11.206 0 20.92-7.754 23.403-18.681z"></path></svg>
+              </button>
+            </div>
+          </>
         )}
       </div>
 
-      {/* Cart sidebar */}
-      {showCart && <CartSidebar show={showCart} onClose={() => setShowCart(false)} />}
+      {/* Cart sidebar (only when user & toggled) */}
+      {isUser && showCart && (
+        <CartSidebar show={showCart} onClose={() => setShowCart(false)} />
+      )}
     </header>
   );
 }

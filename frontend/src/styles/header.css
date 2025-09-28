@@ -348,6 +348,10 @@
 .switch-wrap input:checked + .switch-slider{ background:#1AC963; }
 .switch-wrap input:checked + .switch-slider:after{ transform:translateX(18px); }
 
+.header-cartButton svg{
+    color: #232733;
+}
+
 /* Responsive */
 @media (min-width:760px){
   .header-centerStack{ max-width:820px; }
