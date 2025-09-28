@@ -7,10 +7,10 @@ export type StockItem = {
   symbol: string;
   name: string;
   currentPrice: number;
-  changePct: number;          // ej: -0.48 significa -0.48%
-  last30d: number[];          // serie para sparkline (0..1 o cualquier escala)
+  changePct: number;        
+  last30d: number[];        // sparkline series (any scale)
   targetPrice: number;
-  recommendation: string;     // ej: "COMPRA", "MANTENER", etc.
+  recommendation: string;   // "BUY", "HOLD", "SELL"
 };
 
 type Props = {
@@ -21,11 +21,11 @@ export default function StocksRecommendationsTable({ rows }: Props) {
   return (
     <section className="stocks-table">
       <div className="stocks-table-header">
-        <div className="stocks-table-header-cell stocks-table-col-stock">Acciones</div>
-        <div className="stocks-table-header-cell">Precio actual</div>
-        <div className="stocks-table-header-cell">Últimos 30 días</div>
-        <div className="stocks-table-header-cell">Precio objetivo</div>
-        <div className="stocks-table-header-cell">Recomendación</div>
+        <div className="stocks-table-header-cell stocks-table-col-stock">Stocks</div>
+        <div className="stocks-table-header-cell">Current Price</div>
+        <div className="stocks-table-header-cell">Last 30 Days</div>
+        <div className="stocks-table-header-cell">Target Price</div>
+        <div className="stocks-table-header-cell">Recommendation</div>
       </div>
 
       <div className="stocks-table-body">
@@ -77,9 +77,9 @@ export default function StocksRecommendationsTable({ rows }: Props) {
                 <span
                   className={
                     'stocks-table-recommendation-pill ' +
-                    (s.recommendation.toLowerCase().includes('compra')
+                    (s.recommendation.toLowerCase().includes('buy')
                       ? 'stocks-table-pill-positive'
-                      : s.recommendation.toLowerCase().includes('venta')
+                      : s.recommendation.toLowerCase().includes('sell')
                       ? 'stocks-table-pill-negative'
                       : 'stocks-table-pill-neutral')
                   }
@@ -95,7 +95,7 @@ export default function StocksRecommendationsTable({ rows }: Props) {
   );
 }
 
-// graficas con svg
+/** Small SVG sparkline */
 function Sparkline({
   data,
   positiveColor,
@@ -142,5 +142,3 @@ function Sparkline({
     </svg>
   );
 }
-
-

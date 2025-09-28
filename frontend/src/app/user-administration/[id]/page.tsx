@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import "./single-user-admin.css";
 import UserOverview, { User, Wallet } from '@/components/UserOverview';
 import TransactionsTable, { TxRow } from '@/components/tableTrasactions';
-import Link from 'next/link';
 
 /** Opcional: si tu detalle debe ser siempre fresco */
 // export const dynamic = 'force-dynamic';
@@ -12,7 +11,7 @@ import Link from 'next/link';
 
 type PageProps = { params: { id: string } };
 
-// 🔹 BASE URL del backend (ajústala en tu .env.local)
+// BASE URL del backend (ajústala en tu .env.local)
 // NEXT_PUBLIC_API_URL=http://localhost:8000
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
@@ -174,14 +173,12 @@ export default async function UserPage({ params }: PageProps) {
   return (
     <>
       <div className="div-user-sigle-admin">
-        <Link href="/user-administration" className="btn-return" aria-label="Regresar">
+        <a href="/user-administration" className="btn-return" aria-label="Return">
           <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
             <polyline fill="none" stroke="currentColor" strokeWidth="2" points="9 6 15 12 9 18" transform="matrix(-1 0 0 1 24 0)" />
           </svg>
-        </Link>
-
-        <h3 className="title-user-single-admin">Account Details</h3>
-
+          <h3 className="title-user-single-admin">Account Details</h3>
+        </a>
         <div className="summary-div-transactions-user">
           <KpiCard title="Earned Total" value={150} format="money" dark />
           <KpiCard title="Invested Total" value={150} format="money" />

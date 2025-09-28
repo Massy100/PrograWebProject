@@ -11,7 +11,7 @@ import {
 } from '@/services/stocks';
 import '@/styles/searchResults.css';
 
-// adapta el JSON del backend (Stock) al formato simple
+// adapt backend JSON (Stock) to a simple row
 function toRow(s: Stock) {
   return {
     symbol: s.symbol,
@@ -20,7 +20,6 @@ function toRow(s: Stock) {
   };
 }
 
-
 type HeaderPublicProps = {
   marketOpen: boolean;
   totalAmount?: number;
@@ -28,13 +27,13 @@ type HeaderPublicProps = {
 
 export default function SearchResults({
   headerProps,
-  title = 'Resultados de la búsqueda',
-  onOpenLogin, //la recibimos desde Home
-  }: {
-    headerProps: HeaderPublicProps;
-    title?: string;
-    onOpenLogin?: () => void; // la definimos opcional
-  }) {
+  title = 'Search results',
+  onOpenLogin, // received from Home/ClientShell
+}: {
+  headerProps: HeaderPublicProps;
+  title?: string;
+  onOpenLogin?: () => void; // optional
+}) {
   const [rows, setRows] = useState<
     { symbol: string; name: string; price: number }[]
   >([]);
@@ -45,7 +44,7 @@ export default function SearchResults({
 
   const panelRef = useRef<HTMLDivElement | null>(null);
 
-  // cerrar con click fuera 
+  // close overlay when clicking outside
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
       if (!open || !panelRef.current) return;
@@ -59,7 +58,7 @@ export default function SearchResults({
     };
   }, [open]);
 
-  // handler que consumirá el Header
+  // handler consumed by Header
   async function onSearch(params: {
     name: string;
     activeOnly: boolean;
@@ -95,14 +94,12 @@ export default function SearchResults({
         setRows([]);
       }
     } catch (e) {
-      setError('No se pudo aplicar el filtro.');
+      setError('Could not apply the filter.');
       setRows([]);
     } finally {
       setLoading(false);
     }
   }
-
-  
 
   return (
     <>
@@ -110,21 +107,32 @@ export default function SearchResults({
         marketOpen={headerProps.marketOpen}
         totalAmount={headerProps.totalAmount ?? 0}
         onSearch={onSearch}
-        onOpenLogin={onOpenLogin} // se la pasamos al Header
+        onOpenLogin={onOpenLogin} // pass it down to Header
       />
 
       {open && hasSearched && (
-        <div className="search-overlay">
+        <div className="search-overlay" role="dialog" aria-modal="true">
           <div className="search-box" ref={panelRef}>
             <div className="search-box-header">
               <h3>{title}</h3>
-              <button onClick={() => setOpen(false)}><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M405 136.798L375.202 107 256 226.202 136.798 107 107 136.798 226.202 256 107 375.202 136.798 405 256 285.798 375.202 405 405 375.202 285.798 256z"></path></svg></button>
+              <button onClick={() => setOpen(false)} aria-label="Close">
+                <svg
+                  stroke="currentColor"
+                  fill="currentColor"
+                  viewBox="0 0 512 512"
+                  height="1em"
+                  width="1em"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M405 136.798L375.202 107 256 226.202 136.798 107 107 136.798 226.202 256 107 375.202 136.798 405 256 285.798 375.202 405 405 375.202 285.798 256z"></path>
+                </svg>
+              </button>
             </div>
 
-            {loading && <p>Cargando…</p>}
+            {loading && <p>Loading…</p>}
             {error && <p style={{ color: 'crimson' }}>{error}</p>}
             {!loading && !error && rows.length === 0 && (
-              <p>No se encontraron resultados.</p>
+              <p>No results found.</p>
             )}
 
             {!loading && !error && rows.length > 0 && (
