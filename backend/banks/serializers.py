@@ -12,5 +12,5 @@ class FundsTransferSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FundsTransfer
-        fields = ['id', 'user', 'user_name', 'bank', 'amount', 'transfer_date']
+        fields = ['id', 'reference_code', 'user', 'user_name', 'bank', 'amount', 'transfer_date']
         

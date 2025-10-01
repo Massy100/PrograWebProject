@@ -14,12 +14,13 @@ class Bank(models.Model):
         return self.name
     
 class FundsTransfer(models.Model):
+    reference_code = models.CharField(max_length=50, unique=True, default='undefined')
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     bank = models.ForeignKey(Bank, related_name='bank', on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=15, decimal_places=2)
     transfer_date = models.DateTimeField(auto_now_add=True)
 
-    @receiver(post_save, sender='FundsTransfer')
+    @receiver(post_save, sender='banks.FundsTransfer')
     def update_user_balance(sender, instance, created, **kwargs):
         if created:
             user = instance.user
