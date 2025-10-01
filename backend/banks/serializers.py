@@ -7,7 +7,6 @@ class BankSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class FundsTransferSerializer(serializers.ModelSerializer):
-    bank = BankSerializer(read_only=True)
     user_name = serializers.CharField(source='user.username', read_only=True)
 
     class Meta:
