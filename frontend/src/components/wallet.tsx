@@ -11,43 +11,63 @@ type WalletProps = {
 export default function Wallet({ open, onClose }: WalletProps) {
   const [balance, setBalance] = useState<number | null>(null);
   const [banks, setBanks] = useState<string[]>([]);
-  const [newBank, setNewBank] = useState('');
   const [selectedBank, setSelectedBank] = useState('');
   const [amount, setAmount] = useState('');
+  const [referenceCode, setReferenceCode] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
-  const [pendingDeposit, setPendingDeposit] = useState<{ bank: string; amount: number } | null>(null);
+  const [pendingDeposit, setPendingDeposit] = useState<{
+    bank: string;
+    amount: number;
+    reference: string;
+  } | null>(null);
 
-  // Fetch balance when opening
+  // 🏦 Obtener balance y bancos desde el backend
   useEffect(() => {
     if (!open) return;
+
     (async () => {
       try {
-        const res = await fetch('/api/wallet/balance', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-          cache: 'no-store',
-        });
-        const data = await res.json();
-        setBalance(data.balance);
+        const token = localStorage.getItem('token');
+
+        const [balanceRes, banksRes] = await Promise.all([
+          fetch('/api/wallet/balance', {
+            headers: { Authorization: `Bearer ${token}` },
+            cache: 'no-store',
+          }),
+          fetch('/api/banks', {
+            headers: { Authorization: `Bearer ${token}` },
+            cache: 'no-store',
+          }),
+        ]);
+
+        const balanceData = await balanceRes.json();
+        const banksData = await banksRes.json();
+
+        setBalance(balanceData.balance);
+        setBanks(banksData.banks); // ← debe ser un array de strings
       } catch (err) {
         console.error(err);
       }
     })();
   }, [open]);
 
-  const handleSaveBank = () => {
-    if (!newBank.trim()) return;
-    setBanks((prev) => [...prev, newBank.trim()]);
-    setNewBank('');
-  };
-
   const handleDeposit = () => {
-    if (!selectedBank || !amount) return alert('Please complete all fields');
-    setPendingDeposit({ bank: selectedBank, amount: parseFloat(amount) });
+    if (!selectedBank || !amount || !referenceCode) {
+      return alert('Please complete all fields');
+    }
+
+    setPendingDeposit({
+      bank: selectedBank,
+      amount: parseFloat(amount),
+      reference: referenceCode,
+    });
+
     setShowConfirm(true);
   };
 
   const confirmDeposit = async () => {
     if (!pendingDeposit) return;
+
     try {
       const res = await fetch('/api/wallet/deposit', {
         method: 'POST',
@@ -57,11 +77,15 @@ export default function Wallet({ open, onClose }: WalletProps) {
         },
         body: JSON.stringify(pendingDeposit),
       });
+
       if (!res.ok) throw new Error('Deposit failed');
+
       const result = await res.json();
       alert(`Deposit successful: Q${result.newBalance}`);
+
       setBalance(result.newBalance);
       setAmount('');
+      setReferenceCode('');
       setSelectedBank('');
       setShowConfirm(false);
       setPendingDeposit(null);
@@ -76,12 +100,14 @@ export default function Wallet({ open, onClose }: WalletProps) {
   return (
     <>
       <div className="wallet-overlay" onClick={onClose} />
+
       {showConfirm && pendingDeposit && (
         <div className="wallet-modal">
           <div className="wallet-modal-content">
             <h3>Confirm deposit?</h3>
             <p><strong>Bank:</strong> {pendingDeposit.bank}</p>
             <p><strong>Amount:</strong> Q{pendingDeposit.amount.toFixed(2)}</p>
+            <p><strong>Reference:</strong> {pendingDeposit.reference}</p>
             <div className="wallet-modal-actions">
               <button className="wallet-button" onClick={() => setShowConfirm(false)}>Cancel</button>
               <button className="wallet-button deposit" onClick={confirmDeposit}>Confirm deposit</button>
@@ -100,20 +126,6 @@ export default function Wallet({ open, onClose }: WalletProps) {
           </div>
         </header>
 
-        <div className="wallet-section wallet-group">
-          <label className="wallet-label">Bank name:</label>
-          <input
-            type="text"
-            className="wallet-input full"
-            value={newBank}
-            onChange={(e) => setNewBank(e.target.value)}
-            placeholder="Bank name"
-          />
-          <button className="wallet-button full" onClick={handleSaveBank}>
-            Save bank
-          </button>
-        </div>
-
         <div className="wallet-section">
           <label className="wallet-label">Select bank:</label>
           <select
@@ -126,6 +138,17 @@ export default function Wallet({ open, onClose }: WalletProps) {
               <option key={idx} value={bank}>{bank}</option>
             ))}
           </select>
+        </div>
+
+        <div className="wallet-section wallet-group">
+          <label className="wallet-label">Reference code:</label>
+          <input
+            type="text"
+            className="wallet-input full"
+            placeholder="Enter deposit reference"
+            value={referenceCode}
+            onChange={(e) => setReferenceCode(e.target.value)}
+          />
         </div>
 
         <div className="wallet-section wallet-group">
