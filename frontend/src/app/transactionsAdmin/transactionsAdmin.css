@@ -1,0 +1,21 @@
+.div-trasactionAdmin {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: .3rem 2rem 2rem 4.5rem;
+}
+
+
+.title-trasaction-admin {
+    position: absolute;
+    font-size: 23px;
+    font-weight: 500;
+    margin-top: 1.5rem;
+    width: 5rem;
+}
+
+.div-date-filter {
+    /* height: 5rem; */
+    margin-top: 1.5rem;
+    /* background-color: red; */
+}
