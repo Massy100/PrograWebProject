@@ -1,4 +1,4 @@
-import BuyProcess from "@/components/PurchaseSale";
+import BuyProcess from "@/components/Sale";
 import "./Purchase_Sale.css"
 
 
