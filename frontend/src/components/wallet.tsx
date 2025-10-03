@@ -18,38 +18,46 @@ export default function Wallet({ open, onClose }: WalletProps) {
   const [pendingDeposit, setPendingDeposit] = useState<{
     bank: string;
     amount: number;
-    reference: string;
+    reference_code: string;
   } | null>(null);
 
   // 🏦 Obtener balance y bancos desde el backend
   useEffect(() => {
-    if (!open) return;
+  if (!open) return;
 
-    (async () => {
-      try {
-        const token = localStorage.getItem('token');
+  (async () => {
+    try {
+      const token = localStorage.getItem('token');
 
-        const [balanceRes, banksRes] = await Promise.all([
-          fetch('/api/wallet/balance', {
-            headers: { Authorization: `Bearer ${token}` },
-            cache: 'no-store',
-          }),
-          fetch('/api/banks', {
-            headers: { Authorization: `Bearer ${token}` },
-            cache: 'no-store',
-          }),
-        ]);
+      const balanceRes = await fetch('http://localhost:8000/api/banks/fundstransfers/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action: 'get_balance' }),
+        cache: 'no-store',
+      });
 
-        const balanceData = await balanceRes.json();
-        const banksData = await banksRes.json();
+      const banksRes = await fetch('http://localhost:8000/api/banks/banks/', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        cache: 'no-store',
+      });
 
-        setBalance(balanceData.balance);
-        setBanks(banksData.banks); // ← debe ser un array de strings
-      } catch (err) {
-        console.error(err);
-      }
-    })();
-  }, [open]);
+      const balanceData = await balanceRes.json();
+      const banksData = await banksRes.json();
+
+      setBalance(balanceData.balance);
+      setBanks(banksData.banks);
+    } catch (err) {
+      console.error(err);
+    }
+  })();
+}, [open]);
+
 
   const handleDeposit = () => {
     if (!selectedBank || !amount || !referenceCode) {
@@ -59,7 +67,7 @@ export default function Wallet({ open, onClose }: WalletProps) {
     setPendingDeposit({
       bank: selectedBank,
       amount: parseFloat(amount),
-      reference: referenceCode,
+      reference_code: referenceCode,
     });
 
     setShowConfirm(true);
@@ -69,13 +77,14 @@ export default function Wallet({ open, onClose }: WalletProps) {
     if (!pendingDeposit) return;
 
     try {
-      const res = await fetch('/api/wallet/deposit', {
+      const res = await fetch('http://localhost:8000/api/banks/fundstransfers/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
         body: JSON.stringify(pendingDeposit),
+        cache: 'no-store',
       });
 
       if (!res.ok) throw new Error('Deposit failed');
@@ -107,7 +116,7 @@ export default function Wallet({ open, onClose }: WalletProps) {
             <h3>Confirm deposit?</h3>
             <p><strong>Bank:</strong> {pendingDeposit.bank}</p>
             <p><strong>Amount:</strong> Q{pendingDeposit.amount.toFixed(2)}</p>
-            <p><strong>Reference:</strong> {pendingDeposit.reference}</p>
+            <p><strong>Reference:</strong> {pendingDeposit.reference_code}</p>
             <div className="wallet-modal-actions">
               <button className="wallet-button" onClick={() => setShowConfirm(false)}>Cancel</button>
               <button className="wallet-button deposit" onClick={confirmDeposit}>Confirm deposit</button>
