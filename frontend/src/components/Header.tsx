@@ -129,7 +129,7 @@ export default function Header({
               aria-label="Search by name or symbol"
             />
 
-            <button type="submit" className="header-searchBtn">Search</button>
+            {/* <button type="submit" className="header-searchBtn">Search</button> */}
           </form>
 
           <button

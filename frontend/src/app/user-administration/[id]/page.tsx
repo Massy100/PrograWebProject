@@ -5,17 +5,10 @@ import "./single-user-admin.css";
 import UserOverview, { User, Wallet } from '@/components/UserOverview';
 import TransactionsTable, { TxRow } from '@/components/tableTrasactions';
 
-/** Opcional: si tu detalle debe ser siempre fresco */
-// export const dynamic = 'force-dynamic';
-// o usa revalidate global si tu API es cacheable.
 
 type PageProps = { params: { id: string } };
 
-// BASE URL del backend (ajústala en tu .env.local)
-// NEXT_PUBLIC_API_URL=http://localhost:8000
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
-// ---------- MOCKS (para ver funcionamiento mientras no haya backend) ----------
 const mockUser = (id: string): User => ({
   id,
   name: "Jane Doe",
@@ -140,7 +133,6 @@ async function fetchTransactions(userId: string): Promise<TxRow[]> {
 export default async function UserPage({ params }: PageProps) {
   const id = String(params.id);
 
-  // ---------- HOY: usa mocks para ver la UI ----------
   const user = mockUser(id);
   const wallet = mockWallet(id);
   const rows = mockTxRows;
@@ -149,7 +141,6 @@ export default async function UserPage({ params }: PageProps) {
   const allowedIds = ['1','2','3'];
   if (!allowedIds.includes(id)) return notFound();
 
-  // ---------- MAÑANA: activa el fetch real (sustituye mocks) ----------
   /*
   let user: User, wallet: Wallet, rows: TxRow[];
   try {

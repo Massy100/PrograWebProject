@@ -1,0 +1,75 @@
+.landingPageUser {
+  min-height: 100vh;
+}
+
+.div-initial{ 
+  display: flex;
+  justify-content: space-around;
+  /* height: 65vh; */
+  margin-top: 1rem;
+  padding: 2rem;
+}
+
+.info {
+  min-width: 30%;
+  max-width: 35%;
+  padding: 2rem;
+}
+
+.stocks-card {
+  min-width: 45%;
+  max-width: 47%;
+}
+
+/* bienvenida */
+.home-title{
+  color:#13151C;
+  font-size:38px;
+  font-weight:800;
+  margin: 0;
+}
+
+.home-text{
+  color:#6A6C75;
+  font-size:21px;
+  margin-bottom: 4rem;
+}
+
+/* botón */
+.see-more-btn{
+  text-decoration: none;
+  font-size: 18px;
+  padding: .7rem 1rem;
+  background-color: #232733;
+  border: none;
+  color:#ffffff;            
+  cursor:pointer;
+}
+
+.see-more-btn:hover{
+  background:#ffffff;
+  border: 1px solid #232733;
+  color:#232733;            
+}
+
+.div-more-info-dashboard-user{
+  padding: 0 2rem;
+
+}
+
+.div-last-purchase-sale {
+    padding: 0 2rem;
+    margin-bottom: 2rem;
+}
+
+.div-last-purchase-sale h3{
+  font-weight: 400;
+  color:#6A6C75;
+  font-size:20px;
+}
+
+
+@media (max-width:900px){
+  .home-content{ flex-direction:column; }
+  .home-aside{ width:auto; flex:unset; }
+}
