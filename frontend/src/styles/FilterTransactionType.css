@@ -31,10 +31,10 @@
 }
 
 /* Dropdown */
-.filterMenu {
+.filterMenuTransaction {
   position: absolute;
-  top: 205;
-  right: 20;
+  top: 50;
+  right: 5;
   background: #fff;
   border: 1px solid #e6e8ef;
   border-radius: 8px;
@@ -46,7 +46,7 @@
   z-index: 20;
 }
 
-.filterMenu li {
+.filterMenuTransaction li {
   padding: 8px 12px;
   cursor: pointer;
   font-size: 14px;
@@ -54,11 +54,11 @@
   transition: background 0.15s;
 }
 
-.filterMenu li:hover {
+.filterMenuTransaction li:hover {
   background: #f5f5f7;
 }
 
-.filterMenu li.active {
+.filterMenuTransaction li.active {
   font-weight: 600;
   color: #1b2029;
 }

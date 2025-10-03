@@ -7,15 +7,22 @@
 
 
 .title-trasaction-admin {
-    position: absolute;
-    font-size: 23px;
+    font-size: 22px;
     font-weight: 500;
     margin-top: 1.5rem;
     width: 5rem;
 }
 
-.div-date-filter {
-    /* height: 5rem; */
+.div-filter {
+    position: absolute;
+    top: 85;
+    right: 45;
+    width: 50%;
     margin-top: 1.5rem;
-    /* background-color: red; */
+}
+
+.div-all-trasactions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

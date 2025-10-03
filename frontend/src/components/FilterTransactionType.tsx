@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import '../styles/filterDate.css'; // Reutiliza los mismos estilos (botón, menú y chip)
+import '../styles/FilterTransactionType.css';
 
 type TxType = 'purchase' | 'sale' | 'money_movement' | null;
 
 type Props = {
-
   onTypeChange: (value: TxType, label: string) => void;
 
   initial?: TxType;
@@ -18,7 +17,7 @@ type Props = {
     purchase?: string;
     sale?: string;
     money_movement?: string;
-    button?: string; // label del botón
+    button?: string; // button label
   };
 };
 
@@ -29,11 +28,10 @@ export default function FilterTransactionType({
   labels,
 }: Props) {
   const L = {
-    all: 'Todos',
-    purchase: 'Compras',
-    sale: 'Ventas',
-    money_movement: 'Movimientos',
-    button: 'Tipo de transacción',
+    purchase: 'Purchases',
+    sale: 'Sales',
+    money_movement: 'Movements',
+    button: 'Transaction Type',
     ...labels,
   };
 
@@ -90,7 +88,7 @@ export default function FilterTransactionType({
 
   return (
     <div className="filter-date-div" style={{ position: 'relative' }}>
-      {/* Botón */}
+      {/* Button */}
       <button
         className="filterBtn"
         aria-haspopup="listbox"
@@ -103,7 +101,7 @@ export default function FilterTransactionType({
 
       {/* Dropdown */}
       {open && (
-        <ul className="filterMenu" role="listbox">
+        <ul className="filterMenuTransaction" role="listbox">
           {options.map((opt) => (
             <li
               key={`${opt.value ?? 'all'}`}
@@ -124,11 +122,11 @@ export default function FilterTransactionType({
 
       {/* Chip */}
       {currentLabel && (
-        <div className="filter-chip-date" /* reutiliza chip styles */>
+        <div className="filter-chip-date" /* reuse chip styles */>
           {currentLabel}
           <button
             className="chip-close-date"
-            aria-label="Quitar filtro"
+            aria-label="Remove filter"
             onClick={clearFilter}
           >
             ✕
