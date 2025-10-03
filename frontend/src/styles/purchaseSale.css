@@ -1,7 +1,7 @@
 .buy-container {
-  padding: 32px;
-  max-width: 600px;
-  margin: auto;
+  padding: 100px;
+  max-width: 1000px;
+  margin: 40px auto;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -38,7 +38,7 @@
 }
 
 .step-line {
-  width: 100px;
+  width: 200px;
   height: 4px;
   background: #ccc;
   margin-left: -1px;
