@@ -3,6 +3,13 @@
 import { useState } from "react";
 import { useSession } from "@/components/SessionProvider";
 import "../styles/login.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { PhoneNumberUtil } from "google-libphonenumber";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+
+
+
 
 type LoginProps = {
   open: boolean;
@@ -11,7 +18,17 @@ type LoginProps = {
 };
 
 export default function Login({ open, onClose, onSuccess }: LoginProps) {
+  const phoneUtil = PhoneNumberUtil.getInstance();
   const [showLogin, setShowLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);           
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState(""); 
+  const [hasReferral, setHasReferral] = useState(false);
+  const [referralError, setReferralError] = useState("");
+  const [phoneFull, setPhoneFull] = useState("");
+
+
   const { login } = useSession();
 
   if (!open) return null;
@@ -19,10 +36,10 @@ export default function Login({ open, onClose, onSuccess }: LoginProps) {
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = String(formData.get("email"));
+    const emailoruser = String(formData.get("emailoruser"));
     const password = String(formData.get("password"));
 
-    const success = await login(email, password);
+    const success = await login(emailoruser, password);
     if (success) {
       // ------- Simulación (mock) -------
       // lee el rol desde localStorage (mockUsers). 
@@ -49,9 +66,51 @@ export default function Login({ open, onClose, onSuccess }: LoginProps) {
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert("Registro simulado (pendiente backend)");
-    setShowLogin(true);
-  };
+
+    const formData = new FormData(e.currentTarget);
+    const password = String(formData.get("password"));
+    const confirmPassword = String(formData.get("confirmPassword"));
+    
+
+  
+    
+    if (password !== confirmPassword) {
+      setPasswordError("Passwords must match");
+      return;
+    } else {
+      setPasswordError("");
+    }
+
+    if (phoneFull) {
+      try {
+        const number = phoneUtil.parse(phoneFull); 
+        if (!phoneUtil.isValidNumber(number)) {
+          setPhoneError("Invalid phone number");
+          return;
+        } else {
+          setPhoneError("");
+        }
+      } catch (err) {
+        setPhoneError("Invalid phone number format");
+        return;
+      }
+    } else {
+      setPhoneError(""); 
+    }
+
+
+      const referralCode = String(formData.get("referred_code")).trim();
+      if (hasReferral && !referralCode) {
+        setReferralError("Referral code is required");
+        return;
+      } else {
+        setReferralError("");
+      }
+
+
+      alert("Registro simulado (pendiente backend)");
+      setShowLogin(true);
+    };
 
   return (
     <div className="modalOverlay" onClick={onClose}>
@@ -64,28 +123,45 @@ export default function Login({ open, onClose, onSuccess }: LoginProps) {
           <>
             <h2 className="modalTitle">Login</h2>
             <form className="form" onSubmit={handleLogin}>
-              <input type="email" name="email" placeholder="Email" className="input" required />
-              <input type="password" name="password" placeholder="Contraseña" className="input" required />
-              <button type="submit" className="submitButton">Entrar</button>
+              <input type="text" name="emailoruser" placeholder="Email or User" className="input" required />
+              <input type="password" name="password" placeholder="Password" className="input" required />
+              <button type="submit" className="submitButton">Login</button>
             </form>
             <p className="switchText">
-              ¿No tienes cuenta?{" "}
-              <span className="switchLink" onClick={() => setShowLogin(false)}>Regístrate</span>
+              Don't have an account?{" "}
+              <span className="switchLink" onClick={() => setShowLogin(false)}>Register</span>
             </p>
           </>
         ) : (
           <>
-            <h2 className="modalTitle">Registro</h2>
+            <h2 className="modalTitle">Register</h2>
             <form className="form" onSubmit={handleRegister}>
-              <input type="text" name="name" placeholder="Nombre" className="input" required />
+              <input type="text" name="name" placeholder="User" className="input" required />
               <input type="email" name="email" placeholder="Email" className="input" required />
-              <input type="password" name="password" placeholder="Contraseña" className="input" required />
-              <input type="tel" name="phone" placeholder="Teléfono" className="input" />
-              <input type="text" name="referred_code" placeholder="Código de referido" className="input" />
-              <button type="submit" className="submitButton">Crear cuenta</button>
+              <div className="passwordContainer">
+                <input type={showPassword ? "text" : "password"} name="password" placeholder="Password" className="input" required />
+                <button type="button" className="eyeButton" onClick={() => setShowPassword(!showPassword)}>{showPassword ? <FaEyeSlash /> : <FaEye />}</button>
+              </div>
+              <div className="passwordContainer">
+                <input type={showConfirmPassword ? "text" : "password"} name="confirmPassword" placeholder="Confirm Password" className="input" required />
+                <button type="button" className="eyeButton" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>{showConfirmPassword ? <FaEyeSlash /> : <FaEye />}</button>
+              </div>
+              {passwordError && <p className="errorText">{passwordError}</p>}
+              <div className="phoneContainer">
+                <PhoneInput value={phoneFull} onChange={(value) => setPhoneFull(value)} inputClass="input" enableSearch placeholder="Phone" />
+                {phoneError && <p className="errorText">{phoneError}</p>}
+              </div>
+
+              <input type="checkbox" checked={hasReferral} onChange={() => setHasReferral(!hasReferral)} /> I have a referral code
+              {hasReferral && <input type="text" name="referred_code" placeholder="Referral Code" className="input" />}
+              {referralError && <p className="errorText">{referralError}</p>}
+
+            
+
+              <button type="submit" className="submitButton">Create Account</button>
             </form>
             <p className="switchText">
-              ¿Ya tienes cuenta?{" "}
+              Already have an account?{" "}
               <span className="switchLink" onClick={() => setShowLogin(true)}>Login</span>
             </p>
           </>

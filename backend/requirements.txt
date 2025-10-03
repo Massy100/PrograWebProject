@@ -9,3 +9,4 @@ dj-database-url==3.0.1
 python-dotenv==1.1.1
 typing_extensions==4.15.0
 django-filter==23.3
+phonenumbers==8.14.3
