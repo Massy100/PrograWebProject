@@ -1,12 +1,11 @@
-.landingPage {
+.landingPageUser {
   min-height: 100vh;
-  background-color: #f7f7f9;
+  background-color: #F7F7F9;
 }
 
 .div-initial{ 
   display: flex;
   justify-content: space-around;
-  height: 65vh;
   padding: 2rem;
 }
 
@@ -31,15 +30,15 @@
 
 .home-text{
   color:#6A6C75;
-  font-size:24px;
+  font-size:21px;
+  margin-bottom: 4rem;
 }
 
 /* botón */
 .see-more-btn{
-  margin-top: 5rem;
-  height: 3rem;
-  width: 20%;
+  text-decoration: none;
   font-size: 18px;
+  padding: .7rem 1rem;
   background-color: #232733;
   border: none;
   color:#ffffff;            
@@ -52,6 +51,21 @@
   color:#232733;            
 }
 
+.div-more-info-dashboard-user{
+  padding: 0 2rem;
+
+}
+
+.div-last-purchase-sale {
+    padding: 0 2rem;
+    margin-bottom: 2rem;
+}
+
+.div-last-purchase-sale h3{
+  font-weight: 400;
+  color:#6A6C75;
+  font-size:20px;
+}
 
 
 @media (max-width:900px){

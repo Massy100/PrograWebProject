@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSession } from '@/components/SessionProvider';
 import '../styles/header.css';
-import CartSidebar from './CartSidebar'; 
+// import CartSidebar from './CartSidebar'; 
+import CartSidebar from './CartSidebar';
 
 const CATEGORIES = ['', 'Technology', 'Finance', 'Health'];
 
@@ -129,7 +130,7 @@ export default function Header({
               aria-label="Search by name or symbol"
             />
 
-            <button type="submit" className="header-searchBtn">Search</button>
+            {/* <button type="submit" className="header-searchBtn">Search</button> */}
           </form>
 
           <button
@@ -245,7 +246,7 @@ export default function Header({
       <div className="header-rightSection">
         <div className={`header-marketStatus ${marketOpen ? 'header-marketStatus--open' : 'header-marketStatus--closed'}`}>
           <span className="header-marketDot" />
-          <span className="header-marketText">Market {marketOpen ? 'Open' : 'Closed'}</span>
+          Market {marketOpen ? 'Open' : 'Closed'}
         </div>
 
         {/* Total ONLY for user role */}

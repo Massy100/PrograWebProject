@@ -5,10 +5,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 16px;
-    padding: .5rem 1rem;
-    background: #ffffff;
-    /* border-bottom: 1px solid #e5eaf1; */
+    max-height: 2rem;
+    padding: .5rem 1rem .3rem 1rem;
+    /* colo para cuando este en la pagina del user */
+    /* background: #FFFFFF; */
+    background-color: #f7f7f9;
 }
 
 
@@ -18,31 +19,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 4rem;
-    height: 4rem;
+    width: 1.4rem;
+    height: 1.4rem;
     border-radius: 10%;
     margin-left: 1rem;
-    background: #ffffff;
+    background: inherit;
     cursor: pointer;
 }
 
 .header-userIcon {
-    font-size: 40px;
+    font-size: 35px;
     color: #232733;
 }
 
-
-.header-searchForm {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    background: #F2F3F7;
-    border: 1px solid #e5eaf1;
-    border-radius: 8px;
-    min-width: 280px;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
-}
 
 .header-searchIcon {
     color: #5d6b82;
@@ -65,17 +54,24 @@
     display: flex;
     align-items: center;
     justify-self:flex-end;
-    gap: 12px;
+    gap: 8rem 1rem ;
+    display: flex;
+    align-items: center;
+    background-color: transparent;
 }
 
 .header-marketStatus {
+    height: 1.15rem;
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    border: 1px solid #e5eaf1;
+    border: 1px solid #f2f2f2;
     border-radius: 6px;
-    background: #ffffff;
+    color: #232733;
+    font-weight: 500;
+    font-size: 15px;
+    background: transparent;
     box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
 }
 
@@ -93,22 +89,21 @@
     background: #F8191E; 
 }
 
-.header-marketText {
-    color: #232733;
-    font-size: 15px;
-    font-weight: 500;
-}
 
 .header-totalContainer {
     position: relative;
 }
 
 .header-totalButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.15rem;
     padding: 8px 12px;
     border-radius: 6px;
     font-size: 15px;
-    border: 1px solid #e5eaf1;
-    background: #ffffff;
+    border: 1px solid #f2f2f2;
+    background: transparent;
     color: #232733;
     cursor: pointer;
     box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
@@ -149,15 +144,17 @@
 }
 
 .header-searchBox{
+    margin-top: .2rem;
+    height: .8rem;
     flex:1;
     display:flex;
     align-items:center;
     gap:8px;
     padding:8px 10px;
     max-width: 55%;
-    background:#F2F3F7;
+    background: #f2f2f2;
     border:1px solid #e5eaf1;
-    border-radius:8px;
+    border-radius:20px;
     box-shadow:0 1px 2px rgba(16,24,40,.06);
 }
 
@@ -168,28 +165,36 @@
 
 .header-searchBox .header-searchInput{
     flex:1;
-    border:none; outline:none; background:transparent;
+    border:none; outline:none; 
+    background:transparent;
     color:#5d6b82; font-size:14px;
 }
 
 .header-searchBtn{
     border:1px solid #232733;
-    background:#232733; color:#F2F3F7;
-    border-radius:6px; padding:8px 12px; cursor:pointer;
+    background:#232733; 
+    color:#F2F3F7;
+    border-radius: 20px; 
+    padding:8px 12px; 
+    cursor:pointer;
 }
 .header-searchBtn:hover{ filter:brightness(1.04); }
 
-/* Botón filtros (afuera) */
+
+
 .header-filtersBtn{
+    margin-top: .10rem;
+    height: 2.05rem;
     display:inline-flex; 
     align-items:center; 
     justify-content:center; 
     gap:6px;
-    border:1px solid #e5eaf1; 
-    background:#ffffff; 
-    color:#5d6b82;
+    border:1px solid #f2f2f2; 
+    background: transparent; 
+    color: #5d6b82;
     border-radius:8px; 
-    padding:8px 12px; cursor:pointer;
+    padding:8px 12px; 
+    cursor:pointer;
     box-shadow:0 1px 2px rgba(16,24,40,.06);
     min-width:44px;
 }
@@ -292,7 +297,7 @@
 
 .btn-primary{
     border:1px solid #232733; 
-    background:#232733; 
+    background:#021631; 
     color:#F2F3F7;
     padding:8px 12px; 
     border-radius:8px; 
@@ -331,11 +336,6 @@
     transition:.2s;
 }
 
-.header-rightSection {
-  display: flex;
-  align-items: center;
-  gap: 1rem; 
-}
 
 .header-cartButton {
   font-size: 1.5rem;

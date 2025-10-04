@@ -7,6 +7,7 @@ import ChartSwitcher from "@/components/ChartSwitcher";
 import PortfolioList from "@/components/PortfolioList";
 import FilterDate from '@/components/filterDate';
 import TransactionsTable from '@/components/tableTrasactions';
+import BigCardKpi from '@/components/BigCardKpi';
 
 type TxType = 'buy' | 'sell';
 
@@ -81,8 +82,12 @@ export default function History() {
             fetchSummary(range ?? undefined); // 👈 aquí ya aplicamos el filtro
           }}
         />
-
+        
+        <h3 className='title-history'>History</h3>
         <div className="summary-div-transactions">
+          <BigCardKpi title={''} value={''}/>
+        </div>
+        {/* <div className="summary-div-transactions">
           <KpiCard
             title="Earned Total"
             value={summary?.earned_total ?? 0}
@@ -104,7 +109,7 @@ export default function History() {
             value={summary?.sell_count ?? 0}
             format="number"
           />
-        </div>
+        </div> */}
 
         <div className="div-grafics-portfolio">
           <div className="div-grafics">

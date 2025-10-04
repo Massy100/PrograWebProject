@@ -2,14 +2,16 @@
 .tx__wrap{ 
   width:100%; 
   overflow-x:auto; 
+  background-color: #fff;
+  border-radius: 10px;
 }
 
 .tx__table{
-  width:min(100%, 80rem);           /* fluido, sin px duros */
+  width:min(100%, 80rem);          
   margin-inline:auto;
   border-collapse:separate;
   border-spacing:0 .75rem;
-  table-layout:fixed;               /* respeta colgroup */
+  table-layout:fixed;               
   font-size:0.95rem;
 }
 
@@ -89,7 +91,7 @@
 }
 
 .tx__table col:nth-child(2){ 
-  width:28% !important; 
+  width: 23% !important; 
 }
 
 /* Importes */

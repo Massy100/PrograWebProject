@@ -1,5 +1,7 @@
 .div-table-container {
   overflow-x: auto;
+  background-color: #fff;
+  border-radius: 10px;
 }
 
 .div-table {
@@ -10,9 +12,11 @@
 
 .div-table-header {
   padding: 12px;
-  border-bottom: 2px solid #111827;
+  border-bottom: 2px solid #ededf2;
   text-align: left;
-  background-color: #fff;
+  color: #828692;
+  font-weight: 500;
+  background-color: transparent;
 }
 
 .div-table-cell {
@@ -28,25 +32,24 @@
 }
 
 .div-a.userId {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 1.9rem;
-    width: 1.9rem;
-    border-radius: 50%;
-    font-size: 18px;
-    background-color: #111827;
-    color: #fff;
-    margin-right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.9rem;
+  width: 1.9rem;
+  border-radius: 50%;
+  font-size: 18px;
+  /* background-color: #232733; */
+  font-weight: 500;
+  color: #232733;
+  margin-right: 0;
 }
 
-.div-a:hover .div-user-name {
-  text-decoration: underline;
-}
+
 
 .div-user-name {
   font-weight: bold;
-  color: #111827;
+  color: #232733;
 }
 
 .div-user-username {
@@ -58,7 +61,7 @@
   padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid #e5e7eb;
-  background: #b91c1c;
+  background: #646c79;
   color: #fff;
   font-size: 0.85rem;
   cursor: pointer;
