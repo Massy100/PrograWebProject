@@ -10,34 +10,38 @@ type WalletProps = {
 
 export default function Wallet({ open, onClose }: WalletProps) {
   const [balance, setBalance] = useState<number | null>(null);
-  const [banks, setBanks] = useState<string[]>([]);
-  const [selectedBank, setSelectedBank] = useState('');
+  const [banks, setBanks] = useState<{id: number; name:string; address: string; established_date: string}[]>([]);
+  const [selectedBank, setSelectedBank] = useState<number | undefined>();
+  const [sBankName, setSBankName] = useState<string>('');
   const [amount, setAmount] = useState('');
   const [referenceCode, setReferenceCode] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingDeposit, setPendingDeposit] = useState<{
-    bank: string;
+    bank: number;
     amount: number;
     reference_code: string;
+    user: number;
   } | null>(null);
 
-  // 🏦 Obtener balance y bancos desde el backend
+  // Obtener balance y bancos desde el backend
   useEffect(() => {
   if (!open) return;
 
   (async () => {
     try {
       const token = localStorage.getItem('token');
+      const currentUser = localStorage.getItem('auth');
+      const userId = currentUser ? JSON.parse(currentUser).id : null;
+      const balanceRes = await fetch('http://localhost:8000/users/' + userId.toString(), {
 
-      const balanceRes = await fetch('http://localhost:8000/api/banks/fundstransfers/', {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ action: 'get_balance' }),
         cache: 'no-store',
       });
+
 
       const banksRes = await fetch('http://localhost:8000/api/banks/banks/', {
         method: 'GET',
@@ -50,8 +54,10 @@ export default function Wallet({ open, onClose }: WalletProps) {
       const balanceData = await balanceRes.json();
       const banksData = await banksRes.json();
 
-      setBalance(balanceData.balance);
-      setBanks(banksData.banks);
+      const floatBalance = parseFloat(balanceData.client_profile.balance_available);
+      setBalance(floatBalance);
+      setBanks(banksData);
+
     } catch (err) {
       console.error(err);
     }
@@ -68,6 +74,7 @@ export default function Wallet({ open, onClose }: WalletProps) {
       bank: selectedBank,
       amount: parseFloat(amount),
       reference_code: referenceCode,
+      user: JSON.parse(localStorage.getItem('auth') || '{}').id
     });
 
     setShowConfirm(true);
@@ -95,7 +102,7 @@ export default function Wallet({ open, onClose }: WalletProps) {
       setBalance(result.newBalance);
       setAmount('');
       setReferenceCode('');
-      setSelectedBank('');
+      setSelectedBank(undefined);
       setShowConfirm(false);
       setPendingDeposit(null);
     } catch (err) {
@@ -114,13 +121,13 @@ export default function Wallet({ open, onClose }: WalletProps) {
         <div className="wallet-modal">
           <div className="wallet-modal-content">
             <h3>Confirm deposit?</h3>
-            <p><strong>Bank:</strong> {pendingDeposit.bank}</p>
+            <p><strong>Bank:</strong> {sBankName}</p>
             <p><strong>Amount:</strong> Q{pendingDeposit.amount.toFixed(2)}</p>
             <p><strong>Reference:</strong> {pendingDeposit.reference_code}</p>
             <div className="wallet-modal-actions">
               <button className="wallet-button" onClick={() => setShowConfirm(false)}>Cancel</button>
               <button className="wallet-button deposit" onClick={confirmDeposit}>Confirm deposit</button>
-            </div>
+            </div> 
           </div>
         </div>
       )}
@@ -140,11 +147,15 @@ export default function Wallet({ open, onClose }: WalletProps) {
           <select
             className="wallet-select"
             value={selectedBank}
-            onChange={(e) => setSelectedBank(e.target.value)}
+            onChange={(e) => {
+              setSelectedBank(e.target.value ? parseInt(e.target.value) : undefined)
+              setSBankName(e.target.options[e.target.selectedIndex].text)
+            } 
+              }
           >
             <option value="">-- Choose one --</option>
             {banks.map((bank, idx) => (
-              <option key={idx} value={bank}>{bank}</option>
+              <option key={bank.id} value={bank.id}>{bank.name}</option>
             ))}
           </select>
         </div>
