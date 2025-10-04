@@ -1,8 +1,9 @@
 .div-userAdmin {
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
     padding: .3rem 2rem 2rem 4.5rem;
+    background-color: #f7f7f9;
 }
 
 
@@ -11,3 +12,4 @@
     font-weight: 500;
     margin-top: 1rem;
 }
+

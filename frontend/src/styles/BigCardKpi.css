@@ -1,0 +1,57 @@
+.infoCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    max-height: 7rem;
+    width: 90%;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    background-color: #fff;
+}
+
+.cardKpi {
+    width: 95%;
+    padding: 0 2rem;
+}
+
+
+.cardKpi.one{
+    padding-left: .5rem;
+}
+
+.cardKpi.last{
+    padding-right: .5rem;
+}
+
+.cardKpi.especial {
+    border-left: 1px solid #ededf2;
+    border-right: 1px solid #ededf2;
+}
+
+.cardKpi.semiEspecial {
+    border-right: 1px solid #ededf2;
+}
+
+.cardKpi h4 {
+    font-size: 13px;
+    font-weight: 500;
+    color: #828692;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.cardKpi h2 {
+    font-size: 30px;
+    font-weight: 500;
+    margin: .3rem 0;
+}
+
+.cardKpi .up {
+    margin: 0;
+    color: #02c23e;
+}
+
+.cardKpi .down {
+    margin: 0;
+    color: #ff4033;
+}

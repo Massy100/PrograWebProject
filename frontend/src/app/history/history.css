@@ -1,5 +1,6 @@
 .div-purchaseSale {
     min-height: 100vh;
+    background-color: #f7f7f9;
 }
 
 .info-purchaseSale {
@@ -8,6 +9,13 @@
     justify-content: space-around;
     padding: 1rem  2rem 2rem 2rem;
 }
+
+.title-history {
+    font-size: 22px;
+    font-weight: 500;
+    margin: 1rem 0 1.5rem 0;
+}
+
     
 .summary-div-transactions{
     display: flex;

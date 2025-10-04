@@ -1,12 +1,12 @@
 .landingPage {
   min-height: 100vh;
+  background-color: #f7f7f9;
 }
 
 .div-initial{ 
   display: flex;
   justify-content: space-around;
   height: 65vh;
-  margin-top: 1rem;
   padding: 2rem;
 }
 

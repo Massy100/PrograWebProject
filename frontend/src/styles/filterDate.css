@@ -1,6 +1,8 @@
 
 /* filter */
 .filter-date-div {
+  position: absolute;
+  top: 165;
   display: flex;
   flex-direction: row-reverse;
   align-self: flex-end;
@@ -33,7 +35,7 @@
 /* Dropdown */
 .filterMenu {
   position: absolute;
-  top: 165;
+  top: 50;
   right: 20;
   background: #fff;
   border: 1px solid #e6e8ef;
