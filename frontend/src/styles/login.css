@@ -101,6 +101,8 @@
     position: relative;
     width: 100%;
     margin-bottom: 2px; 
+    display: flex;
+    flex-direction: column;
 }
 
 .passwordContainer .input {
@@ -151,4 +153,12 @@
 .phoneInput {
   flex: 1;
 }
+
+.errorText2 {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 4px;
+  margin-bottom: 10px;
+}
+
 
