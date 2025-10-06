@@ -13,7 +13,10 @@ class AdminProfileSerializer(serializers.ModelSerializer):
 
 class UserListSerializer(serializers.ModelSerializer):
     user_type_display = serializers.CharField(source='get_user_type_display', read_only=True)
-    
+    full_name = serializers.SerializerMethodField()
+    balance_available = serializers.SerializerMethodField()
+    balance_blocked = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = [
@@ -22,6 +25,7 @@ class UserListSerializer(serializers.ModelSerializer):
             'email', 
             'first_name', 
             'last_name',
+            'full_name',
             'user_type',
             'user_type_display',
             'phone',
@@ -29,8 +33,24 @@ class UserListSerializer(serializers.ModelSerializer):
             'verified',
             'is_active',
             'date_joined',
-            'created_at'
+            'created_at',
+            'balance_available',
+            'balance_blocked'
         ]
+
+    def get_full_name(self, obj):
+        full_name = f"{obj.first_name} {obj.last_name}".strip()
+        return full_name if full_name else obj.username
+
+    def get_balance_available(self, obj):
+        if hasattr(obj, 'client_profile'):
+            return obj.client_profile.balance_available
+        return 0
+
+    def get_balance_blocked(self, obj):
+        if hasattr(obj, 'client_profile'):
+            return obj.client_profile.balance_blocked
+        return 0
 
 class UserDetailSerializer(serializers.ModelSerializer):
     user_type_display = serializers.CharField(source='get_user_type_display', read_only=True)

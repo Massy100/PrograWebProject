@@ -30,6 +30,58 @@ class UserViewSet(viewsets.ModelViewSet):
             return UserDetailSerializer
         return UserListSerializer
     
+    def list(self, request, *args, **kwargs):
+        self.queryset = self.queryset.filter(verified=True, is_active=True)
+        return super().list(request, *args, **kwargs)
+    
+    @action(detail=False, methods=['GET'])
+    def registered_users(self, request):
+        """
+        Endpoint para obtener solo usuarios verificados y activos
+        """
+        try:
+            registered_users = User.objects.filter(
+                verified=True, 
+                is_active=True
+            ).select_related('client_profile').order_by('-created_at')
+            
+            serializer = UserListSerializer(registered_users, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(f"Error en registered_users: {str(e)}")
+            return Response(
+                {'message': 'Error interno del servidor'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=True, methods=['PATCH'])
+    def deactivate(self, request, pk=None):
+        """
+        Endpoint para desactivar un usuario
+        """
+        try:
+            user = self.get_object()
+            user.is_active = False
+            user.save()
+            
+            return Response(
+                {'message': 'Usuario desactivado correctamente', 'user_id': user.id},
+                status=status.HTTP_200_OK
+            )
+            
+        except User.DoesNotExist:
+            return Response(
+                {'message': 'Usuario no encontrado'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            print(f"Error en deactivate: {str(e)}")
+            return Response(
+                {'message': 'Error interno del servidor'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
     @action(detail=False, methods=['POST'], permission_classes=[AllowAny])
     def login(self, request):
         email = request.data.get('email')
