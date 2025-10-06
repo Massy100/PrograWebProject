@@ -162,3 +162,28 @@
 }
 
 
+.referralRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.referralRow input[type="checkbox"] {
+    position: relative;
+    top: -1px;
+    accent-color: #007bff;
+}
+
+.referralInput {
+    width: 100%;
+    max-width: 375px;
+    margin-top: 5px;
+
+}
+
+.referralInputContainer {
+    margin-top: 1px; 
+    width: 100%;
+
+}
