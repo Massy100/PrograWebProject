@@ -46,6 +46,7 @@ body {
   box-shadow: 0 0 0 1px #DADCE0;
   overflow-x: auto;
   max-width: 100%;
+  scroll-margin-top: 80px;
 }
 
 /* 📁 Pestañas integradas al borde superior de la tabla */
@@ -228,6 +229,7 @@ body {
   background-color: #fad4d4;
 }
 
+
 /* 🔔 Botón minimalista de alerta */
 .alertBtn.full {
   width: 100%;
@@ -248,6 +250,7 @@ body {
 .alertBtn.full:hover {
   background-color: #a7f3d0;
 }
+
 
 /* 📱 Responsive ajustes */
 @media (max-width: 768px) {

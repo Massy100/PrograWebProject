@@ -1,0 +1,24 @@
+.alertContainer {
+  margin-top: 2rem; /* ✅ separa el botón del top */
+}
+
+/* 🔔 Botón minimalista de alerta */
+.alertBtn.full {
+  width: 100%;
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 0.85rem 1.25rem;
+  border: 1px solid #10b981;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  animation: bounceInRight 0.6s ease-out;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+  transition: background-color 0.2s ease;
+}
+
+.alertBtn.full:hover {
+  background-color: #a7f3d0;
+}
