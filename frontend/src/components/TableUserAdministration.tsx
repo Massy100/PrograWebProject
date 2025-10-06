@@ -45,8 +45,8 @@ export default function TableUserAdministration() {
         setUsers(data);
         setError(null);
       } catch (err) {
-        console.error('Error al obtener usuarios', err);
-        setError('No se pudieron cargar los usuarios');
+        console.error('An error occurred while fetching users.', err);
+        setError('Error loading users data');
       } finally {
         setLoading(false);
       }
@@ -83,7 +83,7 @@ export default function TableUserAdministration() {
   if (loading) {
     return (
       <div className="div-table-container">
-        <div className="loading">Cargando usuarios...</div>
+        <div className="loading">Loading users...</div>
       </div>
     );
   }
@@ -112,7 +112,7 @@ export default function TableUserAdministration() {
         </thead>
         <tbody>
           {users.map(u => {
-            const href = `/user-administration/${u.id}`;
+            const href = `/user-overview/${u.id}`;
             return (
               <tr key={u.id}>
                 <td className="div-table-cell">
@@ -158,7 +158,7 @@ export default function TableUserAdministration() {
       </table>
       
       {users.length === 0 && (
-        <div className="no-users">No hay usuarios registrados</div>
+        <div className="no-users">No users registered</div>
       )}
     </div>
   );
