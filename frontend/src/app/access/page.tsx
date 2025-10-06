@@ -27,14 +27,28 @@ export default function Home() {
   const tableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const simulatedRequests = [
-      { name: 'Grecia López', alias: '@grecia', email: 'grecia@example.com' },
-      { name: 'Juan Pérez', alias: '@juan', email: 'juan@example.com' },
-    ];
-    setPending(simulatedRequests);
+    // 🔌 GET /api/requests/pending → obtener solicitudes pendientes
+    const fetchPendingRequests = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/requests/pending', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+
+        const data = await res.json();
+        setPending(data); // data debe ser un array de UserRequest
+      } catch (error) {
+        console.error('Error fetching pending requests:', error);
+      }
+    };
+
+    fetchPendingRequests();
   }, []);
 
-  const handleDecision = (index: number, status: 'Approved' | 'Rejected') => {
+  const handleDecision = async (index: number, status: 'Approved' | 'Rejected') => {
     const user = pending[index];
     const decision: HistoryItem = {
       ...user,
@@ -42,10 +56,26 @@ export default function Home() {
       decidedBy: currentUser,
     };
 
-    if (status === 'Approved') setApproved(prev => [...prev, decision]);
-    else setRejected(prev => [...prev, decision]);
+    // 🔌 POST /api/requests/resolve → enviar decisión tomada
+    try {
+      const res = await fetch('http://localhost:8000/api/requests/resolve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(decision),
+      });
 
-    setPending(prev => prev.filter((_, i) => i !== index));
+      if (!res.ok) throw new Error('Failed to resolve request');
+
+      if (status === 'Approved') setApproved(prev => [...prev, decision]);
+      else setRejected(prev => [...prev, decision]);
+
+      setPending(prev => prev.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error('Error sending decision:', error);
+    }
   };
 
   const revealTables = () => {
@@ -61,12 +91,11 @@ export default function Home() {
 
       {!showTables && pending.length > 0 && (
         <div className="alertContainer">
-            <button className="alertBtn full" onClick={revealTables}>
-            View pending requests 
-            </button>
+          <button className="alertBtn full" onClick={revealTables}>
+            View pending requests
+          </button>
         </div>
-        )}
-
+      )}
 
       {showTables && (
         <div ref={tableRef}>
