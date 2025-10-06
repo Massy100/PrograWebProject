@@ -47,7 +47,7 @@ export default function Login({ open, onClose }: LoginProps) {
       if (res.ok) {
         alert("Login exitoso");
         onClose?.();           // cierra modal si hay handler
-        router.push("/dashboard");
+        router.push("/dashboard-user");
       } else {
         alert("Error: " + result.message);
       }
@@ -104,6 +104,14 @@ export default function Login({ open, onClose }: LoginProps) {
       if (res.ok) {
         alert("Registro exitoso");
         setShowLogin(true);
+
+        setPhoneFull("");
+        setPhoneError("");
+        setPasswordError("");
+        setReferralError("");
+        setHasReferral(false);
+        e.currentTarget.reset();
+
       } else {
         alert("Error: " + result.message);
       }
@@ -114,15 +122,15 @@ export default function Login({ open, onClose }: LoginProps) {
   };
 
   return (
-    <div className="modalOverlay"  onClick={() => { setPhoneFull("");  setPhoneError(""); onClose?.(); }}>
+    <div className="modalOverlay"  onClick={() => { setPhoneFull("");  setPhoneError(""); setHasReferral(false); onClose?.(); }}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <button className="closeButton" aria-label="Cerrar" onClick={() => { setPhoneFull("");  setPhoneError("");onClose?.(); }}><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><g><path fill="none" d="M0 0h24v24H0z"></path><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z"></path></g></svg></button>
+        <button className="closeButton" aria-label="Cerrar" onClick={() => { setPhoneFull("");  setPhoneError("");  setHasReferral(false);  onClose?.(); }}><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><g><path fill="none" d="M0 0h24v24H0z"></path><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z"></path></g></svg></button>
 
         {showLogin ? (
           <>
             <h2 className="modalTitle">Login</h2>
             <form className="form" onSubmit={handleLogin}>
-              <input type="email" name="email" placeholder="Email or User" className="input" required />
+              <input type="email" name="email" placeholder="Email" className="input" required />
               <input type="password" name="password" placeholder="Password" className="input" required />
               <button type="submit" className="submitButton">Login</button>
             </form>
@@ -154,9 +162,10 @@ export default function Login({ open, onClose }: LoginProps) {
                 <PhoneInput value={phoneFull} onChange={(value) => setPhoneFull(value)} inputClass="input" enableSearch placeholder="Phone" />
               </div>
               {phoneError && <p className="errorText2">{phoneError}</p>}
-
+              <div className="referralRow">
               <input type="checkbox" checked={hasReferral} onChange={() => setHasReferral(!hasReferral)} /> I have a referral code
-              {hasReferral && <input type="text" name="referred_code" placeholder="Referral Code" className="input" />}
+              </div>
+              {hasReferral &&  <div className="referralInputContainer"> <input type="text" name="referred_code" placeholder="Referral Code" className="input referralInput" /> </div>}
               {referralError && <p className="errorText">{referralError}</p>}
               <button type="submit" className="submitButton">Create Account</button>
             </form>
