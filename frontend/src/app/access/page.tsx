@@ -1,107 +1,140 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import './access.css';
 
-type Usuario = {
-  id: number;
-  nombre: string;
-  correo: string;
+type UserRequest = {
+  name: string;
+  alias: string;
+  email: string;
 };
 
-type HistorialItem = {
-  nombre: string;
-  correo: string;
-  estado: 'Aprobado' | 'Rechazado';
-  por: string;
+type HistoryItem = {
+  name: string;
+  alias: string;
+  email: string;
+  status: 'Approved' | 'Rejected';
+  decidedBy: string;
 };
 
 export default function Home() {
-  const [pendientes, setPendientes] = useState<Usuario[]>([]);
-  const [historial, setHistorial] = useState<HistorialItem[]>([]);
-  const [usuarioActual, setUsuarioActual] = useState<string>('Josué');
-  const [panelAbierto, setPanelAbierto] = useState(false);
+  const [pending, setPending] = useState<UserRequest[]>([]);
+  const [approved, setApproved] = useState<HistoryItem[]>([]);
+  const [rejected, setRejected] = useState<HistoryItem[]>([]);
+  const [currentUser, setCurrentUser] = useState<string>('Josué');
+  const [showTables, setShowTables] = useState(false);
+  const [activeTab, setActiveTab] = useState<'Pending' | 'Approved' | 'Rejected'>('Pending');
+  const tableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Simulación de solicitudes
-    const solicitudesSimuladas = [
-      { id: 1, nombre: 'Ana López', correo: 'ana@example.com' },
-      { id: 2, nombre: 'Carlos Méndez', correo: 'carlos@example.com' },
+    const simulatedRequests = [
+      { name: 'Grecia López', alias: '@grecia', email: 'grecia@example.com' },
+      { name: 'Juan Pérez', alias: '@juan', email: 'juan@example.com' },
+      { name: 'María Ruiz', alias: '@maria', email: 'maria@example.com' },
     ];
-    setPendientes(solicitudesSimuladas);
+    setPending(simulatedRequests);
   }, []);
 
-  const aprobar = (id: number) => {
-    const usuario = pendientes.find(u => u.id === id);
-    if (!usuario) return;
-    setHistorial(prev => [...prev, { ...usuario, estado: 'Aprobado', por: usuarioActual }]);
-    setPendientes(prev => prev.filter(u => u.id !== id));
+  const handleDecision = (index: number, status: 'Approved' | 'Rejected') => {
+    const user = pending[index];
+    const decision: HistoryItem = {
+      ...user,
+      status,
+      decidedBy: currentUser,
+    };
+
+    if (status === 'Approved') setApproved(prev => [...prev, decision]);
+    else setRejected(prev => [...prev, decision]);
+
+    setPending(prev => prev.filter((_, i) => i !== index));
   };
 
-  const rechazar = (id: number) => {
-    const usuario = pendientes.find(u => u.id === id);
-    if (!usuario) return;
-    setHistorial(prev => [...prev, { ...usuario, estado: 'Rechazado', por: usuarioActual }]);
-    setPendientes(prev => prev.filter(u => u.id !== id));
+  const revealTables = () => {
+    setShowTables(true);
+    setTimeout(() => {
+      tableRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
 
   return (
-    <main>
-      <h1>Bienvenido, {usuarioActual}</h1>
+    <main className="panel">
+      <h1 className="panel__title">User Access Management</h1>
 
-      {pendientes.length > 0 && (
-        <button className="notificacionBtn" onClick={() => setPanelAbierto(true)}>
-          Ver solicitudes pendientes ({pendientes.length})
+      {!showTables && pending.length > 0 && (
+        <button className="alertBtn" onClick={revealTables}>
+          🔔 View pending requests ({pending.length})
         </button>
       )}
 
-      {panelAbierto && (
-        <div className="solicitudes-panel">
-          <button className="solicitudes-close" onClick={() => setPanelAbierto(false)}>✕</button>
-          <h2>Solicitudes de usuarios</h2>
+      {showTables && (
+        <div ref={tableRef}>
+          <div className="tabs">
+            <button className={activeTab === 'Pending' ? 'tab active' : 'tab'} onClick={() => setActiveTab('Pending')}>Pending</button>
+            <button className={activeTab === 'Approved' ? 'tab active' : 'tab'} onClick={() => setActiveTab('Approved')}>Approved</button>
+            <button className={activeTab === 'Rejected' ? 'tab active' : 'tab'} onClick={() => setActiveTab('Rejected')}>Rejected</button>
+          </div>
 
-          {pendientes.length === 0 ? (
-            <p>No hay solicitudes pendientes.</p>
-          ) : (
-            pendientes.map(usuario => (
-              <div key={usuario.id} className="solicitud-card">
-                <div>
-                  <strong>{usuario.nombre}</strong>
-                  <p>{usuario.correo}</p>
-                </div>
-                <div className="acciones">
-                  <button className="btn-aprobar" onClick={() => aprobar(usuario.id)}>Aprobar</button>
-                  <button className="btn-rechazar" onClick={() => rechazar(usuario.id)}>Rechazar</button>
-                </div>
-              </div>
-            ))
-          )}
-
-          {historial.length > 0 && (
-            <div className="solicitudes-historial">
-              <h3>Historial</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Correo</th>
-                    <th>Estado</th>
-                    <th>Por</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {historial.map((item, idx) => (
-                    <tr key={idx}>
-                      <td>{item.nombre}</td>
-                      <td>{item.correo}</td>
-                      <td>{item.estado}</td>
-                      <td>{item.por}</td>
+          <div className="tx__wrap">
+            <table className="tx__table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th>Decided by</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activeTab === 'Pending' &&
+                  pending.map((user, index) => (
+                    <tr key={index}>
+                      <td>
+                        <div className="tx__name">{user.name}</div>
+                        <div className="tx__alias">{user.alias}</div>
+                      </td>
+                      <td><div className="tx__email">{user.email}</div></td>
+                      <td><span className="tx__pill pending">Pending</span></td>
+                      <td><span className="tx__badge">—</span></td>
+                      <td>
+                        <div className="tx__actions">
+                          <button className="tx__actionBtn approve" onClick={() => handleDecision(index, 'Approved')}>✔ Approve</button>
+                          <button className="tx__actionBtn reject" onClick={() => handleDecision(index, 'Rejected')}>✖ Reject</button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+
+                {activeTab === 'Approved' &&
+                  approved.map((item, index) => (
+                    <tr key={index}>
+                      <td>
+                        <div className="tx__name">{item.name}</div>
+                        <div className="tx__alias">{item.alias}</div>
+                      </td>
+                      <td><div className="tx__email">{item.email}</div></td>
+                      <td><span className="tx__pill approved">Approved</span></td>
+                      <td><span className="tx__badge">{item.decidedBy}</span></td>
+                      <td>—</td>
+                    </tr>
+                  ))}
+
+                {activeTab === 'Rejected' &&
+                  rejected.map((item, index) => (
+                    <tr key={index}>
+                      <td>
+                        <div className="tx__name">{item.name}</div>
+                        <div className="tx__alias">{item.alias}</div>
+                      </td>
+                      <td><div className="tx__email">{item.email}</div></td>
+                      <td><span className="tx__pill rejected">Rejected</span></td>
+                      <td><span className="tx__badge">{item.decidedBy}</span></td>
+                      <td>—</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </main>

@@ -1,90 +1,252 @@
-.solicitudes-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0,0,0,0.3);
-  z-index: 999;
+body {
+  background-color: #f7f7f9;
+  margin: 0;
+  padding: 0;
 }
 
-.solicitudes-sidebar {
-  position: fixed;
-  right: 0;
-  top: 0;
-  width: 400px;
-  height: 100vh;
-  background-color: #FFFFFF;
+.panel {
   padding: 2rem;
-  box-shadow: -2px 0 8px rgba(0,0,0,0.1);
-  z-index: 1000;
-  overflow-y: auto;
+  font-family: 'Segoe UI', sans-serif;
+  color: #fff;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.solicitudes-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
+.panel__title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #fff;
 }
 
-.solicitudes-title {
-  margin-bottom: 1rem;
-}
-
-.solicitudes-alert {
+.alertBtn {
   background-color: #0078D4;
   color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-}
-
-.solicitudes-list {
-  margin-bottom: 2rem;
-}
-
-.solicitud-card {
-  background-color: #F2F3F7;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.acciones button {
-  margin-left: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-weight: bold;
+  padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 0.25rem;
+  font-weight: 600;
   cursor: pointer;
+  margin-bottom: 2rem;
+  transition: background-color 0.2s ease;
 }
 
-.btn-aprobar {
-  background-color: #28a745;
+.alertBtn:hover {
+  background-color: #005EA2;
+}
+
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tab {
+  background-color: transparent;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid #DADCE0;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.tab:hover {
+  background-color: #5A5C63;
+}
+
+.tab.active {
+  background-color: #0078D4;
   color: white;
+  border-color: #0078D4;
 }
 
-.btn-rechazar {
-  background-color: #dc3545;
-  color: white;
+.tx__wrap {
+  background-color: #fff;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 0 0 1px #DADCE0;
+  overflow-x: auto;
+  max-width: 100%;
 }
 
-.solicitudes-historial table {
+.tx__table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.95rem;
+  background-color: transparent;
 }
 
-.solicitudes-historial th,
-.solicitudes-historial td {
-  padding: 0.75rem;
-  border: 1px solid #DADCE0;
+.tx__table thead th {
+  color: #6A6C75;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   text-align: left;
+  padding: 0.75rem;
+  border-bottom: 1px solid #6A6C75;
+  font-weight: 500;
+}
+
+.tx__table tbody tr {
+  border-bottom: 1px solid #E6E8EB;
+  transition: background 0.15s ease;
+}
+
+.tx__table tbody tr:hover {
+  background-color: #F9FAFB;
+}
+
+.tx__table td {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+  color: #232733;
+}
+
+.tx__name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #13151C;
+}
+
+.tx__alias {
+  font-size: 0.75rem;
+  color: #6A6C75;
+  margin-top: 0.15rem;
+}
+
+.tx__email {
+  font-size: 0.85rem;
+  color: #232733;
+}
+
+/* 📁 Botones de estado tipo folder */
+.tx__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background-color: #6c757d;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.tx__pill.approved {
+  background-color: #28a745;
+}
+
+.tx__pill.rejected {
+  background-color: #dc3545;
+}
+
+.tx__pill.pending {
+  background-color: #6c757d;
+}
+
+.tx__pill::before {
+  font-size: 0.9rem;
+}
+
+/* 📛 Rectángulo para decidedBy */
+.tx__badge {
+  background-color: #F2F3F7;
+  padding: 0.5rem 1rem;
+  border-radius: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #232733;
+  display: inline-block;
+  white-space: nowrap;
+  box-shadow: inset 0 0 0 1px #DADCE0;
+  transition: background 0.2s ease;
+}
+
+.tx__badge:hover {
+  background-color: #E6E8EB;
+}
+
+/* 🧾 Contenedor para botones de acción con espacio */
+.tx__actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* 🟨 Botones de acción con diseño moderno */
+.tx__actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #f3f4f6;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.tx__actionBtn:hover {
+  background-color: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+.tx__actionBtn.approve {
+  background-color: #e6f4ea;
+  color: #1a7f37;
+  border: 1px solid #c3e6cb;
+}
+
+.tx__actionBtn.approve:hover {
+  background-color: #d1ecd8;
+}
+
+.tx__actionBtn.reject {
+  background-color: #fde8e8;
+  color: #b42318;
+  border: 1px solid #f5c2c7;
+}
+
+.tx__actionBtn.reject:hover {
+  background-color: #fad4d4;
+}
+
+/* 📱 Responsive ajustes */
+@media (max-width: 768px) {
+  .panel {
+    padding: 1rem;
+  }
+
+  .tx__table {
+    font-size: 0.85rem;
+  }
+
+  .tx__name {
+    font-size: 0.95rem;
+  }
+
+  .tx__alias {
+    font-size: 0.7rem;
+  }
+
+  .tx__email {
+    font-size: 0.8rem;
+  }
+
+  .tx__actionBtn {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.75rem;
+  }
+
+  .tx__actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
