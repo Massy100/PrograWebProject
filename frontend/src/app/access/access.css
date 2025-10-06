@@ -1,9 +1,11 @@
+/* 🌐 Fondo general de la página */
 body {
   background-color: #f7f7f9;
   margin: 0;
   padding: 0;
 }
 
+/* 🌐 Layout principal */
 .panel {
   padding: 2rem;
   font-family: 'Segoe UI', sans-serif;
@@ -12,13 +14,15 @@ body {
   margin: 0 auto;
 }
 
+/* 🧭 Título */
 .panel__title {
   font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 2rem;
-  color: #fff;
+  color: rgba(43, 43, 43, 0.907);
 }
 
+/* 🔔 Botón de alerta inicial */
 .alertBtn {
   background-color: #0078D4;
   color: white;
@@ -35,42 +39,47 @@ body {
   background-color: #005EA2;
 }
 
-.tabs {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.tab {
-  background-color: transparent;
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1px solid #DADCE0;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.tab:hover {
-  background-color: #5A5C63;
-}
-
-.tab.active {
-  background-color: #0078D4;
-  color: white;
-  border-color: #0078D4;
-}
-
+/* 📦 Contenedor de tabla con fondo blanco y bordes redondeados */
 .tx__wrap {
   background-color: #fff;
   border-radius: 0.75rem;
-  padding: 1rem;
   box-shadow: 0 0 0 1px #DADCE0;
   overflow-x: auto;
   max-width: 100%;
 }
 
+/* 📁 Pestañas integradas al borde superior de la tabla */
+.tx__tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #fff;
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  border-bottom: 1px solid #DADCE0;
+}
+
+.tx__tab {
+  background-color: #e5e7eb;
+  color: #1f2937;
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.tx__tab:hover {
+  background-color: #d1d5db;
+}
+
+.tx__tab.active {
+  background-color: #0078D4;
+  color: white;
+}
+
+/* 📊 Tabla minimalista */
 .tx__table {
   width: 100%;
   border-collapse: collapse;
@@ -105,6 +114,7 @@ body {
   color: #232733;
 }
 
+/* 🧑 Nombre en negrita + alias debajo */
 .tx__name {
   font-weight: 600;
   font-size: 1rem;
@@ -218,6 +228,27 @@ body {
   background-color: #fad4d4;
 }
 
+/* 🔔 Botón minimalista de alerta */
+.alertBtn.full {
+  width: 100%;
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 0.85rem 1.25rem;
+  border: 1px solid #10b981;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  animation: bounceInRight 0.6s ease-out;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+  transition: background-color 0.2s ease;
+}
+
+.alertBtn.full:hover {
+  background-color: #a7f3d0;
+}
+
 /* 📱 Responsive ajustes */
 @media (max-width: 768px) {
   .panel {
@@ -250,3 +281,21 @@ body {
     gap: 0.5rem;
   }
 }
+
+@keyframes bounceInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(100%) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(-10%) scale(1.05);
+  }
+  80% {
+    transform: translateX(0%) scale(0.95);
+  }
+  100% {
+    transform: translateX(0%) scale(1);
+  }
+}
+

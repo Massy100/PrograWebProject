@@ -30,7 +30,6 @@ export default function Home() {
     const simulatedRequests = [
       { name: 'Grecia López', alias: '@grecia', email: 'grecia@example.com' },
       { name: 'Juan Pérez', alias: '@juan', email: 'juan@example.com' },
-      { name: 'María Ruiz', alias: '@maria', email: 'maria@example.com' },
     ];
     setPending(simulatedRequests);
   }, []);
@@ -61,20 +60,23 @@ export default function Home() {
       <h1 className="panel__title">User Access Management</h1>
 
       {!showTables && pending.length > 0 && (
-        <button className="alertBtn" onClick={revealTables}>
-          🔔 View pending requests ({pending.length})
-        </button>
-      )}
+        <div className="alertContainer">
+            <button className="alertBtn full" onClick={revealTables}>
+            View pending requests 
+            </button>
+        </div>
+        )}
+
 
       {showTables && (
         <div ref={tableRef}>
-          <div className="tabs">
-            <button className={activeTab === 'Pending' ? 'tab active' : 'tab'} onClick={() => setActiveTab('Pending')}>Pending</button>
-            <button className={activeTab === 'Approved' ? 'tab active' : 'tab'} onClick={() => setActiveTab('Approved')}>Approved</button>
-            <button className={activeTab === 'Rejected' ? 'tab active' : 'tab'} onClick={() => setActiveTab('Rejected')}>Rejected</button>
-          </div>
-
           <div className="tx__wrap">
+            <div className="tx__tabs">
+              <button className={activeTab === 'Pending' ? 'tx__tab active' : 'tx__tab'} onClick={() => setActiveTab('Pending')}>📁 Pending</button>
+              <button className={activeTab === 'Approved' ? 'tx__tab active' : 'tx__tab'} onClick={() => setActiveTab('Approved')}>✔ Approved</button>
+              <button className={activeTab === 'Rejected' ? 'tx__tab active' : 'tx__tab'} onClick={() => setActiveTab('Rejected')}>✖ Rejected</button>
+            </div>
+
             <table className="tx__table">
               <thead>
                 <tr>
