@@ -96,3 +96,94 @@
 .closeButton:active {
   transform: scale(0.92);
 }
+
+.passwordContainer {
+    position: relative;
+    width: 100%;
+    margin-bottom: 2px; 
+    display: flex;
+    flex-direction: column;
+}
+
+.passwordContainer .input {
+    width: 100%;
+    padding-right: 2.5rem; 
+    padding-left: 10px;     
+    padding-top: 10px;     
+    padding-bottom: 10px;   
+    border: 1px solid #6A6C75;
+    border-radius: 6px;
+    box-sizing: border-box; 
+}
+
+
+.eyeButton {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: #6A6C75;
+    padding: 0;
+}
+
+.eyeButton:hover {
+    color: #232733;
+}
+
+.errorText {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
+.phoneContainer {
+  display: flex;
+  gap: 5px;
+}
+
+.countryCodeInput {
+  width: 80px;
+}
+
+.phoneInput {
+  flex: 1;
+}
+
+.errorText2 {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 4px;
+  margin-bottom: 10px;
+}
+
+
+.referralRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.referralRow input[type="checkbox"] {
+    position: relative;
+    top: -1px;
+    accent-color: #007bff;
+}
+
+.referralInput {
+    width: 100%;
+    max-width: 375px;
+    margin-top: 5px;
+
+}
+
+.referralInputContainer {
+    margin-top: 1px; 
+    width: 100%;
+
+}
