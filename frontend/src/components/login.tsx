@@ -112,6 +112,9 @@ export default function Login({ open, onClose }: LoginProps) {
         setHasReferral(false);
         e.currentTarget.reset();
 
+        const loginForm = document.querySelector("form");
+        if (loginForm) (loginForm as HTMLFormElement).reset();
+
       } else {
         alert("Error: " + result.message);
       }
