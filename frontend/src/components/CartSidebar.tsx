@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import '../styles/CartSidebar.css';
 
@@ -18,11 +18,24 @@ type Props = {
 export default function CartSidebar({ onClose, show = false }: Props) {
   const router = useRouter();
 
-  const [cart, setCart] = useState<CartItem[]>([
-    { stockId: 1, name: "Apple Inc.", quantity: 1, price: 150 },
-    { stockId: 2, name: "Microsoft Corp.", quantity: 2, price: 280 },
-    { stockId: 3, name: "Google LLC", quantity: 1, price: 2700 },
-  ]);
+
+
+  
+  const [cart, setCart] = useState<CartItem[]>([]);
+
+  useEffect(() => {
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) {
+      setCart(JSON.parse(storedCart));
+    } else {
+       setCart([
+         { stockId: 1, name: "Apple Inc.", quantity: 1, price: 150 },
+         { stockId: 2, name: "Microsoft Corp.", quantity: 2, price: 280 },
+         { stockId: 3, name: "Google LLC", quantity: 1, price: 2700 },
+       ]);
+    }
+  }, []);
+
 
   const incrementQuantity = (stockId: number) => {
     setCart(prev =>
