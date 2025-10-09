@@ -4,6 +4,8 @@ from rest_framework.decorators import action
 from django.db.models import Sum
 from django.db import transaction
 
+from decimal import Decimal
+
 from .models import Transaction, TransactionDetail
 
 from .serializers import TransactionSerializer, FullTransactionSerializer
@@ -23,6 +25,28 @@ class TransactionViewSet(viewsets.ModelViewSet):
             return FullTransactionSerializer
         return TransactionSerializer
     
+    '''
+    json structure for buy/sell:
+    {
+        "client_id": 1,
+        "total_amount": 1000.00,
+        "details": [
+            {
+                "stock_id": 1,
+                "quantity": 10,
+                "unit_price": 100.00,
+                "portfolio_id": 1
+            },
+            {
+                "stock_id": 2,
+                "quantity": 5,
+                "unit_price": 200.00,
+                "portfolio_id": 1
+            }
+        ]
+    }
+    '''
+
     @transaction.atomic
     @action(detail=False, methods=['post'], url_path='buy')
     def buy(self, request):
@@ -69,20 +93,93 @@ class TransactionViewSet(viewsets.ModelViewSet):
             investment, created = Investment.objects.get_or_create(
                 portfolio=portfolio,
                 stock=stock,
-                defaults={'quantity': 0, 'average_price': 0}
+                defaults={'quantity': 0, 'average_price': 0, 'total_invested': 0, 'purchase_price': 0}
             )
 
             total_qty = investment.quantity + quantity
             investment.average_price = (
-                (investment.average_price * investment.quantity) + (unit_price * quantity)
+                (investment.average_price * investment.quantity) + Decimal(unit_price * quantity)
             ) / total_qty
 
+
             investment.quantity = total_qty
+
+            investment.total_invested = investment.quantity * investment.average_price
+            investment.purchase_price = unit_price
+            investment.current_value = stock.last_price * investment.quantity if stock.last_price else 0
+
             investment.save()
 
-        client.balance_available -= total_amount
+        client.balance_available -= Decimal(total_amount)
+        client.save()
 
-    
+        serializer = TransactionSerializer(transaction_obj)
+        return Response(serializer.data, status=201)
+
+    @transaction.atomic
+    @action(detail=False, methods=['post'], url_path='sell')
+    def sell(self, request):
+        data = request.data
+        client_id = data.get('client_id')
+        total_amount = data.get('total_amount')
+        details = data.get('details', [])
+
+        try:
+            client = ClientProfile.objects.get(id=client_id)
+        except ClientProfile.DoesNotExist:
+            return Response({"error": "Client not found."}, status=404)
+
+        transaction_obj = Transaction.objects.create(
+            code='TXN' + str(Transaction.objects.count() + 1).zfill(6),
+            client=client,
+            transaction_type='sell',
+            total_amount=total_amount,
+        )
+
+        for item in details:
+            stock_id = item.get('stock_id')
+            quantity = item.get('quantity')
+            unit_price = item.get('unit_price')
+            portfolio_id = item.get('portfolio_id')
+
+            try:
+                stock = Stock.objects.get(id=stock_id)
+                portfolio = Portfolio.objects.get(id=portfolio_id)
+                investment = Investment.objects.get(portfolio=portfolio, stock=stock)
+            except (Stock.DoesNotExist, Portfolio.DoesNotExist, Investment.DoesNotExist):
+                transaction.set_rollback(True)
+                return Response({"error": "Stock, Portfolio or Investment not found."}, status=404)
+
+            if investment.quantity < quantity:
+                transaction.set_rollback(True)
+                return Response({"error": f"Not enough shares of {stock.symbol} to sell."}, status=400)
+
+            TransactionDetail.objects.create(
+                transaction=transaction_obj,
+                stock=stock,
+                quantity=quantity,
+                unit_price=unit_price,
+            )
+
+            investment.quantity -= Decimal(quantity)
+
+            investment.total_invested = investment.quantity * investment.average_price
+
+            investment.current_value = stock.last_price * investment.quantity if stock.last_price else 0
+
+            if investment.quantity == 0:
+                investment.is_active = False
+
+            investment.save()
+
+        client.balance_available += Decimal(total_amount)
+
+        client.save()
+
+        serializer = TransactionSerializer(transaction_obj)
+
+        return Response(serializer.data, status=201)
+
     @action(detail=False, methods=['get'], url_path='bought')
     def bought(self, request):
         qs = self.get_queryset().filter(transaction_type='buy')
