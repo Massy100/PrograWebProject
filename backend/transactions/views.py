@@ -4,15 +4,11 @@ from rest_framework.decorators import action
 from django.db.models import Sum
 from django.db import transaction
 
-from decimal import Decimal
-
-from .models import Transaction, TransactionDetail
+from .models import Transaction
 
 from .serializers import TransactionSerializer, FullTransactionSerializer
 
-from users.models import ClientProfile
-from stocks.models import Stock
-from portfolio.models import Portfolio, Investment
+from .services.transaction_service import TransactionService
 
 # Create your views here.
 
@@ -50,135 +46,16 @@ class TransactionViewSet(viewsets.ModelViewSet):
     @transaction.atomic
     @action(detail=False, methods=['post'], url_path='buy')
     def buy(self, request):
-        data = request.data
-        client_id = data.get('client_id')
-        total_amount = data.get('total_amount')
-        details = data.get('details', [])
-
-        try:
-            client = ClientProfile.objects.get(id=client_id)
-        except ClientProfile.DoesNotExist:
-            return Response({"error": "Client not found."}, status=404)
-
-        if client.balance_available < total_amount:
-            return Response({"error": "Insufficient balance."}, status=400)
-
-        transaction_obj = Transaction.objects.create(
-            code='TXN' + str(Transaction.objects.count() + 1).zfill(6),
-            client=client,
-            transaction_type='buy',
-            total_amount=total_amount,
-        )
-
-        for item in details:
-            stock_id = item.get('stock_id')
-            quantity = item.get('quantity')
-            unit_price = item.get('unit_price')
-            portfolio_id = item.get('portfolio_id')
-
-            try:
-                stock = Stock.objects.get(id=stock_id)
-                portfolio = Portfolio.objects.get(id=portfolio_id)
-            except (Stock.DoesNotExist, Portfolio.DoesNotExist):
-                transaction.set_rollback(True)
-                return Response({"error": "Stock or Portfolio not found."}, status=404)
-            
-            TransactionDetail.objects.create(
-                transaction=transaction_obj,
-                stock=stock,
-                quantity=quantity,
-                unit_price=unit_price,
-            )
-
-            investment, created = Investment.objects.get_or_create(
-                portfolio=portfolio,
-                stock=stock,
-                defaults={'quantity': 0, 'average_price': 0, 'total_invested': 0, 'purchase_price': 0}
-            )
-
-            total_qty = investment.quantity + quantity
-            investment.average_price = (
-                (investment.average_price * investment.quantity) + Decimal(unit_price * quantity)
-            ) / total_qty
-
-
-            investment.quantity = total_qty
-
-            investment.total_invested = investment.quantity * investment.average_price
-            investment.purchase_price = unit_price
-            investment.current_value = stock.last_price * investment.quantity if stock.last_price else 0
-
-            investment.save()
-
-        client.balance_available -= Decimal(total_amount)
-        client.save()
-
-        serializer = TransactionSerializer(transaction_obj)
-        return Response(serializer.data, status=201)
+        service = TransactionService(request.data)
+        result = service.process_buy()
+        return Response(result['data'], status=result['status'])
 
     @transaction.atomic
     @action(detail=False, methods=['post'], url_path='sell')
     def sell(self, request):
-        data = request.data
-        client_id = data.get('client_id')
-        total_amount = data.get('total_amount')
-        details = data.get('details', [])
-
-        try:
-            client = ClientProfile.objects.get(id=client_id)
-        except ClientProfile.DoesNotExist:
-            return Response({"error": "Client not found."}, status=404)
-
-        transaction_obj = Transaction.objects.create(
-            code='TXN' + str(Transaction.objects.count() + 1).zfill(6),
-            client=client,
-            transaction_type='sell',
-            total_amount=total_amount,
-        )
-
-        for item in details:
-            stock_id = item.get('stock_id')
-            quantity = item.get('quantity')
-            unit_price = item.get('unit_price')
-            portfolio_id = item.get('portfolio_id')
-
-            try:
-                stock = Stock.objects.get(id=stock_id)
-                portfolio = Portfolio.objects.get(id=portfolio_id)
-                investment = Investment.objects.get(portfolio=portfolio, stock=stock)
-            except (Stock.DoesNotExist, Portfolio.DoesNotExist, Investment.DoesNotExist):
-                transaction.set_rollback(True)
-                return Response({"error": "Stock, Portfolio or Investment not found."}, status=404)
-
-            if investment.quantity < quantity:
-                transaction.set_rollback(True)
-                return Response({"error": f"Not enough shares of {stock.symbol} to sell."}, status=400)
-
-            TransactionDetail.objects.create(
-                transaction=transaction_obj,
-                stock=stock,
-                quantity=quantity,
-                unit_price=unit_price,
-            )
-
-            investment.quantity -= Decimal(quantity)
-
-            investment.total_invested = investment.quantity * investment.average_price
-
-            investment.current_value = stock.last_price * investment.quantity if stock.last_price else 0
-
-            if investment.quantity == 0:
-                investment.is_active = False
-
-            investment.save()
-
-        client.balance_available += Decimal(total_amount)
-
-        client.save()
-
-        serializer = TransactionSerializer(transaction_obj)
-
-        return Response(serializer.data, status=201)
+        service = TransactionService(request.data)
+        result = service.process_sell()
+        return Response(result['data'], status=result['status'])
 
     @action(detail=False, methods=['get'], url_path='bought')
     def bought(self, request):
