@@ -2,9 +2,13 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db.models import Sum
+from django.db import transaction
 
 from .models import Transaction
+
 from .serializers import TransactionSerializer, FullTransactionSerializer
+
+from .services.transaction_service import TransactionService
 
 # Create your views here.
 
@@ -17,6 +21,42 @@ class TransactionViewSet(viewsets.ModelViewSet):
             return FullTransactionSerializer
         return TransactionSerializer
     
+    '''
+    json structure for buy/sell:
+    {
+        "client_id": 1,
+        "total_amount": 1000.00,
+        "details": [
+            {
+                "stock_id": 1,
+                "quantity": 10,
+                "unit_price": 100.00,
+                "portfolio_id": 1
+            },
+            {
+                "stock_id": 2,
+                "quantity": 5,
+                "unit_price": 200.00,
+                "portfolio_id": 1
+            }
+        ]
+    }
+    '''
+
+    @transaction.atomic
+    @action(detail=False, methods=['post'], url_path='buy')
+    def buy(self, request):
+        service = TransactionService(request.data)
+        result = service.process_buy()
+        return Response(result['data'], status=result['status'])
+
+    @transaction.atomic
+    @action(detail=False, methods=['post'], url_path='sell')
+    def sell(self, request):
+        service = TransactionService(request.data)
+        result = service.process_sell()
+        return Response(result['data'], status=result['status'])
+
     @action(detail=False, methods=['get'], url_path='bought')
     def bought(self, request):
         qs = self.get_queryset().filter(transaction_type='buy')
