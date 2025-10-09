@@ -2,9 +2,15 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db.models import Sum
+from django.db import transaction
 
-from .models import Transaction
+from .models import Transaction, TransactionDetail
+
 from .serializers import TransactionSerializer, FullTransactionSerializer
+
+from users.models import ClientProfile
+from stocks.models import Stock
+from portfolio.models import Portfolio, Investment
 
 # Create your views here.
 
@@ -16,6 +22,66 @@ class TransactionViewSet(viewsets.ModelViewSet):
         if self.action == 'retrieve':
             return FullTransactionSerializer
         return TransactionSerializer
+    
+    @transaction.atomic
+    @action(detail=False, methods=['post'], url_path='buy')
+    def buy(self, request):
+        data = request.data
+        client_id = data.get('client_id')
+        total_amount = data.get('total_amount')
+        details = data.get('details', [])
+
+        try:
+            client = ClientProfile.objects.get(id=client_id)
+        except ClientProfile.DoesNotExist:
+            return Response({"error": "Client not found."}, status=404)
+
+        if client.balance_available < total_amount:
+            return Response({"error": "Insufficient balance."}, status=400)
+
+        transaction_obj = Transaction.objects.create(
+            code='TXN' + str(Transaction.objects.count() + 1).zfill(6),
+            client=client,
+            transaction_type='buy',
+            total_amount=total_amount,
+        )
+
+        for item in details:
+            stock_id = item.get('stock_id')
+            quantity = item.get('quantity')
+            unit_price = item.get('unit_price')
+            portfolio_id = item.get('portfolio_id')
+
+            try:
+                stock = Stock.objects.get(id=stock_id)
+                portfolio = Portfolio.objects.get(id=portfolio_id)
+            except (Stock.DoesNotExist, Portfolio.DoesNotExist):
+                transaction.set_rollback(True)
+                return Response({"error": "Stock or Portfolio not found."}, status=404)
+            
+            TransactionDetail.objects.create(
+                transaction=transaction_obj,
+                stock=stock,
+                quantity=quantity,
+                unit_price=unit_price,
+            )
+
+            investment, created = Investment.objects.get_or_create(
+                portfolio=portfolio,
+                stock=stock,
+                defaults={'quantity': 0, 'average_price': 0}
+            )
+
+            total_qty = investment.quantity + quantity
+            investment.average_price = (
+                (investment.average_price * investment.quantity) + (unit_price * quantity)
+            ) / total_qty
+
+            investment.quantity = total_qty
+            investment.save()
+
+        client.balance_available -= total_amount
+
     
     @action(detail=False, methods=['get'], url_path='bought')
     def bought(self, request):
