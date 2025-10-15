@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSession } from '@/components/SessionProvider';
 import '../styles/header.css';
-// import CartSidebar from './CartSidebar'; 
 import CartSidebar from './CartSidebar';
 
 const CATEGORIES = ['', 'Technology', 'Finance', 'Health'];
