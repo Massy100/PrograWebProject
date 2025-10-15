@@ -115,9 +115,9 @@ export default function History() {
           <div className="div-grafics">
             {summary && <ChartSwitcher summary={summary} />}
           </div>
-          <div className="div-portfolio">
+          {/* <div className="div-portfolio">
             <PortfolioList />
-          </div>
+          </div> */}
         </div>
 
         <h3 className="title_transactions">Transactions</h3>

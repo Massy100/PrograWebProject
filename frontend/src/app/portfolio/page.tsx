@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import PortfolioCard from "@/components/PortfolioCard";
 import "./portfolio.css";
+import PortfolioList from "@/components/PortfolioList";
 
 interface Portfolio {
   id: number;
@@ -119,6 +120,7 @@ const PortfolioCarousel: React.FC = () => {
             ))}
           </div>
         </div>
+        <PortfolioList />
       </div>
       
     </div>
