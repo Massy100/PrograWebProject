@@ -1,25 +1,125 @@
 .div-portfolio-list {
   display: flex;
+  flex-direction: column;
+  padding: 2rem 1rem;
+  background-color: #f7f7f9;
+  color: #13151c;
+}
+
+.portfolio-list-title {
+  font-size: 1.4rem;
+  color: #021631;
+  margin: 0.5rem 0 2rem 1rem;
+  font-weight: 600;
+  text-align: start;
+}
+
+.portfolio-list-grid {
+  display: flex;
   flex-wrap: wrap;
-  min-height: 100%;
+  gap: 20px;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.portfolio-card-item {
+  background: #ffffff;
+  border: 1px solid #e6e8ec;
+  border-radius: 10px;
+  padding: 1.2rem;
   width: 100%;
-  color: #13151C;
+  max-width: 340px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.portfolio-card-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+  border-color: #d9dbe0;
+}
+
+.portfolio-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.portfolio-card-header h3 {
+  font-size: 1.05rem;
+  margin: 0;
+  color: #021631;
+  font-weight: 600;
+}
+
+.portfolio-status {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.portfolio-card-body {
+  font-size: 0.9rem;
+  color: #5c616c;
+  margin-bottom: 0.8rem;
+  line-height: 1.5;
+}
+
+.portfolio-card-body strong{
+  font-size: 0.9rem;
+  color: #5c616c;
+  margin-bottom: 0.8rem;
+  line-height: 1.5;
+}
+
+.progress-container {
+  height: 7px;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #f0f1f4;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s ease;
+}
+
+.progress-bar.growing {
+  background-color: #8bb8a3;
+}
+
+.progress-bar.stable {
+  background-color: rgba(235, 214, 124, 1); 
+}
+
+.progress-bar.decreasing {
+  background-color: #e07e7e; 
+}
+
+
+.portfolio-list-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+  margin-right: 1.2rem;
+  justify-content: end;
 }
 
 .showMoreBtn {
-    align-self: self-end;
-    width: 7rem;
-  margin-top: 16px;
-  padding: 10px 16px;
-  background:#13151C;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:600;
-  transition: background 0.2s ease;
+  width: 7rem;
+  padding: 9px 14px;
+  background: #021631;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
 
 .showMoreBtn:hover {
-  background:#333;
+  transform: translateY(-1px);
 }

@@ -2,10 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import StockCard from "@/components/stockcard";
-import '../../../styles/portfolio.css';
+import './individualPortfolio.css';
 import { useRouter, useParams } from "next/navigation";
-import Header from "@/components/Header";
-
 
 type StockData = {
   id: number;
@@ -124,11 +122,6 @@ export default function Portfolio() {
     <div className="page">
       <button className="backButton" onClick={goHome}>← Prev</button>
         
-      <Header
-        isLoggedIn={true}
-        marketOpen={true}
-        onSearch={(applyFiltersAndSort)} 
-      />
 
       <header className="portfolioHeader">
         <h1>{portfolioTitle}</h1>
