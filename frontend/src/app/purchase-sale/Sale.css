@@ -1,40 +1,28 @@
-html, body {
-  height: 0;
-  min-height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-/* ✅ Enable scroll only on step 1 */
-body.scrollEnabled {
-  overflow-y: auto;
-}
-
-/* 🌐 Layout */
 .saleLayoutSplit {
   display: flex;
-  background-color: #FFFFFF;
+  background-color: #f7f7f9;
   padding: 1rem 2rem;
   gap: 2rem;
-  font-family: 'Segoe UI', sans-serif;
   color: #13151C;
   overflow: hidden;
 }
 
-/* 🔵 Step rail */
 .stepRailVertical {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 1rem;
   padding-top: 1rem;
+  padding-left: 2.2rem;  
+}
+
+.stepRailVertical span {
+  width: 7rem;
+  margin-top: .8rem;
 }
 
 .railStepV {
   display: flex;
-  align-items: center;
   gap: 0.75rem;
   position: relative;
   cursor: pointer;
@@ -63,9 +51,9 @@ body.scrollEnabled {
 }
 
 .railStepV.completed .railCircleV {
-  background-color: #0078D4;
+  background-color: #021631;
   color: #FFFFFF;
-  border-color: #0078D4;
+  border-color: #021631;
 }
 
 .railLineV {
@@ -82,17 +70,37 @@ body.scrollEnabled {
   font-weight: 500;
 }
 
-/* 📦 Main container */
+.checkIcon {
+  width: 16px;
+  height: 16px;
+  stroke: #51AE6E;
+}
+
+.stepLabelText {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #232733;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 1rem;
+}
+
+.stepLabelText strong {
+  color: #021631;
+  font-weight: 700;
+}
+
+
 .saleBox {
-  background-color: #F2F3F7;
   border-radius: 0.5rem;
-  padding: 2rem;
+  padding: 0 2rem 0 1rem;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  /* align-items: stretch; */
   width: 100%;
   height: auto;
-  justify-content: center;
+  /* justify-content: center; */
 }
 
 /* 🧩 Form section */
@@ -108,39 +116,61 @@ body.scrollEnabled {
   color: #232733;
 }
 
-/* 📂 Portfolio grid */
+/* === Portfolio Grid mejorado === */
 .portfolioGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 1.5rem;
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-top: 1rem;
 }
 
+/* === Tarjeta de carpeta === */
 .folderCard {
-  background-color: #E6E8EB;
-  border: 1px solid #DADCE0;
-  border-radius: 0.5rem;
-  padding: 1.25rem;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border: 1.5px solid #EDEDF2;
+  border-radius: 0.75rem;
+  padding: 1rem;
   cursor: pointer;
-  transition: border-color 0.2s ease;
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+.folderCard:hover {
+  transform: translateY(-3px);
+}
+
+/* === Estado seleccionado === */
 .folderCard.selected {
-  border: 2px solid #232733;
-  background-color: #D1D3D6;
+  background-color: rgba(223, 241, 251, 0.6); 
+
 }
 
+/* === Ícono de carpeta === */
 .folderIcon {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  color: #232733;
+  font-size: 1.2rem;
+  display: inline-block;
+  margin-right: .5rem;
+  transition: transform 0.25s ease;
 }
 
+.folderIcon svg {
+  color: #021631;
+}
+
+.folderCard:hover .folderIcon {
+  transform: scale(1.1);
+}
+
+/* === Nombre de la carpeta === */
 .folderCard span {
+  display: block;
   font-size: 1rem;
-  color: #13151C;
+  font-weight: 600;
+  color: #021631;
+  letter-spacing: 0.2px;
 }
 
 /* 👇 Horizontal step row */
