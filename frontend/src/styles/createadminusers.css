@@ -1,0 +1,145 @@
+
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 80%; 
+  margin: 40px auto;
+  padding: 30px;
+  background-color: transparent;  
+  border-radius: 12px;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+  width: 100%;
+}
+
+.profile-picture {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: black;  
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;  
+  margin-right: 30px;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+}
+
+.profile-info h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #333;
+  font-weight: bold;
+}
+
+.profile-info p {
+  color: #888;
+  font-size: 1.1rem;
+}
+
+
+.profile-form {
+  width: 100%;
+  background-color: transparent;  
+  padding: 25px;
+  border-radius: 10px;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.form-group {
+  width: 48%;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.input:focus {
+  border: 1px solid #ff6600;
+}
+
+.passwordContainer {
+  display: flex;
+  align-items: center;
+}
+
+.passwordContainer input {
+  flex: 1;
+}
+
+.eyeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  margin-left: 10px;
+}
+
+.submitButton {
+  width: auto;
+  padding: 12px 25px;
+  background-color: black; 
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s;
+}
+
+.submitButton:hover {
+  background-color: #333;  
+}
+
+.phoneContainer {
+  margin-top: 10px;
+}
+
+
+.backButton {
+  width: auto;
+  padding: 10px 20px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s;
+}
+
+.backButton:hover {
+  background-color: #444;
+}
