@@ -1,0 +1,34 @@
+.div-user-sigle-admin {
+    padding: .3rem 2rem 2rem 5rem;
+    background-color: #f7f7f9;
+}
+
+.title-user-single-admin {
+    font-size: 22px;
+    font-weight: 500;
+    margin-top: .1rem;
+}
+
+.summary-div-transactions-user{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.info-user {
+    margin-top: 2rem;
+}
+
+.div-transactions {
+    margin-top: 2rem;
+}
+
+.btn-return {
+    display: flex;
+    margin-top: 1.5rem;
+    font-size: 35px;
+    text-decoration: none;
+    cursor: pointer;
+    color: #232733;
+}

@@ -15,81 +15,86 @@ type UserRow = {
   balance_blocked: number;
 };
 
-// 🔹 Datos estáticos (para pruebas mientras no haya back)
-const staticUsers: UserRow[] = [
-  {
-    id: 1,
-    username: 'grecia',
-    full_name: 'Grecia López',
-    email: 'grecia@example.com',
-    created_at: '2025-09-22T10:00:00Z',
-    user_type: 'client',
-    is_active: true,
-    balance_available: 1500.25,
-    balance_blocked: 200.0,
-  },
-  {
-    id: 2,
-    username: 'juan',
-    full_name: 'Juan Pérez',
-    email: 'juan@example.com',
-    created_at: '2025-09-10T15:30:00Z',
-    user_type: 'admin',
-    is_active: false,
-    balance_available: 0,
-    balance_blocked: 0,
-  },
-  {
-    id: 3,
-    username: 'maria',
-    full_name: 'María Ruiz',
-    email: 'maria@example.com',
-    created_at: '2025-08-05T09:12:00Z',
-    user_type: 'client',
-    is_active: true,
-    balance_available: 980.0,
-    balance_blocked: 120.5,
-  },
-];
+const API_BASE_URL = 'http://localhost:8000'; 
 
 export default function TableUserAdministration() {
-  const [users, setUsers] = useState<UserRow[]>(staticUsers);
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 🔹 Aquí iría la request real al back con Django REST
-  /*
+  // 🔹 Obtener usuarios desde el backend de Django
   useEffect(() => {
     async function fetchUsers() {
       try {
-        const res = await fetch('http://localhost:8000/api/users/', {
+        setLoading(true);
+        const res = await fetch(`${API_BASE_URL}/api/users/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            // Si necesitas autenticación, agrega el token aquí:
+            // 'Authorization': `Bearer ${token}`
           },
-          cache: 'no-store', // para que Next no guarde en cache
+          cache: 'no-store',
         });
-        if (!res.ok) throw new Error('Error fetching users');
+        
+        if (!res.ok) {
+          throw new Error(`Error ${res.status}: ${res.statusText}`);
+        }
+        
         const data: UserRow[] = await res.json();
         setUsers(data);
+        setError(null);
       } catch (err) {
-        console.error('Error al obtener usuarios', err);
+        console.error('An error occurred while fetching users.', err);
+        setError('Error loading users data');
+      } finally {
+        setLoading(false);
       }
     }
+    
     fetchUsers();
   }, []);
-  */
 
-  const deactivate = (id: number) => {
-    setUsers(prev =>
-      prev.map(u => (u.id === id ? { ...u, is_active: false } : u))
-    );
-    // 🔹 Aquí podrías también hacer un PATCH a Django:
-    /*
-    fetch(`http://localhost:8000/api/users/${id}/deactivate/`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    */
+  const deactivateUser = async (id: number) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/users/${id}/deactivate/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': `Bearer ${token}`
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error('Error al desactivar usuario');
+      }
+
+      // Actualizar el estado local
+      setUsers(prev =>
+        prev.map(u => (u.id === id ? { ...u, is_active: false } : u))
+      );
+      
+    } catch (err) {
+      console.error('Error al desactivar usuario', err);
+      alert('Error al desactivar el usuario');
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="div-table-container">
+        <div className="loading">Loading users...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="div-table-container">
+        <div className="error-message">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="div-table-container">
@@ -107,7 +112,7 @@ export default function TableUserAdministration() {
         </thead>
         <tbody>
           {users.map(u => {
-            const href = `/user-administration/${u.id}`;
+            const href = `/user-overview/${u.id}`;
             return (
               <tr key={u.id}>
                 <td className="div-table-cell">
@@ -140,10 +145,10 @@ export default function TableUserAdministration() {
                 <td className="div-table-cell">
                   <button
                     className="div-button-deactivate"
-                    onClick={() => deactivate(u.id)}
+                    onClick={() => deactivateUser(u.id)}
                     disabled={!u.is_active}
                   >
-                    Deactivate
+                    {u.is_active ? 'Deactivate' : 'Inactive'}
                   </button>
                 </td>
               </tr>
@@ -151,6 +156,10 @@ export default function TableUserAdministration() {
           })}
         </tbody>
       </table>
+      
+      {users.length === 0 && (
+        <div className="no-users">No users registered</div>
+      )}
     </div>
   );
 }

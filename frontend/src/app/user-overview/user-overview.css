@@ -1,0 +1,15 @@
+.div-userAdmin {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: .3rem 2rem 2rem 4.5rem;
+    background-color: #f7f7f9;
+}
+
+
+.title-user-admin {
+    font-size: 22px;
+    font-weight: 500;
+    margin-top: 1rem;
+}
+

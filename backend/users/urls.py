@@ -30,7 +30,6 @@ permission_urls = [
     path('administrator/users/', user_management, name='user-management'),
     path('administrator/stocks/', StockManagementView.as_view(), name='stock-management'),
 
-
 ]
 
 urlpatterns = router.urls + permission_urls
