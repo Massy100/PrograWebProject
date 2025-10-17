@@ -1,0 +1,23 @@
+/* Titles above table */
+.stocks-administration{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: .3rem 2rem 2rem 4.5rem;
+    background-color: #f7f7f9;
+}
+
+.stocks-table-title {
+  font-size: 1.7rem;
+  color: #021631;
+  margin: .2rem 1rem 0 2rem;
+  font-weight: 700;
+  text-align: start;
+}
+
+.stocks-table-subtitle {
+  font-size: 0.95rem;
+  color: #6a6c75;
+  margin: 0 2rem 1.2rem;
+  font-family: "Inter", sans-serif;
+}
