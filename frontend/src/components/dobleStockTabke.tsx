@@ -16,6 +16,8 @@ type Props = {
 };
 
 export default function DobleStockTable({ items }: Props) {
+  const visibleItems = items.slice(0, 4);
+
   return (
     <aside className="popular-stocks-card" aria-label="Most popular stocks">
       {/* header */}
@@ -25,13 +27,14 @@ export default function DobleStockTable({ items }: Props) {
       </div>
 
       <ul className="popular-stocks-card-list">
-        {items.map((it) => (
+        {visibleItems.map((it) => (
           <a
             key={it.symbol}
             href={`/stocks/${it.symbol}`}
             className="popular-stocks-card-link"
           >
             <li className="popular-stocks-card-item">
+              {/* Left: symbol + name */}
               <div className="popular-stocks-card-item-left">
                 <span className="popular-stocks-card-item-symbol">
                   {it.symbol}
@@ -41,6 +44,7 @@ export default function DobleStockTable({ items }: Props) {
                 </span>
               </div>
 
+              {/* Right: price + change */}
               <div className="popular-stocks-card-item-right">
                 <span className="popular-stocks-card-item-price">
                   Q.{it.price}

@@ -3,13 +3,15 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "../styles/CartSidebar.css";
 
+// Tipo actualizado para que coincida con los datos guardados en localStorage
 type CartItem = {
-  stockId: number;
-  name: string;
+  portfolio: string;
+  stockName: string;
+  stockSymbol: string;
+  stockPrice: number;
   quantity: number;
-  price: number;
-  dateAdded?: string;
-  company?: string;
+  total: number;
+  date: string;
 };
 
 type Props = {
@@ -21,50 +23,39 @@ export default function CartSidebar({ onClose, show = false }: Props) {
   const router = useRouter();
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  const [cart, setCart] = useState<CartItem[]>([
-    {
-      stockId: 1,
-      name: "Apple Inc.",
-      quantity: 1,
-      price: 150,
-      dateAdded: "2025-10-12",
-      company: "NASDAQ",
-    },
-    {
-      stockId: 2,
-      name: "Microsoft Corp.",
-      quantity: 2,
-      price: 280,
-      dateAdded: "2025-10-10",
-      company: "NASDAQ",
-    },
-    {
-      stockId: 3,
-      name: "Google LLC",
-      quantity: 1,
-      price: 2700,
-      dateAdded: "2025-10-11",
-      company: "NASDAQ",
-    },
-  ]);
-
+  const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<CartItem | null>(null);
 
-  const incrementQuantity = (stockId: number) => {
+  useEffect(() => {
+    const storedCart = localStorage.getItem("shoppingCart");
+    if (storedCart) {
+      try {
+        const parsedCart = JSON.parse(storedCart);
+        setCart(parsedCart);
+        console.log("🛒 Datos cargados desde localStorage:", parsedCart);
+      } catch (error) {
+        console.error("Error leyendo localStorage:", error);
+      }
+    }
+  }, []);
+
+  // Incrementar cantidad
+  const incrementQuantity = (stockSymbol: string) => {
     setCart((prev) =>
       prev.map((item) =>
-        item.stockId === stockId
+        item.stockSymbol === stockSymbol
           ? { ...item, quantity: item.quantity + 1 }
           : item
       )
     );
   };
 
-  const decrementQuantity = (stockId: number) => {
+  // Decrementar cantidad
+  const decrementQuantity = (stockSymbol: string) => {
     setCart((prev) =>
       prev
         .map((item) =>
-          item.stockId === stockId && item.quantity > 1
+          item.stockSymbol === stockSymbol && item.quantity > 1
             ? { ...item, quantity: item.quantity - 1 }
             : item
         )
@@ -72,26 +63,46 @@ export default function CartSidebar({ onClose, show = false }: Props) {
     );
   };
 
-  const updateQuantity = (stockId: number, newQty: number) => {
+  // Actualizar cantidad manualmente
+  const updateQuantity = (itemToUpdate: CartItem, newQty: number) => {
     if (newQty < 1) return;
-    setCart((prev) =>
-      prev.map((item) =>
-        item.stockId === stockId ? { ...item, quantity: newQty } : item
-      )
+
+    const updatedCart = cart.map((item) =>
+      item.stockSymbol === itemToUpdate.stockSymbol &&
+      item.portfolio === itemToUpdate.portfolio &&
+      item.date === itemToUpdate.date
+        ? { ...item, quantity: newQty, total: item.stockPrice * newQty }
+        : item
     );
+
+    setCart(updatedCart);
+    localStorage.setItem("shoppingCart", JSON.stringify(updatedCart)); 
   };
 
-  const removeItem = (stockId: number) => {
-    setCart((prev) => prev.filter((item) => item.stockId !== stockId));
+
+  // Eliminar item
+  const removeItem = (itemToRemove: CartItem) => {
+    const updatedCart = cart.filter(
+      (item) =>
+        !(
+          item.stockSymbol === itemToRemove.stockSymbol &&
+          item.portfolio === itemToRemove.portfolio &&
+          item.date === itemToRemove.date
+        )
+    );
+
+    setCart(updatedCart);
+    localStorage.setItem("shoppingCart", JSON.stringify(updatedCart));
     setSelectedItem(null);
   };
 
-  const total = cart.reduce((acc, p) => acc + p.price * p.quantity, 0);
+  // Calcular total general
+  const total = cart.reduce((acc, p) => acc + p.total, 0);
 
+  // Ir a página de compra
   const handleFinishPurchase = () => {
-    router.push("/purchase-sale");
+    router.push("/purchase");
   };
-
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -131,21 +142,40 @@ export default function CartSidebar({ onClose, show = false }: Props) {
               {cart.length === 0 ? (
                 <p className="cartEmpty">Your cart is empty</p>
               ) : (
-                cart.map((item) => (
+                cart.map((item, index) => (
                   <div
-                    key={item.stockId}
+                    key={index}
                     className="cartCard"
                     onClick={() => setSelectedItem(item)}
                   >
                     <div className="cartCardLeft">
-                      <div className="cartCardIcon"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke-width="2" d="M1,16 L8,9 L13,14 L23,4 M0,22 L23.999,22 M16,4 L23,4 L23,11"></path></svg></div>
+                      {/* <div className="cartCardIcon">
+                        <svg
+                          stroke="currentColor"
+                          fill="currentColor"
+                          strokeWidth="0"
+                          viewBox="0 0 24 24"
+                          height="1em"
+                          width="1em"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fill="none"
+                            strokeWidth="2"
+                            d="M1,16 L8,9 L13,14 L23,4 M0,22 L23.999,22 M16,4 L23,4 L23,11"
+                          ></path>
+                        </svg>
+                      </div> */}
                       <div>
-                        <p className="cartCardName">{item.name}</p>
+                        <p className="cartCardPortfolio">
+                          Portfolio: {item.portfolio}
+                        </p>
+                        <p className="cartCardName">{item.stockName}</p>
                         <p className="cartCardQty">Qty: {item.quantity}</p>
                       </div>
                     </div>
                     <p className="cartCardPrice">
-                      Q.{(item.price * item.quantity).toFixed(2)}
+                      Q.{item.total.toFixed(2)}
                     </p>
                   </div>
                 ))
@@ -171,21 +201,26 @@ export default function CartSidebar({ onClose, show = false }: Props) {
 
             <div className="cartDetailHeader">
               <div>
-                <p className="cartDetailName">{selectedItem.name}</p>
-                <p className="cartDetailCompany">{selectedItem.company}</p>
+                <p className="cartDetailName">{selectedItem.stockName}</p>
+                <p className="cartDetailCompany">
+                  {selectedItem.stockSymbol}
+                </p>
               </div>
               <p className="cartDetailPrice">
-                Q.{(selectedItem.price * selectedItem.quantity).toFixed(2)}
+                Q.{(selectedItem.stockPrice * selectedItem.quantity).toFixed(2)}
               </p>
             </div>
 
             <div className="cartDetailInfo">
               <p>
-                <strong>Date Added:</strong> {selectedItem.dateAdded}
+                <strong>Date Added:</strong> {selectedItem.date}
+              </p>
+              <p>
+                <strong>Portfolio:</strong> {selectedItem.portfolio}
               </p>
               <p>
                 <strong>Individual Price:</strong> Q.
-                {selectedItem.price.toFixed(2)}
+                {selectedItem.stockPrice.toFixed(2)}
               </p>
             </div>
 
@@ -199,20 +234,15 @@ export default function CartSidebar({ onClose, show = false }: Props) {
                 onChange={(e) => {
                   const newQty = parseInt(e.target.value, 10);
                   if (newQty > 0) {
-                    updateQuantity(selectedItem.stockId, newQty);
-                    setSelectedItem({ ...selectedItem, quantity: newQty });
+                    updateQuantity(selectedItem, newQty);
+                    setSelectedItem({ ...selectedItem, quantity: newQty, total: selectedItem.stockPrice * newQty });
                   }
                 }}
               />
             </div>
 
             <div className="cartDetailActions">
-              <button
-                onClick={() => removeItem(selectedItem.stockId)}
-                className="cartBtnRemove"
-              >
-                Remove
-              </button>
+              <button onClick={() => removeItem(selectedItem)} className="cartBtnRemove">Remove</button>
             </div>
           </div>
         )}

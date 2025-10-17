@@ -1,10 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import "./StockPage.css";
 import { StockChart } from "@/components/StockChart";
+import { BuyStockSidebar } from "@/components/BuyStockSidebar";
 
 export default function StockOverviewPage() {
+  const [showSidebar, setShowSidebar] = useState(false);
+
+  // esta es la info que se tiene que fijooo recibir para la grafica osea, la hora o la fecha y el precio tiene que existir varios datos
+  // para que se pueda ver mejor la grafica
   const stockData = [
     { date: "9 AM", value: 120 },
     { date: "10 AM", value: 135 },
@@ -37,19 +42,19 @@ export default function StockOverviewPage() {
 
   return (
     <div className="stock-page">
-      {/* Header */}
       <section className="stock-hero">
         <div>
           <h1 className="hero-title">
             {stockInfo.name} <br /> ({stockInfo.symbol})
           </h1>
-          <p className="hero-subtitle">
-            {stockInfo.category}. 
-          </p>
+          <p className="hero-subtitle">{stockInfo.category}.</p>
         </div>
+
+        <button className="buy-stock-btn" onClick={() => setShowSidebar(true)}>
+          Add Stock
+        </button>
       </section>
 
-      {/* Metrics Section */}
       <section className="stock-metrics">
         <div className="metric">
           <span>SYMBOL</span>
@@ -74,7 +79,6 @@ export default function StockOverviewPage() {
         </div>
       </section>
 
-      {/* Chart */}
       <div className="stock-chart-section">
         <StockChart name={stockInfo.symbol} data={stockData} theme="dark" />
       </div>
@@ -140,6 +144,19 @@ export default function StockOverviewPage() {
           </div>
         </div>
       </div>
+
+
+      <BuyStockSidebar
+        isOpen={showSidebar}
+        onClose={() => setShowSidebar(false)}
+        stockName={stockInfo.name}
+        stockSymbol={stockInfo.symbol}
+        stockPrice={stockInfo.lastPrice}
+        portfolios={["Main Portfolio", "Growth Fund", "Tech Picks"]}
+        onConfirm={(data) => {
+          console.log("Added to portfolio:", data);
+        }}
+      />
     </div>
   );
 }

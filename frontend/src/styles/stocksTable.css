@@ -2,6 +2,7 @@
   background: #ffffff;                 
   overflow: hidden;
   margin: 0 2rem;
+  border-radius: 15px;
 }
 
 
@@ -139,6 +140,41 @@
 
 .stocks-table-row {
   transition: background-color 0.2s ease;
+}
+
+/* Pagination */
+.stocks-table-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 10px;
+  font-family: "Inter", sans-serif;
+}
+
+.pagination-btn {
+  background: #f2f2f2;
+  border: none;
+  color: #021631;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #e0e0e5;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-size: 0.9rem;
+  color: #646c79;
 }
 
 

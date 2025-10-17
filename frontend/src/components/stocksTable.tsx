@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import "../styles/stocksTable.css";
 
 export type StockItem = {
@@ -8,7 +8,7 @@ export type StockItem = {
   name: string;
   currentPrice: number;
   changePct: number;
-  last30d: number[];
+  last30d: number[]; // los ultimos precios de la accion o de los ultimos precios segun la hora osea a las 9 costa 450 a las 10 400 y asi
   targetPrice: number;
   recommendation: string;
 };
@@ -18,8 +18,19 @@ type Props = {
 };
 
 export default function StocksRecommendationsTable({ rows }: Props) {
+  const pageSize = 8; 
+  const [page, setPage] = useState(0);
+
+  const totalPages = Math.ceil(rows.length / pageSize);
+  const startIndex = page * pageSize;
+  const visibleRows = rows.slice(startIndex, startIndex + pageSize);
+
+  const nextPage = () => setPage((p) => Math.min(p + 1, totalPages - 1));
+  const prevPage = () => setPage((p) => Math.max(p - 1, 0));
+
   return (
     <section className="stocks-table">
+      {/* Header */}
       <div className="stocks-table-header">
         <div className="stocks-table-header-cell stocks-table-col-stock">Stocks</div>
         <div className="stocks-table-header-cell">Current Price</div>
@@ -28,8 +39,9 @@ export default function StocksRecommendationsTable({ rows }: Props) {
         <div className="stocks-table-header-cell">Recommendation</div>
       </div>
 
+      {/* Body */}
       <div className="stocks-table-body">
-        {rows.map((s) => {
+        {visibleRows.map((s) => {
           const trendUp = s.last30d[s.last30d.length - 1] >= s.last30d[0];
           return (
             <a
@@ -47,7 +59,9 @@ export default function StocksRecommendationsTable({ rows }: Props) {
 
                 <div className="stocks-table-cell">
                   <div className="stocks-table-price">
-                    <span className="stocks-table-price-value">Q.{s.currentPrice}</span>
+                    <span className="stocks-table-price-value">
+                      Q.{s.currentPrice}
+                    </span>
                     <span
                       className={
                         "stocks-table-price-change " +
@@ -71,7 +85,9 @@ export default function StocksRecommendationsTable({ rows }: Props) {
                 </div>
 
                 <div className="stocks-table-cell">
-                  <span className="stocks-table-target-price">Q.{s.targetPrice}</span>
+                  <span className="stocks-table-target-price">
+                    Q.{s.targetPrice}
+                  </span>
                 </div>
 
                 <div className="stocks-table-cell">
@@ -93,10 +109,31 @@ export default function StocksRecommendationsTable({ rows }: Props) {
           );
         })}
       </div>
+
+      {totalPages > 1 && (
+        <div className="stocks-table-pagination">
+          <button
+            className="pagination-btn"
+            onClick={prevPage}
+            disabled={page === 0}
+          >
+            ‹ Prev
+          </button>
+          <span className="pagination-info">
+            Page {page + 1} of {totalPages}
+          </span>
+          <button
+            className="pagination-btn"
+            onClick={nextPage}
+            disabled={page >= totalPages - 1}
+          >
+            Next ›
+          </button>
+        </div>
+      )}
     </section>
   );
 }
-
 
 function Sparkline({
   data,
