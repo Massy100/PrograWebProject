@@ -1,24 +1,44 @@
 .alertContainer {
-  margin-top: 2rem; /* ✅ separa el botón del top */
+  margin-top: 3rem;
+  display: flex;
+  justify-content: center; /* ✅ centra el botón */
 }
 
 /* 🔔 Botón minimalista de alerta */
 .alertBtn.full {
-  width: 100%;
-  background-color: #d1fae5;
+  width: 1900px; /* ✅ ancho fijo más pequeño */
+  max-width: 100%;
+  background-color: #f3fff9;
   color: #065f46;
   padding: 0.85rem 1.25rem;
-  border: 1px solid #10b981;
+  border: 1px solid #d1fae5;
   border-radius: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
   cursor: pointer;
   animation: bounceInRight 0.6s ease-out;
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 3px 10px rgba(101, 255, 204, 0.2);
   transition: background-color 0.2s ease;
+  margin-top: 1rem;
 }
 
 .alertBtn.full:hover {
-  background-color: #a7f3d0;
+  background-color: #ccf9e4;
 }
+
+@media (max-width: 1900px) {
+  .alertContainer {
+    margin-top: 1rem;
+    padding: 0 1rem;
+  }
+
+  .alertBtn.full {
+    width: 100%;
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.45rem;
+    box-shadow: 0 2px 8px rgba(101, 255, 204, 0.15);
+  }
+}
+

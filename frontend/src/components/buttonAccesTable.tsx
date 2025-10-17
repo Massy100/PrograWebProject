@@ -6,7 +6,7 @@ import '../styles/buttonAccessTable.css';
 
 export default function PendingAlert() {
   const [pendingCount, setPendingCount] = useState<number>(0);
-  const [visible, setVisible] = useState<boolean>(false);
+  const [visible, setVisible] = useState<boolean>(true);
   const router = useRouter();
 
   useEffect(() => {

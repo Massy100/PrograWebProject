@@ -23,6 +23,7 @@ export default function RequestsTable() {
   const [rejected, setRejected] = useState<HistoryItem[]>([]);
   const [currentUser, setCurrentUser] = useState<string>('Josué');
   const [activeTab, setActiveTab] = useState<'Pending' | 'Approved' | 'Rejected'>('Pending');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const tableRef = useRef<HTMLDivElement>(null);
 
   // ✅ Detectar si venís desde el botón de alerta
@@ -33,10 +34,10 @@ export default function RequestsTable() {
       setTimeout(() => {
         const target = document.querySelector('.tx__wrap');
         if (target) {
-            const offset = target.getBoundingClientRect().top + window.scrollY - 80; // ajustá 80 según tu header
-            window.scrollTo({ top: offset, behavior: 'smooth' });
+          const offset = target.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top: offset, behavior: 'smooth' });
         }
-        }, 300);
+      }, 300);
       localStorage.removeItem('accessTab');
     }
   }, []);
@@ -97,14 +98,35 @@ export default function RequestsTable() {
     <main className="panel">
       <h1 className="panel__title">Access Requests</h1>
 
+      {/* ✅ Dropdown de pestañas */}
+      <div className="tx__dropdown">
+        <button
+          className="tx__dropdownBtn"
+          onClick={() => setDropdownOpen(prev => !prev)}
+        >
+          {activeTab === 'Pending' && '📁 Pending'}
+          {activeTab === 'Approved' && '✔ Approved'}
+          {activeTab === 'Rejected' && '✖ Rejected'}
+          <span className="tx__dropdownArrow">▾</span>
+        </button>
+
+        {dropdownOpen && (
+          <div className="tx__dropdownMenu">
+            {activeTab !== 'Pending' && (
+              <button onClick={() => { setActiveTab('Pending'); setDropdownOpen(false); }}>📁 Pending</button>
+            )}
+            {activeTab !== 'Approved' && (
+              <button onClick={() => { setActiveTab('Approved'); setDropdownOpen(false); }}>✔ Approved</button>
+            )}
+            {activeTab !== 'Rejected' && (
+              <button onClick={() => { setActiveTab('Rejected'); setDropdownOpen(false); }}>✖ Rejected</button>
+            )}
+          </div>
+        )}
+      </div>
+
       <div ref={tableRef}>
         <div className="tx__wrap">
-          <div className="tx__tabs">
-            <button className={activeTab === 'Pending' ? 'tx__tab active' : 'tx__tab'} onClick={() => setActiveTab('Pending')}>📁 Pending</button>
-            <button className={activeTab === 'Approved' ? 'tx__tab active' : 'tx__tab'} onClick={() => setActiveTab('Approved')}>✔ Approved</button>
-            <button className={activeTab === 'Rejected' ? 'tx__tab active' : 'tx__tab'} onClick={() => setActiveTab('Rejected')}>✖ Rejected</button>
-          </div>
-
           <table className="tx__table">
             <thead>
               <tr>

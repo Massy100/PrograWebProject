@@ -49,35 +49,59 @@ body {
   scroll-margin-top: 80px;
 }
 
-/* 📁 Pestañas integradas al borde superior de la tabla */
-.tx__tabs {
+/* 📁 Dropdown de pestañas */
+.tx__dropdown {
+  position: relative;
   display: flex;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background-color: #fff;
-  border-top-left-radius: 0.75rem;
-  border-top-right-radius: 0.75rem;
-  border-bottom: 1px solid #DADCE0;
+  justify-content: flex-end;
+  padding: 0.5rem 1rem 1rem;
 }
 
-.tx__tab {
-  background-color: #e5e7eb;
-  color: #1f2937;
-  padding: 0.4rem 1rem;
+.tx__dropdownBtn {
+  background-color: #0078D4;
+  color: white;
+  padding: 0.5rem 1rem;
   border: none;
   border-radius: 0.5rem;
   font-weight: 600;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tx__dropdownArrow {
+  font-size: 0.8rem;
+}
+
+.tx__dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border: 1px solid #DADCE0;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-top: 0.5rem;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+}
+
+.tx__dropdownMenu button {
+  background: none;
+  border: none;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 500;
+  color: #1f2937;
+  cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.tx__tab:hover {
-  background-color: #d1d5db;
-}
-
-.tx__tab.active {
-  background-color: #0078D4;
-  color: white;
+.tx__dropdownMenu button:hover {
+  background-color: #f3f4f6;
 }
 
 /* 📊 Tabla minimalista */
@@ -229,7 +253,6 @@ body {
   background-color: #fad4d4;
 }
 
-
 /* 🔔 Botón minimalista de alerta */
 .alertBtn.full {
   width: 100%;
@@ -251,11 +274,15 @@ body {
   background-color: #a7f3d0;
 }
 
-
 /* 📱 Responsive ajustes */
 @media (max-width: 768px) {
   .panel {
     padding: 1rem;
+  }
+
+  .panel__title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .tx__table {
@@ -283,22 +310,34 @@ body {
     flex-direction: column;
     gap: 0.5rem;
   }
-}
 
-@keyframes bounceInRight {
-  0% {
-    opacity: 0;
-    transform: translateX(100%) scale(0.9);
+  .tx__dropdown {
+    justify-content: center;
+    padding: 0.5rem 0.5rem 1rem;
   }
-  60% {
-    opacity: 1;
-    transform: translateX(-10%) scale(1.05);
+
+  .tx__dropdownBtn {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
   }
-  80% {
-    transform: translateX(0%) scale(0.95);
+
+  .tx__dropdownMenu {
+    right: 0;
+    min-width: 100%;
+    font-size: 0.85rem;
   }
-  100% {
-    transform: translateX(0%) scale(1);
+
+  .tx__dropdownMenu button {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .tx__pill {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.75rem;
+  }
+
+  .tx__badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.75rem;
   }
 }
-
