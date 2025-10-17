@@ -1,8 +1,9 @@
 .stocks-table {
   background: #ffffff;                 
   overflow: hidden;
-  margin: 1rem 2rem;
+  margin: 0 2rem;
 }
+
 
 .stocks-table-header {
   display: grid;
@@ -10,7 +11,7 @@
   gap: 0;               
   color: #6a6c75;                      
   padding: 12px 16px;
-  border-bottom: 1px solid #13151c;
+  border-bottom: 1px solid #828692;
   font-weight: 600;
   font-size: 13px;
 }
@@ -123,6 +124,23 @@
   border-color: #ffa318; 
   color: #ffa318;
 }
+
+.stocks-table-row-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: background 0.2s ease;
+}
+
+.stocks-table-row-link:hover .stocks-table-row {
+  background-color: #fafbfc;
+  cursor: pointer;
+}
+
+.stocks-table-row {
+  transition: background-color 0.2s ease;
+}
+
 
 /* responsive */
 @media (max-width: 900px) {

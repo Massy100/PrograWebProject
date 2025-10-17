@@ -87,13 +87,13 @@
 }
 
 .popular-stocks-card-item-change{ 
-    font-size:14px; 
+  font-size:14px; 
 }
 .popular-stocks-text-positive{ 
-    color:#1AC963; 
+  color:#1AC963; 
 }
 .popular-stocks-text-negative{ 
-    color:#F8191E; 
+  color:#F8191E; 
 }
 
 
@@ -105,6 +105,26 @@
   color:#13151C;
 }
 
+.popular-stocks-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.popular-stocks-card-link:hover .popular-stocks-card-item {
+  background-color: #fafbfc;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.popular-stocks-card-item {
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.popular-stocks-card-link:hover .popular-stocks-card-item {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+}
 
 
 @media (max-width:480px){

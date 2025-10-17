@@ -1,0 +1,197 @@
+.stock-page {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding: 40px;
+  background-color: #fafafa;
+  min-height: 100vh;
+}
+
+/* Hero Section */
+.stock-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-left: 1rem;
+}
+
+/* .stock-hero div {
+    display: flex;
+    justify-content: space-between;
+    background-color: red; 
+    width: 90%;
+} */
+
+.hero-title {
+  width: 100%;
+  font-size: 40px;
+  font-weight: 800;
+  color: #021631;
+  margin: 0 0 16px;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.hero-subtitle {
+  color: #646c79;
+  max-width: 500px;
+  line-height: 1.5;
+  margin: 1rem 0 0 0 ;
+}
+
+
+.stock-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  border-top: 1px solid #e4e6eb;
+  border-bottom: 1px solid #e4e6eb;
+  padding: 20px 0;
+  margin: 0;
+}
+
+.metric {
+  text-align: center;
+  flex: 1;
+  min-width: 120px;
+}
+
+.metric span {
+  display: block;
+  font-size: 12px;
+  color: #777;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.metric p {
+  font-size: 22px;
+  font-weight: 700;
+  color: #021631;
+}
+
+/* Status + colors */
+.metric .positive {
+  color: #02c23e;
+}
+
+.metric .negative {
+  color: #ff4033;
+}
+
+.metric .active {
+  color: #02c23e;
+}
+
+.metric .inactive {
+  color: #efaE3c;
+}
+
+/* Chart */
+.stock-chart-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 60vh;
+    margin: 3rem 0;
+}
+
+/* Info Cards */
+.stock-info-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.stock-info-card {
+  flex: 1;
+  min-width: 340px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #edeef1;
+}
+
+.stock-info-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #021631;
+  border-bottom: 1px solid #edeef1;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.stock-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.stock-info-row span {
+  color: #646c79;
+  font-weight: 500;
+}
+
+.stock-info-row p {
+  margin: 0;
+  color: #021631;
+  font-weight: 500;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  min-width: 80px;
+}
+
+.status-badge.active {
+  background-color: #e3fcf0;
+  color: #02c23e;
+}
+
+.status-badge.inactive {
+  background-color: #fef2dc;
+  color: #efaE3c;
+}
+
+.stock-price {
+  font-size: 15px;
+  font-weight: 600;
+  color: #021631;
+}
+
+.stock-variation {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.stock-variation.positive {
+  color: #02c23e;
+}
+
+.stock-variation.negative {
+  color: #ff4033;
+}
+
+.trend {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.trend.up {
+  color: #02c23e;
+}
+
+.trend.down {
+  color: #ff4033;
+}

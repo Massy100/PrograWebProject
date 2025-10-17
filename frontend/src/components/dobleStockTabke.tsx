@@ -15,11 +15,10 @@ type Props = {
   items: PopularStock[];
 };
 
-export default function PopularStocksCard({ items }: Props) {
+export default function DobleStockTable({ items }: Props) {
   return (
     <aside className="popular-stocks-card" aria-label="Most popular stocks">
-      <h3 className="popular-stocks-card-title">Most Popular Stocks</h3>
-
+      {/* header */}
       <div className="popular-stocks-card-header">
         <span className="hdr-left">Stock</span>
         <span className="hdr-mid">Price</span>
