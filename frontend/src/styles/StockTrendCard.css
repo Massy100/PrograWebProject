@@ -1,0 +1,133 @@
+.trendCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 16px;
+  overflow: hidden;
+  min-width: 369px;
+  max-width: 370px;
+  height: 130px;
+  transition: transform 0.3s ease;
+  border: 1px solid #ededf2;
+  padding: 1rem;
+  position: relative;
+}
+
+.trendCard.up {
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #ffffff 45%,
+    #f5fff9 75%,
+    #dcffe8 100%
+  );
+}
+
+.trendCard.down {
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #ffffff 45%,
+    #fff5f5 75%,
+    #ffd6d6 100%
+  );
+}
+
+.fade {
+  animation: fadeSlide 0.3s ease;
+}
+
+.trendLeft {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.trendLeft canva {
+  height: 85%;
+}
+
+.trendChart {
+  width: 85%;
+  max-height: 70%;
+}
+
+.trendRight {
+  flex: 1;
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.trendHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trendHeader h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #021631;
+}
+
+.trendSub {
+  text-align: start;
+  color: #646c79;
+  margin: 0.2rem 0;
+  font-size: 0.8rem;
+}
+
+.trendPrice {
+  text-align: start;
+  font-weight: 700;
+  color: #021631;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.trendPercent {
+  font-weight: 700;
+  font-size: .8rem;
+    text-align: start;
+}
+
+.trendPercent.up {
+  color: #0ecb81;
+}
+
+.trendPercent.down {
+  color: #f6465d;
+}
+
+.status {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.status.up {
+  background: rgba(14, 203, 129, 0.15);
+  color: #0ecb81;
+}
+
+.status.down {
+  background: rgba(246, 70, 93, 0.15);
+  color: #f6465d;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateX(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

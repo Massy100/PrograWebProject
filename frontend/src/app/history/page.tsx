@@ -79,7 +79,7 @@ export default function History() {
         <FilterDate
           onFilterChange={(range, label) => {
             console.log("Filter change:", range, label);
-            fetchSummary(range ?? undefined); // 👈 aquí ya aplicamos el filtro
+            fetchSummary(range ?? undefined); 
           }}
         />
         

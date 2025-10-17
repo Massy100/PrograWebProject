@@ -5,6 +5,8 @@ import PopularStocksCard, { PopularStock } from '@/components/popularCardStocks'
 import "./generalStocks.css";
 import StockTrends from '@/components/StockTrends';
 import DobleStockTable from '@/components/dobleStockTabke';
+import StockTrendCard from '@/components/StockTrendCard';
+import StockGraphCarousel from '@/components/StockGraphCarousel';
 
 export default function StocksPage() {
   const router = useRouter();
@@ -38,60 +40,6 @@ export default function StocksPage() {
   }));
 
 
-  const last5Tx = [
-    {
-      transaction_type: 'buy' as const,
-      stock: 'AAPL',
-      code: 'TX-1001',
-      total_amount: 1500,
-      created_at: new Date(),
-      is_active: true,
-      quantity: 10,
-      unit_price: 150,
-    },
-    {
-      transaction_type: 'sell' as const,
-      stock: 'TSLA',
-      code: 'TX-1002',
-      total_amount: 900,
-      created_at: new Date(Date.now() - 86400000), 
-      is_active: false,
-      quantity: 3,
-      unit_price: 300,
-    },
-    {
-      transaction_type: 'buy' as const,
-      stock: 'MSFT',
-      code: 'TX-1003',
-      total_amount: 1200,
-      created_at: new Date(Date.now() - 2 * 86400000),
-      is_active: true,
-      quantity: 6,
-      unit_price: 200,
-    },
-    {
-      transaction_type: 'sell' as const,
-      stock: 'NVDA',
-      code: 'TX-1004',
-      total_amount: 750,
-      created_at: new Date(Date.now() - 3 * 86400000),
-      is_active: true,
-      quantity: 1,
-      unit_price: 750,
-    },
-    {
-      transaction_type: 'buy' as const,
-      stock: 'AMZN',
-      code: 'TX-1005',
-      total_amount: 480,
-      created_at: new Date(Date.now() - 4 * 86400000),
-      is_active: true,
-      quantity: 3,
-      unit_price: 160,
-    },
-    
-  ];
-
   return (
     <main className="landingPageUser">
         <p className="subtitle">Investment Opportunities</p>
@@ -103,6 +51,9 @@ export default function StocksPage() {
 
         <div className="div-more-info-dashboard-user">
             <StocksRecommendationsTable rows={demoRows} />
+
+            <StockGraphCarousel />
+
         </div>
 
 

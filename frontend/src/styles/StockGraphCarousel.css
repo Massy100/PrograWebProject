@@ -1,0 +1,38 @@
+.loop-carousel-container {
+  width: 100%;
+  max-width: 1300px;
+  margin: 2rem auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.loop-carousel-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #021631;
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.loop-carousel-wrapper {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+.loop-carousel-track {
+  display: flex;
+  gap: 1rem;
+  white-space: nowrap;
+  transition: transform 0.1s linear;
+  will-change: transform;
+}
+
+.loop-carousel-slide {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
