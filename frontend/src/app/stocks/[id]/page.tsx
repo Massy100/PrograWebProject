@@ -42,6 +42,9 @@ export default function StockOverviewPage() {
 
   return (
     <div className="stock-page">
+      <a className="backBtn" href="/stocks">
+        ← Back
+      </a>
       <section className="stock-hero">
         <div>
           <h1 className="hero-title">

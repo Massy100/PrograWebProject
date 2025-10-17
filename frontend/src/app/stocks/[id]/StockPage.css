@@ -2,9 +2,20 @@
   display: flex;
   flex-direction: column;
   gap: 40px;
-  padding: 40px;
-    background-color: #F7F7F9;
+  padding: 20px 40px 40px 40px;
+  background-color: #F7F7F9;
   min-height: 100vh;
+}
+
+.backBtn {
+  height: .1px;
+  background: none;
+  border: none;
+  color: #646C79;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  margin: 0;
 }
 
 
