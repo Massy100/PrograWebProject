@@ -1,0 +1,163 @@
+
+.carousel-container {
+  width: 100%;
+  background-color: transparent;
+  border-radius: 12px;
+  padding: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.stock-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.stock-link:hover {
+  text-decoration: none;
+}
+
+
+.carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.carousel-header h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #021631;
+}
+
+.carousel-subtitle {
+  color: #646c79;
+  font-size: 0.9rem;
+}
+
+
+.carousel-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-btn {
+  background: #f2f2f2;
+  border: none;
+  color: #021631;
+  font-size: 1.4rem;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: #e0e0e5;
+}
+
+
+.carousel-wrapper {
+  overflow: hidden;
+  width: 100%;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 16px;
+  transition: transform 0.1s linear;
+  will-change: transform;
+}
+
+
+.stock-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #ededef;
+  min-width: 220px;
+  padding: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s ease;
+}
+
+.stock-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+
+.stock-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stock-card-header h3 {
+  font-size: 1rem;
+  color: #021631;
+  margin: 0;
+}
+
+.stock-card-header span.active {
+  background: #e3fcf0;
+  color: #02c23e;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.stock-card-header span.inactive {
+  background: #fef2dc;
+  color: #F8191E;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+
+.stock-code {
+  font-size: 0.8rem;
+  color: #828692;
+  margin-top: 4px;
+}
+
+.stock-amount h4 {
+  font-size: 1.3rem;
+  color: #021631;
+  font-weight: 700;
+  margin: 8px 0 0;
+}
+
+.stock-amount p {
+  color: #828692;
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.stock-change {
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 8px 0;
+}
+
+.stock-change.positive {
+  color: #51ae6e;
+}
+
+.stock-change.negative {
+  color: #F8191E;
+}
+
+
+.stock-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #646c79;
+  margin-top: 6px;
+}

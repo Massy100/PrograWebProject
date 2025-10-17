@@ -1,0 +1,102 @@
+.stock-chart-container {
+  border-radius: 20px;
+  padding: 24px;
+  width: 90%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* .stock-chart-container.dark {
+  background: rgba(0, 0, 0, 0.637);
+  background-color: #02163181;
+} */
+
+/* .stock-chart-container.dark {
+  background: linear-gradient(
+    145deg,
+    rgba(35, 30, 28, 0.65) 0%,
+    rgba(20, 18, 18, 0.45) 100%
+  );
+
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    inset 0 0 0.5px rgba(255, 255, 255, 0.05);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  transition: all 0.3s ease;
+} */
+
+.stock-chart-container.dark {
+  background: linear-gradient(
+  145deg,
+  rgba(25, 25, 30, 0.65) 0%,
+  rgba(15, 15, 20, 0.4) 100%
+);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    inset 0 0 0.5px rgba(255, 255, 255, 0.05);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  transition: all 0.3s ease;
+}
+
+
+.stock-chart-container.light {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+
+.stock-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.stock-chart-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ededf2;
+}
+
+
+.stock-chart-ranges {
+  display: flex;
+  gap: 10px;
+}
+
+.stock-range-btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  background-color: transparent;
+  color: #ededf2;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stock-range-btn.active {
+  background-color: #2779f5;
+  color: #ffffff;
+}
+
+/* ======= ÁREA DEL GRÁFICO ======= */
+.stock-chart-graph {
+  flex-grow: 1;
+}

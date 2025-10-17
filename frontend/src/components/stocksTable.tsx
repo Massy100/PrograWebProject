@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import React from 'react';
-import '../styles/stocksTable.css';
+import React, { useState } from "react";
+import "../styles/stocksTable.css";
 
 export type StockItem = {
   symbol: string;
   name: string;
   currentPrice: number;
-  changePct: number;        
-  last30d: number[];        // sparkline series (any scale)
+  changePct: number;
+  last30d: number[]; // los ultimos precios de la accion o de los ultimos precios segun la hora osea a las 9 costa 450 a las 10 400 y asi
   targetPrice: number;
-  recommendation: string;   // "BUY", "HOLD", "SELL"
+  recommendation: string;
 };
 
 type Props = {
@@ -18,8 +18,19 @@ type Props = {
 };
 
 export default function StocksRecommendationsTable({ rows }: Props) {
+  const pageSize = 8; 
+  const [page, setPage] = useState(0);
+
+  const totalPages = Math.ceil(rows.length / pageSize);
+  const startIndex = page * pageSize;
+  const visibleRows = rows.slice(startIndex, startIndex + pageSize);
+
+  const nextPage = () => setPage((p) => Math.min(p + 1, totalPages - 1));
+  const prevPage = () => setPage((p) => Math.max(p - 1, 0));
+
   return (
     <section className="stocks-table">
+      {/* Header */}
       <div className="stocks-table-header">
         <div className="stocks-table-header-cell stocks-table-col-stock">Stocks</div>
         <div className="stocks-table-header-cell">Current Price</div>
@@ -28,74 +39,102 @@ export default function StocksRecommendationsTable({ rows }: Props) {
         <div className="stocks-table-header-cell">Recommendation</div>
       </div>
 
+      {/* Body */}
       <div className="stocks-table-body">
-        {rows.map((s) => {
+        {visibleRows.map((s) => {
           const trendUp = s.last30d[s.last30d.length - 1] >= s.last30d[0];
           return (
-            <div key={s.symbol} className="stocks-table-row">
-              <div className="stocks-table-cell stocks-table-col-stock">
-                <div className="stocks-table-stock-name">
-                  <strong className="stocks-table-stock-symbol">{s.symbol}</strong>
-                  <span className="stocks-table-stock-fullname">{s.name}</span>
+            <a
+              key={s.symbol}
+              href={`/stocks/${s.symbol}`}
+              className="stocks-table-row-link"
+            >
+              <div className="stocks-table-row">
+                <div className="stocks-table-cell stocks-table-col-stock">
+                  <div className="stocks-table-stock-name">
+                    <strong className="stocks-table-stock-symbol">{s.symbol}</strong>
+                    <span className="stocks-table-stock-fullname">{s.name}</span>
+                  </div>
                 </div>
-              </div>
 
-              <div className="stocks-table-cell">
-                <div className="stocks-table-price">
-                  <span className="stocks-table-price-value">
-                    Q.{s.currentPrice}
+                <div className="stocks-table-cell">
+                  <div className="stocks-table-price">
+                    <span className="stocks-table-price-value">
+                      Q.{s.currentPrice}
+                    </span>
+                    <span
+                      className={
+                        "stocks-table-price-change " +
+                        (s.changePct >= 0
+                          ? "stocks-table-text-positive"
+                          : "stocks-table-text-negative")
+                      }
+                    >
+                      ({s.changePct >= 0 ? "+" : ""}
+                      {s.changePct.toFixed(2)}%)
+                    </span>
+                  </div>
+                </div>
+
+                <div className="stocks-table-cell">
+                  <Sparkline
+                    data={s.last30d}
+                    positiveColor={trendUp ? "#1AC963" : "#F8191E"}
+                    negativeColor={trendUp ? "#1AC963" : "#F8191E"}
+                  />
+                </div>
+
+                <div className="stocks-table-cell">
+                  <span className="stocks-table-target-price">
+                    Q.{s.targetPrice}
                   </span>
+                </div>
+
+                <div className="stocks-table-cell">
                   <span
                     className={
-                      'stocks-table-price-change ' +
-                      (s.changePct >= 0
-                        ? 'stocks-table-text-positive'
-                        : 'stocks-table-text-negative')
+                      "stocks-table-recommendation-pill " +
+                      (s.recommendation.toLowerCase().includes("buy")
+                        ? "stocks-table-pill-positive"
+                        : s.recommendation.toLowerCase().includes("sell")
+                        ? "stocks-table-pill-negative"
+                        : "stocks-table-pill-neutral")
                     }
                   >
-                    ({s.changePct >= 0 ? '+' : ''}
-                    {s.changePct.toFixed(2)}%)
+                    {s.recommendation}
                   </span>
                 </div>
               </div>
-
-              <div className="stocks-table-cell">
-                <Sparkline
-                  data={s.last30d}
-                  positiveColor={trendUp ? '#1AC963' : '#F8191E'}
-                  negativeColor={trendUp ? '#1AC963' : '#F8191E'}
-                />
-              </div>
-
-              <div className="stocks-table-cell">
-                <span className="stocks-table-target-price">
-                  Q.{s.targetPrice}
-                </span>
-              </div>
-
-              <div className="stocks-table-cell">
-                <span
-                  className={
-                    'stocks-table-recommendation-pill ' +
-                    (s.recommendation.toLowerCase().includes('buy')
-                      ? 'stocks-table-pill-positive'
-                      : s.recommendation.toLowerCase().includes('sell')
-                      ? 'stocks-table-pill-negative'
-                      : 'stocks-table-pill-neutral')
-                  }
-                >
-                  {s.recommendation}
-                </span>
-              </div>
-            </div>
+            </a>
           );
         })}
       </div>
+
+      {totalPages > 1 && (
+        <div className="stocks-table-pagination">
+          <button
+            className="pagination-btn"
+            onClick={prevPage}
+            disabled={page === 0}
+          >
+            ‹ Prev
+          </button>
+          <span className="pagination-info">
+            Page {page + 1} of {totalPages}
+          </span>
+          <button
+            className="pagination-btn"
+            onClick={nextPage}
+            disabled={page >= totalPages - 1}
+          >
+            Next ›
+          </button>
+        </div>
+      )}
     </section>
   );
 }
 
-/** Small SVG sparkline */
 function Sparkline({
   data,
   positiveColor,
@@ -133,11 +172,11 @@ function Sparkline({
         fill="none"
         stroke={up ? positiveColor : negativeColor}
         strokeWidth="2"
-        points={points.join(' ')}
+        points={points.join(" ")}
       />
       <polygon
-        points={`1,${h - 1} ${points.join(' ')} ${w - 1},${h - 1}`}
-        fill={up ? 'rgba(26,201,99,0.12)' : 'rgba(248,25,30,0.12)'}
+        points={`1,${h - 1} ${points.join(" ")} ${w - 1},${h - 1}`}
+        fill={up ? "rgba(26,201,99,0.12)" : "rgba(248,25,30,0.12)"}
       />
     </svg>
   );

@@ -16,6 +16,7 @@ export default function OptionsUser({ onOpenWallet }: { onOpenWallet?: () => voi
 
   const options: OptionItem[] = [
     { name: "Dashboard",    icon: <FaTachometerAlt className="optionIcon" />, href: "/dashboard-user", type: "link" },
+    { name: "Stocks",    icon: <FaChartBar className="optionIcon" />, href: "/stocks", type: "link" },
     { name: "Portfolio",    icon: <FaChartBar className="optionIcon" />,     href: "/portfolio",       type: "link" },
     { name: "History",      icon: <FaHistory className="optionIcon" />,      href: "/history",         type: "link" },
 
