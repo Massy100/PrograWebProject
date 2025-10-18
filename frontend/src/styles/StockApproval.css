@@ -42,7 +42,7 @@
   font-size: 13px;
 }
 .input-add {
-    margin-left: 1rem;
+  margin-left: 1rem;
 }
 
 .approval-row {
@@ -217,6 +217,38 @@
 .approval-row {
   grid-template-columns: .7fr .8fr  1.5fr  1.5fr  1.3fr  1.3fr  .7fr;
 }
+
+.tabs-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 1.2rem;
+}
+
+.tab-btn {
+  background: #f2f2f2;
+  color: #021631;
+  border: none;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.tab-btn:hover {
+  background: #e0e0e5;
+}
+
+.tab-btn.active {
+  background: #021631;
+  color: #ffffff;
+}
+
+.tab-count {
+  font-weight: 600;
+  color: #646c79;
+}
+
 
 
 @keyframes fadeIn {

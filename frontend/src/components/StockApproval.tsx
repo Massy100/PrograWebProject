@@ -13,15 +13,53 @@ type StockItem = {
   recommendation: string;
 };
 
-export default function StockApproval() {
+export default function StockManager() {
   const [stocks, setStocks] = useState<StockItem[]>([]);
+  const [systemStocks, setSystemStocks] = useState<StockItem[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [tab, setTab] = useState<"pending" | "system">("pending");
+
+  // esta es la simulacion de datos de las stock que en teoria ya tenemos en nuestro sistema
+  const mockSystemStocks: StockItem[] = [
+    {
+      symbol: "AAPL",
+      name: "Apple Inc.",
+      currentPrice: 175.23,
+      changePct: 1.25,
+      last30d: [168, 170, 172, 174, 175],
+      targetPrice: 190,
+      recommendation: "BUY",
+    },
+    {
+      symbol: "TSLA",
+      name: "Tesla Inc.",
+      currentPrice: 250.5,
+      changePct: -2.13,
+      last30d: [260, 258, 255, 253, 250],
+      targetPrice: 300,
+      recommendation: "HOLD",
+    },
+    {
+      symbol: "NVDA",
+      name: "NVIDIA Corp.",
+      currentPrice: 895.6,
+      changePct: 3.05,
+      last30d: [820, 850, 870, 890, 895],
+      targetPrice: 950,
+      recommendation: "STRONG BUY",
+    },
+  ];
 
   useEffect(() => {
-    const stored = localStorage.getItem("stocksToTheSystem");
-    if (stored) setStocks(JSON.parse(stored));
-  }, []);
+    if (tab === "pending") {
+      const stored = localStorage.getItem("stocksToTheSystem");
+      setStocks(stored ? JSON.parse(stored) : []);
+    } else {
+      // aqui es donde tiene que estar la conexion con el back de donde esten guardadas las stocks que ya estan en el sistema 
+      setSystemStocks(mockSystemStocks);
+    }
+  }, [tab]);
 
   const toggleSelect = (symbol: string) => {
     setSelected((prev) =>
@@ -31,29 +69,67 @@ export default function StockApproval() {
     );
   };
 
-  const confirmApproval = () => {
-    // estas son las acciones que el admin ya confirmo que quiere ingresar al sistema
-    const approvedStocks = stocks.filter((s) =>
-      selected.includes(s.symbol)
-    );
+  const handleConfirm = () => {
+    if (tab === "pending") {
+      // estas son las acciones que el admin ya confirmó que quiere ingresar al sistema
+      const approved = stocks.filter((s) => selected.includes(s.symbol));
 
-    // aqui se tendria que agregar el back para mandar esas stocks al back para que el sistema ya tenga acceso a esas
-    console.log("Approved stocks to send:", approvedStocks);
+      // aqui se tendria que agregar el back para mandar esas acciones al backend
+      // para que el sistema ya tenga acceso a ellas
+      console.log("Approved stocks to send:", approved);
 
-    // elimina del localstorage las acciones que fueron a probadas
-    const remaining = stocks.filter((s) => !selected.includes(s.symbol));
-    localStorage.setItem("stocksToTheSystem", JSON.stringify(remaining));
-    setStocks(remaining);
+      // elimina del localstorage las acciones que fueron aprobadas
+      const remaining = stocks.filter((s) => !selected.includes(s.symbol));
+      localStorage.setItem("stocksToTheSystem", JSON.stringify(remaining));
+      setStocks(remaining);
+    } else {
+      // estas son las acciones que el admin decidió eliminar del sistema
+      const removedStocks = systemStocks.filter((s) =>
+        selected.includes(s.symbol)
+      );
+
+      // aqui se tendria que agregar el back para eliminar estas acciones del sistema
+      console.log("Removed system stocks:", removedStocks);
+
+      // actualiza el estado eliminando las acciones seleccionadas
+      const remaining = systemStocks.filter(
+        (s) => !selected.includes(s.symbol)
+      );
+      setSystemStocks(remaining);
+    }
+
+    // limpia la selección y cierra el modal
     setSelected([]);
     setShowModal(false);
   };
-
+  
   return (
     <section className="approval-container">
-      <h2 className="approval-title">Stock Approval</h2>
+      <h2 className="approval-title">Stock Management</h2>
       <p className="approval-subtitle">
-        Review and confirm the stocks to be added to the system
+        Manage pending approvals and system stocks
       </p>
+
+      <div className="tabs-container">
+        <button
+          className={`tab-btn ${tab === "pending" ? "active" : ""}`}
+          onClick={() => setTab("pending")}
+        >
+          Pending Stocks{" "}
+          <span className="tab-count">
+            ({stocks.length > 0 ? stocks.length : 0})
+          </span>
+        </button>
+        <button
+          className={`tab-btn ${tab === "system" ? "active" : ""}`}
+          onClick={() => setTab("system")}
+        >
+          In System{" "}
+          <span className="tab-count">
+            ({systemStocks.length > 0 ? systemStocks.length : 0})
+          </span>
+        </button>
+      </div>
 
       <div className="approval-table">
         <div className="approval-header">
@@ -66,10 +142,14 @@ export default function StockApproval() {
           <div>Change %</div>
         </div>
 
-        {stocks.length === 0 ? (
-          <div className="approval-empty">No pending stocks to review.</div>
+        {(tab === "pending" ? stocks : systemStocks).length === 0 ? (
+          <div className="approval-empty">
+            {tab === "pending"
+              ? "No pending stocks to review."
+              : "No stocks currently in the system."}
+          </div>
         ) : (
-          stocks.map((s) => {
+          (tab === "pending" ? stocks : systemStocks).map((s) => {
             const trendUp = s.last30d[s.last30d.length - 1] >= s.last30d[0];
             return (
               <div
@@ -83,7 +163,6 @@ export default function StockApproval() {
                     type="checkbox"
                     checked={selected.includes(s.symbol)}
                     onChange={() => toggleSelect(s.symbol)}
-                    className="input-add"
                   />
                 </div>
                 <div className="symbol-cell">{s.symbol}</div>
@@ -113,14 +192,14 @@ export default function StockApproval() {
         )}
       </div>
 
-      {stocks.length > 0 && (
+      {(tab === "pending" ? stocks : systemStocks).length > 0 && (
         <div className="approval-footer">
           <button
-            className="confirm-btn"
+            className={`confirm-btn ${tab === "system" ? "remove-btn" : ""}`}
             onClick={() => setShowModal(true)}
             disabled={selected.length === 0}
           >
-            Confirm Approval
+            {tab === "pending" ? "Confirm Approval" : "Remove Selected"}
           </button>
         </div>
       )}
@@ -128,9 +207,12 @@ export default function StockApproval() {
       {showModal && (
         <div className="modal-overlay">
           <div className="modal">
-            <h3>Confirm Approval</h3>
+            <h3>
+              {tab === "pending" ? "Confirm Approval" : "Remove Stocks"}
+            </h3>
             <p>
-              Are you sure you want to approve{" "}
+              Are you sure you want to{" "}
+              {tab === "pending" ? "approve" : "remove"}{" "}
               <strong>{selected.length}</strong> stock(s)?
             </p>
             <div className="modal-actions">
@@ -140,8 +222,8 @@ export default function StockApproval() {
               >
                 Cancel
               </button>
-              <button className="approve-btn" onClick={confirmApproval}>
-                Yes, Approve
+              <button className="approve-btn" onClick={handleConfirm}>
+                Yes, {tab === "pending" ? "Approve" : "Remove"}
               </button>
             </div>
           </div>
@@ -150,6 +232,7 @@ export default function StockApproval() {
     </section>
   );
 }
+
 
 function Sparkline({
   data,
@@ -192,7 +275,7 @@ function Sparkline({
       />
       <polygon
         points={`1,${h - 1} ${points.join(" ")} ${w - 1},${h - 1}`}
-        fill={up ? "rgba(26,201,99,0.12)" : "rgba(248,25,30,0.12)"}
+        fill={up ? "rgba(81,174,110,0.12)" : "rgba(197,91,115,0.12)"}
       />
     </svg>
   );
