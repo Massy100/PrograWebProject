@@ -1,0 +1,7 @@
+.stocks-approval-div{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0 2rem 2rem 4.5rem;
+    background-color: #f7f7f9;
+}
