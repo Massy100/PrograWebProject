@@ -11,20 +11,12 @@ interface Portfolio {
   current_value: number;
 }
 
-export default function PortfolioList() {
+interface PortfolioListProps {
+  portfolios: Portfolio[];
+}
+
+export default function PortfolioList({ portfolios }: PortfolioListProps) {
   const router = useRouter();
-
-  const portfolios: Portfolio[] = [
-    { id: 1, name: 'Portfolio 1', total_invested: 5000, current_value: 5800 },
-    { id: 2, name: 'Portfolio 2', total_invested: 3000, current_value: 2500 },
-    { id: 3, name: 'Portfolio 3', total_invested: 10000, current_value: 200 },
-    { id: 4, name: 'Portfolio 4', total_invested: 1500, current_value: 1500 },
-    { id: 5, name: 'Portfolio 5', total_invested: 4000, current_value: 4200 },
-    { id: 6, name: 'Portfolio 6', total_invested: 8000, current_value: 7500 },
-    { id: 7, name: 'Portfolio 7', total_invested: 2000, current_value: 2100 },
-    { id: 8, name: 'Portfolio 8', total_invested: 6000, current_value: 7000 },
-  ];
-
   const [page, setPage] = useState(0);
   const itemsPerPage = 9;
 
@@ -40,8 +32,10 @@ export default function PortfolioList() {
     if (page > 0) setPage(page - 1);
   };
 
-  const openPortfolio = (id: number) => {
-    router.push(`/portfolio/${id}`);
+  const openPortfolio = (portfolio: Portfolio) => {
+    sessionStorage.setItem("selectedPortfolio", JSON.stringify(portfolio));
+
+    router.push(`/portfolio/${portfolio.id}`);
   };
 
   return (
@@ -60,7 +54,7 @@ export default function PortfolioList() {
 
           if (ratio >= 1.1) {
             status = 'Growing';
-            color = '#8bb8a3';
+            color = '#51ae6e';
             bg = '#E3FCF0';
           } else if (ratio >= 0.9) {
             status = 'Stable';
@@ -68,7 +62,7 @@ export default function PortfolioList() {
             bg = '#FEF2DC';
           } else {
             status = 'Decreasing';
-            color = '#e07e7e';
+            color = '#ff4033';
             bg = '#FEECEC';
           }
 
@@ -76,7 +70,7 @@ export default function PortfolioList() {
             <div
               key={p.id}
               className="portfolio-card-item"
-              onClick={() => openPortfolio(p.id)}
+              onClick={() => openPortfolio(p)}
             >
               <div className="portfolio-card-header">
                 <h3>{p.name}</h3>

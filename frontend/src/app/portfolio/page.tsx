@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import PortfolioCard from "@/components/PortfolioCard";
 import "./portfolio.css";
 import PortfolioList from "@/components/PortfolioList";
+import PortfolioGrowthChart from "@/components/PortfolioGrowthChart";
 
 interface Portfolio {
   id: number;
@@ -73,6 +74,16 @@ const PortfolioCarousel: React.FC = () => {
     },
   ];
 
+  const growthData = [
+  { month: "Jan", "Growth 2025": 5000, "Tech Global": 4200, "Dividend Pro": 2500 },
+  { month: "Feb", "Growth 2025": 5200, "Tech Global": 4000, "Dividend Pro": 2600 },
+  { month: "Mar", "Growth 2025": 5400, "Tech Global": 3800, "Dividend Pro": 2800 },
+  { month: "Apr", "Growth 2025": 5600, "Tech Global": 3600, "Dividend Pro": 2900 },
+  { month: "May", "Growth 2025": 5800, "Tech Global": 3700, "Dividend Pro": 3000 },
+  { month: "Jun", "Growth 2025": 6100, "Tech Global": 3600, "Dividend Pro": 3100 },
+];
+
+
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const visibleCards = 3; 
@@ -91,6 +102,16 @@ const PortfolioCarousel: React.FC = () => {
   return (
     <div className="div-portfolio">
       <div className="div-portfolio-info">
+
+        {/* aqui tiene que ir el id y el nombre de los portafolios y tambien la data de lo que han gano y el mes*/}
+        <PortfolioGrowthChart
+          portfolios={[
+            { id: 1, name: "Growth 2025" },
+            { id: 2, name: "Tech Global" },
+            { id: 3, name: "Dividend Pro" },
+          ]}
+          growthData={growthData}
+        />
         <div className="carousel-container">
           <h2 className="carousel-title">Most Used Portfolios</h2>
 
@@ -104,6 +125,7 @@ const PortfolioCarousel: React.FC = () => {
             >
               {mockData.map((p) => (
                 <div className="carousel-slide" key={p.id}>
+                  {/* este componente solo debe recibir  6 portafolio (pueden ser chance los que tienen mas movimientos)*/}
                   <PortfolioCard data={p} />
                 </div>
               ))}
@@ -120,7 +142,8 @@ const PortfolioCarousel: React.FC = () => {
             ))}
           </div>
         </div>
-        <PortfolioList />
+        {/* a este componente se le tendria que mandar la informacion del todos los portafolios */}
+        <PortfolioList portfolios={mockData} />
       </div>
       
     </div>

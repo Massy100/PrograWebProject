@@ -87,7 +87,7 @@
 }
 
 .progress-bar.growing {
-  background-color: #8bb8a3;
+  background-color: #51ae6e;
 }
 
 .progress-bar.stable {
@@ -95,7 +95,7 @@
 }
 
 .progress-bar.decreasing {
-  background-color: #e07e7e; 
+  background-color: #ff4033; 
 }
 
 
