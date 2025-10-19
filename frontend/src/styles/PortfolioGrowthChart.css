@@ -1,0 +1,136 @@
+.growth-chart-container {
+  width: 100%;
+  background: #f7f7f9;
+  border-radius: 10px;
+}
+
+.growth-chart-panel {
+  position: static; 
+  margin-top: 1rem;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  animation: slideDown 0.4s ease-in-out;
+}
+
+
+.chart-controls {
+  display: flex;
+  justify-content: flex-end;
+  /* margin-bottom: 1rem; */
+}
+
+
+.chart-controls svg {
+    font-size: 22px;
+}
+
+.toggle-chart-btn,
+.search-toggle-btn {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+
+
+.toggle-chart-btn.open {
+    font-size: 22px;
+  background: transparent;
+}
+
+.growth-chart-panel {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  animation: slideIn 0.4s ease-in-out;
+}
+
+
+.chart-title {
+  color: #021631;
+  margin-bottom: 1rem;
+}
+
+.search-panel {
+  position: relative;
+  margin-bottom: 1rem;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.search-input {
+  border: 1px solid #EDEDF2;
+  border-radius: 5px;
+  padding: 0.5rem 0.75rem;
+  outline: none;
+  width: 95%;
+  transition: border-color 0.3s;
+}
+
+.search-input:focus {
+  border-color: #2779F5;
+}
+
+.search-results {
+  list-style: none;
+  margin: 0.5rem 0 0 0;
+  padding: 0;
+  background: #f7f7f9;
+  border-radius: 6px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.search-results li {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.search-results li:hover {
+  background: #EDEDF2;
+}
+
+.no-results {
+  color: #828692;
+  padding: 0.5rem;
+}
+
+.chart-wrapper {
+  width: 100%;
+  height: 300px;
+}
+
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

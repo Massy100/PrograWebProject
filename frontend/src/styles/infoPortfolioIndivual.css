@@ -3,7 +3,7 @@
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  margin: 0 1rem 2rem 1rem;
+  margin: .2rem 1rem 2rem 1rem;
   padding: 1rem 1.7rem 1.2rem 1.7rem;
   min-width: 240px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
