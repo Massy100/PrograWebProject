@@ -1,75 +1,92 @@
 "use client";
 
 import React from "react";
-import "../styles/portfolio.css";
+import "../styles/stockcard.css";
 
-type StockCardProps = {
+export type StockRow = {
   symbol: string;
   name: string;
   quantity: number;
   purchasePrice: number;
-  currentValue?: number; 
-  change?: number;  
-  category?: string; 
-  variant?: "small" | "large";    
+  averagePrice: number;
+  totalInvested: number;
+  isActive: boolean;
+  lastPurchaseDate: string;
+  change?: number;
 };
 
-export default function StockCard({
-  symbol,
-  name,
-  quantity,
-  purchasePrice,
-  currentValue,
-  change,
-  category,  
-  variant = "large",
-}: StockCardProps) {
-  let changeClass = "neutral";
-  if (change && change > 0) changeClass = "positive";
-  if (change && change < 0) changeClass = "negative";
+type Props = {
+  rows: StockRow[];
+};
 
+export default function StockCard({ rows }: Props) {
   return (
-    <div className={`stockCard ${variant}`}>
-      <div className="stockHeader">
-        <h3>
-          {name} <span className="stockSymbol">({symbol})</span>
-        </h3>
-        {category && <span className="stockCategory">{category}</span>}
-      </div>
+    <section className="stock-table">
+      <header className="stock-table-header">
+        <div>Stock</div>
+        <div>Quantity</div>
+        <div>
+          Purchase
+          <br />
+          Price
+        </div>
+        <div>
+          Average
+          <br />
+          Price
+        </div>
+        <div>
+          Total
+          <br />
+          Invested
+        </div>
+        <div>Status</div>
+        <div>
+          Last
+          <br />
+          Purchase
+        </div>
+        <div>Change</div>
+      </header>
 
-      <div className="stockBody">
-        {variant === "large" ? (
-          <div className="stockInfoContainer">
-            <div className="stockInfoRow">
-              <p>Quantity: {quantity}</p>
-              <p>Purchase Price: Q{purchasePrice.toFixed(2)}</p>
-              <p>Current Value: Q{currentValue?.toFixed(2)}</p>
-            </div>
 
-            {currentValue !== undefined && (
-              <span className={`${changeClass} changeText`}>
-                {change! > 0 && "↑ "}
-                {change! < 0 && "↓ "}
-                {Math.abs(change!).toFixed(2)}%
-              </span>
-            )}
+      {rows.map((s) => (
+        <div key={s.symbol} className="stock-table-row">
+          <div className="stock-info">
+            <strong className="symbol">{s.symbol}</strong>
+            <span className="name">{s.name}</span>
           </div>
-        ) : (
-          <>
-            {currentValue !== undefined && (
-              <p>
-                ${currentValue.toFixed(2)}{" "}
-                <span className={changeClass}>{change?.toFixed(2)}%</span>
-              </p>
-            )}
-          </>
-        )}
 
+          <div>{s.quantity}</div>
+          <div>Q.{s.purchasePrice.toFixed(2)}</div>
+          <div>Q.{s.averagePrice.toFixed(2)}</div>
+          <div>Q.{s.totalInvested.toFixed(2)}</div>
 
+          <div>
+            <span
+              className={`status-pill ${s.isActive ? "active" : "inactive"}`}
+            >
+              {s.isActive ? "Active" : "Inactive"}
+            </span>
+          </div>
 
+          <div>{new Date(s.lastPurchaseDate).toLocaleDateString()}</div>
 
-      </div>
-    </div>
+          <div
+            className={`change ${
+              s.change && s.change > 0
+                ? "positive"
+                : s.change && s.change < 0
+                ? "negative"
+                : ""
+            }`}
+          >
+            {s.change !== undefined
+              ? `${s.change > 0 ? "+" : ""}${s.change.toFixed(2)}%`
+              : "-"}
+          </div>
+        </div>
+      ))}
+    </section>
   );
-
 }

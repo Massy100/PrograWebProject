@@ -104,6 +104,7 @@ const PortfolioCarousel: React.FC = () => {
             >
               {mockData.map((p) => (
                 <div className="carousel-slide" key={p.id}>
+                  {/* este componente solo debe recibir  6 portafolio (pueden ser chance los que tienen mas movimientos)*/}
                   <PortfolioCard data={p} />
                 </div>
               ))}
@@ -120,7 +121,8 @@ const PortfolioCarousel: React.FC = () => {
             ))}
           </div>
         </div>
-        <PortfolioList />
+        {/* a este componente se le tendria que mandar la informacion del todos los portafolios */}
+        <PortfolioList portfolios={mockData} />
       </div>
       
     </div>

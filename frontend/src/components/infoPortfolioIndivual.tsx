@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
-import "../styles/PortfolioCard.css";
+import "../styles/infoPortfolioIndivual.css";
 
 interface Portfolio {
   id: number;
@@ -18,36 +17,23 @@ interface Props {
   data: Portfolio;
 }
 
-const PortfolioCard: React.FC<Props> = ({ data }) => {
-  const router = useRouter();
-
-  const {
-    id,
-    name,
-    created_at,
-    avg_price,
-    total_invested,
-    current_value,
-    is_active,
-  } = data;
+const InfoPortfolioIndividual: React.FC<Props> = ({ data }) => {
+  const { id, name, created_at, avg_price, total_invested, current_value, is_active } = data;
 
   const gain = current_value - total_invested;
-  const gainPercent = ((gain / total_invested) * 100).toFixed(2);
-  const gainColor = gain >= 0 ? "#51AE6E" : "#ff4033";
+  const gainPercent =
+    total_invested > 0 ? ((gain / total_invested) * 100).toFixed(2) : "0.00";
+  const gainColor = gain >= 0 ? "#51AE6E" : "#FF4033";
 
-  const handleClick = () => {
-    sessionStorage.setItem("selectedPortfolio", JSON.stringify(data));
-
-    router.push(`/portfolio/${id}`);
-  };
+  const gradientId = `grad-${id}-unique`;
 
   return (
-    <div className="portfolio-card" onClick={handleClick}>
+    <div className="portfolio-card">
       <div className="portfolio-header">
         <h3>{name}</h3>
         <span
           className="status"
-          style={{ color: is_active ? "#51AE6E" : "#ff4033" }}
+          style={{ color: is_active ? "#51AE6E" : "#FF4033" }}
         >
           {is_active ? "Active" : "Inactive"}
         </span>
@@ -58,19 +44,14 @@ const PortfolioCard: React.FC<Props> = ({ data }) => {
       </p>
 
       <div className="portfolio-stats">
-        <div>
-          <strong>Avg:</strong> ${avg_price.toLocaleString()}
-        </div>
-        <div>
-          <strong>Invested:</strong> ${total_invested.toLocaleString()}
-        </div>
-        <div>
-          <strong>Current:</strong> ${current_value.toLocaleString()}
-        </div>
+        <div><strong>Avg:</strong> ${Number(avg_price ?? 0).toLocaleString()}</div>
+        <div><strong>Invested:</strong> ${Number(total_invested ?? 0).toLocaleString()}</div>
+        <div><strong>Current:</strong> ${Number(current_value ?? 0).toLocaleString()}</div>
         <div style={{ color: gainColor }}>
-          <strong>{gain >= 0 ? "Gain" : "Loss"}:</strong> {gainPercent}%
+            <strong>{gain >= 0 ? "Gain" : "Loss"}:</strong> {gainPercent}%
         </div>
       </div>
+
 
       <div className="mini-chart">
         <div className="chart-container">
@@ -90,10 +71,12 @@ const PortfolioCard: React.FC<Props> = ({ data }) => {
               cy="18"
               r="15.9155"
               fill="none"
-              stroke={`url(#grad-${id})`}
+              stroke={`url(#${gradientId})`}
               strokeWidth="3"
               strokeDasharray={`${Math.min(
-                (current_value / total_invested) * 100,
+                total_invested > 0
+                  ? (current_value / total_invested) * 100
+                  : 0,
                 100
               )}, 100`}
               strokeLinecap="round"
@@ -101,34 +84,25 @@ const PortfolioCard: React.FC<Props> = ({ data }) => {
             />
 
             <defs>
-              <linearGradient id={`grad-${id}`} x1="0" y1="0" x2="1" y2="1">
-                <stop
-                  offset="0%"
-                  stopColor={gain >= 0 ? "#51AE6E" : "#FF4033"}
-                />
-                <stop
-                  offset="100%"
-                  stopColor={gain >= 0 ? "#2779F5" : "#EFAE3C"}
-                />
+              <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor={gain >= 0 ? "#51AE6E" : "#FF4033"} />
+                <stop offset="100%" stopColor={gain >= 0 ? "#2779F5" : "#EFAE3C"} />
               </linearGradient>
             </defs>
           </svg>
 
           <div className="chart-hover">
-            <p
-              style={{
-                fontWeight: 600,
-                color: gainColor,
-                marginBottom: "4px",
-              }}
-            >
+            <p style={{ fontWeight: 600, color: gainColor, marginBottom: "4px" }}>
               {gain >= 0 ? "Portfolio growing" : "Portfolio decreasing"}
             </p>
 
             <p style={{ marginBottom: "4px" }}>
               It's now at{" "}
               <strong>
-                {((current_value / total_invested) * 100).toFixed(1)}%
+                {total_invested > 0
+                  ? ((current_value / total_invested) * 100).toFixed(1)
+                  : "0.0"}
+                %
               </strong>{" "}
               of your total investment.
             </p>
@@ -139,4 +113,4 @@ const PortfolioCard: React.FC<Props> = ({ data }) => {
   );
 };
 
-export default PortfolioCard;
+export default InfoPortfolioIndividual;

@@ -1,0 +1,108 @@
+.portfolio-card {
+  min-height: 80%;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin: 0 1rem 2rem 1rem;
+  padding: 1rem 1.7rem 1.2rem 1.7rem;
+  min-width: 240px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+.portfolio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.portfolio-header h3 {
+  font-size: 1.4rem;
+  margin: 0;
+  color: #021631;
+}
+
+.status {
+  font-weight: 500;
+}
+
+.portfolio-date {
+    text-align: start;
+  font-size: 0.9rem;
+  color: #828692;
+  margin-bottom: 0.5rem;
+}
+
+.portfolio-stats {
+    text-align: start;
+}
+
+.portfolio-stats div {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+  color: #828692;
+
+}
+
+.portfolio-stats div strong{
+  color: #021631;
+}
+.mini-chart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 3rem;
+  position: relative;
+  overflow: visible; 
+  z-index: 2;
+  cursor: pointer;
+}
+
+.chart-container {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  overflow: visible;
+}
+
+.mini-pie {
+  width: 160px;
+  height: 160px;
+}
+
+.chart-bg {
+  stroke: #ededf2;
+}
+
+.chart-gain {
+  transition: stroke-dasharray 0.6s ease, stroke 0.4s ease;
+}
+
+/* Tooltip */
+.chart-hover {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  bottom: 105%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-5px);
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.8rem;
+  width: 200px;
+  max-width: 90vw;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 1000;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.chart-container:hover .chart-hover {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-10px);
+  pointer-events: auto;
+}
+

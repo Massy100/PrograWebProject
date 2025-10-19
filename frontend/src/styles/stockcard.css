@@ -1,0 +1,82 @@
+.stock-table {
+  background: #ffffff;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  gap: 0.6rem;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.stock-table-header {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1.2fr 1.2fr 1.3fr 1fr 1.3fr 0.8fr;
+  font-size: 0.85rem;
+  color: #828692;
+  font-weight: 600;
+  border-bottom: 1px solid #f2f2f2;
+  padding-bottom: 0.4rem;
+  text-align: left;
+}
+
+.stock-table-row {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1.2fr 1.2fr 1.3fr 1fr 1.3fr 0.8fr;
+  align-items: center;
+  font-size: 0.9rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #f7f7f9;
+  transition: background 0.2s ease;
+}
+
+.stock-table-row:hover {
+  background: #f7f7f9;
+  border-radius: 8px;
+}
+
+.stock-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.symbol {
+  color: #021631;
+  font-weight: 600;
+}
+
+.name {
+  color: #646c79;
+  font-size: 0.85rem;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-pill.active {
+  background: #e3fcf0;
+  color: #51ae6e;
+}
+
+.status-pill.inactive {
+  background: #fef2dc;
+  color: #ff4033;
+}
+
+.change {
+  font-weight: 600;
+}
+
+.change.positive {
+  color: #51ae6e;
+}
+
+.change.negative {
+  color: #ff4033;
+}
