@@ -12,11 +12,36 @@ import { useAuth0 } from '@auth0/auth0-react';
 export default function ClientShell({ children }: { children: React.ReactNode }) {
   const [loginOpen, setLoginOpen] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
-  const { user, isAuthenticated, loginWithRedirect, logout } = useAuth0();
-  const [role, setRole] = useState<'admin' | 'user' | null>(user?.role || null);
+  const { user, getAccessTokenSilently } = useAuth0();
+  const [role, setRole] = useState<'admin' | 'client' | null>(null);
+  const [dbUser, setDbUser] = useState(null);
+
+  const callApi = async () => {
+    try {
+      const token = await getAccessTokenSilently();
+      const response = await fetch("http://localhost:8000/api/users/sync/", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+      const data = await response.json();
+      if (!data) {
+        throw new Error("No se obtuvo respuesta del backend.");
+      }
+      setDbUser(data);
+      setRole(data.user_type);
+      console.log(dbUser);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   useEffect(() => {
-    setRole(user?.role || null);
+    if (user) {
+        callApi()
+    }
   }, [user]);
 
   return (
@@ -27,7 +52,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
         onOpenLogin={() => setLoginOpen(true)} 
       />
 
-      {role === 'user' && (
+      {role === 'client' && (
         <OptionsUser onOpenWallet={() => setWalletOpen(true)} />
       )}
 

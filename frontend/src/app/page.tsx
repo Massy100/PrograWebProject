@@ -50,7 +50,7 @@ export default function Home() {
           </p>
 
           {/* If there is no session, show login button */}
-          {!user && (
+          {!isAuthenticated && (
             <button
               type="button"
               className="see-more-btn"

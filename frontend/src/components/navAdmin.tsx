@@ -1,7 +1,7 @@
 "use client";
 
+import { useAuth0 } from '@auth0/auth0-react';
 import { useRouter } from "next/navigation";
-import { useSession } from "@/components/SessionProvider";
 import Link from "next/link";
 import '../styles/navAdmin.css';
 
@@ -16,7 +16,7 @@ const options = [
 
 export default function SidebarOptions() {
   const router = useRouter();
-  const { user, logout } = useSession();
+  const { user, logout } = useAuth0();
 
   return (
     <div className="sidebar">
