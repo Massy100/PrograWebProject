@@ -2,16 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from '@/components/SessionProvider';
+import { useAuth0 } from '@auth0/auth0-react';
 import StocksRecommendationsTable, { StockItem } from '@/components/stocksTable';
 import PopularStocksCard, { PopularStock } from '@/components/popularCardStocks';
 import '@/app/page.css';
-import Login from '@/components/login';
+// import Login from '@/components/login';
 
 export default function Home() {
   const router = useRouter();
-  const [loginOpen, setLoginOpen] = useState(false);
-  const { user, logout } = useSession(); // using session context
+  // const [loginOpen, setLoginOpen] = useState(false);
+  const { user, isAuthenticated, loginWithRedirect, logout } = useAuth0();
 
   const demoRows: StockItem[] = [
     { symbol: 'NIO',  name: 'Nio Inc.-ADR', currentPrice: 6.04,  changePct: -0.48, last30d: [9,8,7,6.5,6.7,6.6], targetPrice: 61.75,  recommendation: 'STRONG BUY' },
@@ -30,6 +30,7 @@ export default function Home() {
   return (
     <main className="landingPage">
       {/* Login modal controlled by state */}
+      {/*
       <Login
         open={loginOpen}
         onClose={() => setLoginOpen(false)}
@@ -39,6 +40,7 @@ export default function Home() {
           else router.push('/dashboard-user');
         }}
       />
+      */}
 
       <section className="div-initial">
         <div className="info">
@@ -52,7 +54,7 @@ export default function Home() {
             <button
               type="button"
               className="see-more-btn"
-              onClick={() => setLoginOpen(true)}
+              onClick={() => loginWithRedirect()}
             >
               Login
             </button>
