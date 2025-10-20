@@ -24,7 +24,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         (USER_TYPE_ADMIN, 'Administrator'),
     )
     
-    auth0_id = models.CharField(max_length=100, default="pending_migration")
+    auth0_id = models.CharField(max_length=100, unique=True, db_index=True)
     username = models.CharField(max_length=50, unique=True)
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
