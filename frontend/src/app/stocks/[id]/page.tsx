@@ -5,6 +5,17 @@ import "./StockPage.css";
 import { StockChart } from "@/components/StockChart";
 import { BuyStockSidebar } from "@/components/BuyStockSidebar";
 
+// Tipo de datos para el carrito (las acciones que el usuario agrega)
+type CartItem = {
+  portfolio: string;
+  stockName: string;
+  stockSymbol: string;
+  stockPrice: number;
+  quantity: number;
+  total: number;
+  date: string;
+};
+
 export default function StockOverviewPage() {
   const [showSidebar, setShowSidebar] = useState(false);
 
@@ -18,15 +29,9 @@ export default function StockOverviewPage() {
     { date: "1 PM", value: 158 },
     { date: "2 PM", value: 165 },
     { date: "3 PM", value: 172 },
-    { date: "9 AM", value: 20 },
-    { date: "10 AM", value: 75 },
-    { date: "11 AM", value: 150 },
-    { date: "12 PM", value: 140 },
-    { date: "1 PM", value: 60 },
-    { date: "2 PM", value: 125 },
-    { date: "3 PM", value: 90 },
   ];
 
+  // es la info que se esta simulando que se le tiene que enviar al carrito de compras pero aqui tiene que ir la de la stock en donde estemos
   const stockInfo = {
     symbol: "TSLA",
     name: "Tesla Inc.",
@@ -40,17 +45,46 @@ export default function StockOverviewPage() {
 
   const isPositive = stockInfo.variation >= 0;
 
+  const handleAddToCart = (newItem: CartItem) => {
+    const storedCart = localStorage.getItem("shoppingCart");
+    const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
+
+    // Verificar si ya existe la misma acción en el mismo portafolio
+    const existingIndex = cart.findIndex(
+      (item) =>
+        item.stockSymbol === newItem.stockSymbol &&
+        item.portfolio === newItem.portfolio
+    );
+
+    if (existingIndex !== -1) {
+      // Sobrescribe la accion existente con los nuevos datos
+      cart[existingIndex] = {
+        ...cart[existingIndex],
+        quantity: newItem.quantity,
+        total: newItem.stockPrice * newItem.quantity,
+        date: newItem.date,
+      };
+    } else {
+      // Agregar una nueva acción si no existe
+      cart.push(newItem);
+    }
+
+    localStorage.setItem("shoppingCart", JSON.stringify(cart));
+    console.log("🛒 Carrito actualizado:", cart);
+  };
+
   return (
     <div className="stock-page">
       <a className="backBtn" href="/stocks">
         ← Back
       </a>
+
       <section className="stock-hero">
         <div>
           <h1 className="hero-title">
             {stockInfo.name} <br /> ({stockInfo.symbol})
           </h1>
-          <p className="hero-subtitle">{stockInfo.category}.</p>
+          <p className="hero-subtitle">{stockInfo.category}</p>
         </div>
 
         <button className="buy-stock-btn" onClick={() => setShowSidebar(true)}>
@@ -86,7 +120,6 @@ export default function StockOverviewPage() {
         <StockChart name={stockInfo.symbol} data={stockData} theme="dark" />
       </div>
 
-      {/* Detailed Info Section */}
       <div className="stock-info-section">
         <div className="stock-info-card">
           <h3>Stock Information</h3>
@@ -148,7 +181,6 @@ export default function StockOverviewPage() {
         </div>
       </div>
 
-
       <BuyStockSidebar
         isOpen={showSidebar}
         onClose={() => setShowSidebar(false)}
@@ -157,7 +189,18 @@ export default function StockOverviewPage() {
         stockPrice={stockInfo.lastPrice}
         portfolios={["Main Portfolio", "Growth Fund", "Tech Picks"]}
         onConfirm={(data) => {
-          console.log("Added to portfolio:", data);
+          const newCartItem: CartItem = {
+            portfolio: data.portfolio,
+            stockName: stockInfo.name,
+            stockSymbol: stockInfo.symbol,
+            stockPrice: stockInfo.lastPrice,
+            quantity: data.quantity,
+            total: stockInfo.lastPrice * data.quantity,
+            date: new Date().toLocaleString(),
+          };
+
+          handleAddToCart(newCartItem);
+          setShowSidebar(false);
         }}
       />
     </div>

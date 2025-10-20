@@ -1,0 +1,219 @@
+.purchase-container {
+  padding: 2rem 3rem;
+  background: #f7f7f9;
+  min-height: 100vh;
+}
+
+.purchase-container h1 {
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.portfolio-select {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.portfolio-select label {
+  font-weight: 500;
+  color: #374151;
+}
+
+.portfolio-select select {
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  font-size: 0.95rem;
+  color: #111827;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.portfolio-select select:hover {
+  border-color: #9ca3af;
+}
+
+.cart-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 0.3fr;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  padding: 0.5rem 2rem;
+  border-bottom: 2px solid #e5e7eb;
+  width: 80%;
+  margin: 0 auto 0.5rem auto;
+}
+
+.cart-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 0.3fr;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.6rem;
+  padding: 0.8rem 2rem;
+  width: 80%;
+  margin: 0 auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.cart-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.cart-stock-info h3 {
+  margin: 0.2rem 0;
+  font-size: 1.2rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.cart-stock-info .symbol {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+  font-weight: 600;
+}
+
+.cart-stock-info .portfolio {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.cart-quantity input {
+  width: 65px;
+  text-align: center;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.35rem;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+}
+
+.cart-quantity input:focus {
+  border-color: #021631;
+  outline: none;
+}
+
+.cart-unit,
+.cart-total {
+  font-weight: 500;
+  color: #111827;
+  font-size: 0.95rem;
+}
+
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: #b91c1c;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  justify-self: center;
+}
+
+.remove-btn:hover {
+  color: #ef4444;
+}
+
+.checkout-section {
+  text-align: right;
+  margin-top: 2.5rem;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.checkout-section h2 {
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.checkout-btn {
+  background-color: #021631;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.checkout-btn:hover {
+  transform: translateY(-1px);
+}
+
+.checkout-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 🪄 Success modal overlay */
+.portfolioOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.portfolioModal {
+  background-color: #ffffff;
+  padding: 2rem 2.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.portfolioModal h3 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  color: #232733;
+}
+
+.portfolioModal p {
+  font-size: 1rem;
+  color: #6a6c75;
+}
+
+/* ✨ Small animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
