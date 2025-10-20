@@ -30,8 +30,8 @@ export default function ClientShell({ children }: { children: React.ReactNode })
       if (!data) {
         throw new Error("No se obtuvo respuesta del backend.");
       }
-      setDbUser(data);
-      setRole(data.user_type);
+      setDbUser(data.user);
+      setRole(data.user.user_type);
       console.log(dbUser);
     } catch (e) {
       console.error(e);

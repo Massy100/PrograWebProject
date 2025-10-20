@@ -5,14 +5,22 @@ import { ReactNode } from "react";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
  
-  const apiIdentifier = process.env.AUTH0_API_IDENTIFIER;
+  const apiIdentifier = process.env.NEXT_PUBLIC_AUTH0_API_IDENTIFIER;
 
+  const dom = process.env.NEXT_PUBLIC_AUTH0_DOMAIN;
+  const clientId = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID;
+
+  console.log("dominio")
+  console.log(dom)
+
+  console.log("clioent")
+  console.log(clientId)
   return (
     <Auth0Provider
-          domain={process.env.AUTH0_DOMAIN || ""}
-          clientId={process.env.AUTH0_CLIENT_ID || ""}
+          domain={dom || ""}
+          clientId={clientId || ""}
           authorizationParams={{
-            redirect_uri: window.location.origin,
+            redirect_uri: "http://localhost:3000/",
             audience: apiIdentifier,
             scope: "openid profile email",
           }}

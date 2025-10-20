@@ -20,6 +20,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
+AUTH0_API_IDENTIFIER = os.getenv("AUTH0_API_IDENTIFIER")
+AUTH0_ALGORITHMS = [os.getenv("AUTH0_ALGORITHMS")]
+
 
 # Application definition
 
@@ -56,7 +60,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-    'users.middleware.SessionCleanupMiddleware',
+    'users.middlewares.middleware.SessionCleanupMiddleware',
+    'users.middlewares.auth0_middleware.auth0_middleware'
 ]
 
 ROOT_URLCONF = 'api.urls'

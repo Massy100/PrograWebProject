@@ -290,6 +290,29 @@ class UserViewSet(viewsets.ModelViewSet):
         )
         
         return response
+    
+    @action(detail=False, methods=['POST'], url_path="sync")
+    def sync_user(self, request):
+        payload = getattr(request, 'auth0_payload', None)
+        if not payload:
+            return Response({'error': 'Invalid or missing token'}, status=401)
+
+        print(payload)
+        auth0_id = payload.get('sub')
+        email = payload.get('email')
+        name = payload.get('name', '')
+
+        user, created = User.objects.get_or_create(
+            auth0_id=auth0_id,
+            defaults={'email': email, 'first_name': name.split(" ")[0]}
+        )
+
+        serializer = UserDetailSerializer(user)
+
+        return Response({
+            'created': created,
+            'user': serializer.data
+        })
 
 @client_required
 def client_portfolio(request):
