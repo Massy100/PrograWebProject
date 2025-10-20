@@ -113,6 +113,27 @@
 }
 
 
+
+.chart-controls button {
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-controls button:hover {
+  background: #e6e8ef;
+}
+
+
+
+
+
 @keyframes slideDown {
   from {
     opacity: 0;
