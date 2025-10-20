@@ -30,64 +30,83 @@ export default function CartSidebar({ onClose, show = false }: Props) {
     const storedCart = localStorage.getItem("shoppingCart");
     if (storedCart) {
       try {
-        const parsedCart = JSON.parse(storedCart);
-        setCart(parsedCart);
-        console.log("🛒 Datos cargados desde localStorage:", parsedCart);
+        const parsedCart: CartItem[] = JSON.parse(storedCart);
+
+        const uniqueMap = new Map<string, CartItem>();
+        parsedCart.forEach((item) => {
+          const key = `${item.portfolio}_${item.stockSymbol}`;
+          uniqueMap.set(key, item);
+        });
+
+        const cleanedCart = Array.from(uniqueMap.values());
+        setCart(cleanedCart);
+        localStorage.setItem("shoppingCart", JSON.stringify(cleanedCart));
+
+        console.log("🛒 Datos cargados y limpiados desde localStorage:", cleanedCart);
       } catch (error) {
         console.error("Error leyendo localStorage:", error);
       }
     }
   }, []);
 
-  // Incrementar cantidad
-  const incrementQuantity = (stockSymbol: string) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.stockSymbol === stockSymbol
-          ? { ...item, quantity: item.quantity + 1 }
+  const incrementQuantity = (stockSymbol: string, portfolio: string) => {
+    setCart((prev) => {
+      const updated = prev.map((item) =>
+        item.stockSymbol === stockSymbol && item.portfolio === portfolio
+          ? {
+              ...item,
+              quantity: item.quantity + 1,
+              total: (item.quantity + 1) * item.stockPrice,
+            }
           : item
-      )
-    );
+      );
+      localStorage.setItem("shoppingCart", JSON.stringify(updated));
+      return updated;
+    });
   };
 
-  // Decrementar cantidad
-  const decrementQuantity = (stockSymbol: string) => {
-    setCart((prev) =>
-      prev
+
+  const decrementQuantity = (stockSymbol: string, portfolio: string) => {
+    setCart((prev) => {
+      const updated = prev
         .map((item) =>
-          item.stockSymbol === stockSymbol && item.quantity > 1
-            ? { ...item, quantity: item.quantity - 1 }
+          item.stockSymbol === stockSymbol &&
+          item.portfolio === portfolio &&
+          item.quantity > 1
+            ? {
+                ...item,
+                quantity: item.quantity - 1,
+                total: (item.quantity - 1) * item.stockPrice,
+              }
             : item
         )
-        .filter((item) => item.quantity > 0)
-    );
+        .filter((item) => item.quantity > 0);
+
+      localStorage.setItem("shoppingCart", JSON.stringify(updated));
+      return updated;
+    });
   };
 
-  // Actualizar cantidad manualmente
   const updateQuantity = (itemToUpdate: CartItem, newQty: number) => {
     if (newQty < 1) return;
 
     const updatedCart = cart.map((item) =>
       item.stockSymbol === itemToUpdate.stockSymbol &&
-      item.portfolio === itemToUpdate.portfolio &&
-      item.date === itemToUpdate.date
+      item.portfolio === itemToUpdate.portfolio
         ? { ...item, quantity: newQty, total: item.stockPrice * newQty }
         : item
     );
 
     setCart(updatedCart);
-    localStorage.setItem("shoppingCart", JSON.stringify(updatedCart)); 
+    localStorage.setItem("shoppingCart", JSON.stringify(updatedCart));
   };
 
-
-  // Eliminar item
   const removeItem = (itemToRemove: CartItem) => {
     const updatedCart = cart.filter(
       (item) =>
         !(
           item.stockSymbol === itemToRemove.stockSymbol &&
-          item.portfolio === itemToRemove.portfolio &&
-          item.date === itemToRemove.date
+          item.portfolio === itemToRemove.portfolio
         )
     );
 
@@ -96,10 +115,8 @@ export default function CartSidebar({ onClose, show = false }: Props) {
     setSelectedItem(null);
   };
 
-  // Calcular total general
   const total = cart.reduce((acc, p) => acc + p.total, 0);
 
-  // Ir a página de compra
   const handleFinishPurchase = () => {
     router.push("/purchase");
   };
@@ -149,23 +166,6 @@ export default function CartSidebar({ onClose, show = false }: Props) {
                     onClick={() => setSelectedItem(item)}
                   >
                     <div className="cartCardLeft">
-                      {/* <div className="cartCardIcon">
-                        <svg
-                          stroke="currentColor"
-                          fill="currentColor"
-                          strokeWidth="0"
-                          viewBox="0 0 24 24"
-                          height="1em"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fill="none"
-                            strokeWidth="2"
-                            d="M1,16 L8,9 L13,14 L23,4 M0,22 L23.999,22 M16,4 L23,4 L23,11"
-                          ></path>
-                        </svg>
-                      </div> */}
                       <div>
                         <p className="cartCardPortfolio">
                           Portfolio: {item.portfolio}
@@ -174,9 +174,7 @@ export default function CartSidebar({ onClose, show = false }: Props) {
                         <p className="cartCardQty">Qty: {item.quantity}</p>
                       </div>
                     </div>
-                    <p className="cartCardPrice">
-                      Q.{item.total.toFixed(2)}
-                    </p>
+                    <p className="cartCardPrice">Q.{item.total.toFixed(2)}</p>
                   </div>
                 ))
               )}
@@ -202,12 +200,11 @@ export default function CartSidebar({ onClose, show = false }: Props) {
             <div className="cartDetailHeader">
               <div>
                 <p className="cartDetailName">{selectedItem.stockName}</p>
-                <p className="cartDetailCompany">
-                  {selectedItem.stockSymbol}
-                </p>
+                <p className="cartDetailCompany">{selectedItem.stockSymbol}</p>
               </div>
               <p className="cartDetailPrice">
-                Q.{(selectedItem.stockPrice * selectedItem.quantity).toFixed(2)}
+                Q.
+                {(selectedItem.stockPrice * selectedItem.quantity).toFixed(2)}
               </p>
             </div>
 
@@ -235,14 +232,23 @@ export default function CartSidebar({ onClose, show = false }: Props) {
                   const newQty = parseInt(e.target.value, 10);
                   if (newQty > 0) {
                     updateQuantity(selectedItem, newQty);
-                    setSelectedItem({ ...selectedItem, quantity: newQty, total: selectedItem.stockPrice * newQty });
+                    setSelectedItem({
+                      ...selectedItem,
+                      quantity: newQty,
+                      total: selectedItem.stockPrice * newQty,
+                    });
                   }
                 }}
               />
             </div>
 
             <div className="cartDetailActions">
-              <button onClick={() => removeItem(selectedItem)} className="cartBtnRemove">Remove</button>
+              <button
+                onClick={() => removeItem(selectedItem)}
+                className="cartBtnRemove"
+              >
+                Remove
+              </button>
             </div>
           </div>
         )}
