@@ -1,7 +1,21 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
 
-class User(AbstractUser):
+class UserManager(BaseUserManager):
+    def create_user(self, email, **extra_fields):
+        if not email:
+            raise ValueError("El email es obligatorio")
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, **extra_fields)
+
+class User(AbstractBaseUser, PermissionsMixin):
     USER_TYPE_CLIENT = 'client'
     USER_TYPE_ADMIN = 'admin'
     
@@ -10,6 +24,12 @@ class User(AbstractUser):
         (USER_TYPE_ADMIN, 'Administrator'),
     )
     
+    auth0_id = models.CharField(max_length=100, unique=True, db_index=True)
+    user_name = models.CharField(max_length=50, unique=True)
+    first_name = models.CharField(max_length=100, blank=True)
+    last_name = models.CharField(max_length=100, blank=True)
+
+    email = models.EmailField(unique=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     status = models.BooleanField(default=True)
     verified = models.BooleanField(default=False)
@@ -20,6 +40,13 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
+
+    is_staff = models.BooleanField(default=False)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = UserManager()
     
     class Meta:
         db_table = 'users'
@@ -43,6 +70,7 @@ class User(AbstractUser):
 class AdminProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_profile')
     access_level = models.CharField(max_length=50)
+    is_active = models.BooleanField(default=True)
     
     def __str__(self):
         return f"Admin Profile: {self.user.username}"
@@ -51,6 +79,7 @@ class ClientProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='client_profile')
     balance_available = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     balance_blocked = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    is_active = models.BooleanField(default=True)
     
     def __str__(self):
         return f"Client Profile: {self.user.username}"
