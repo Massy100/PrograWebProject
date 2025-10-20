@@ -7,11 +7,36 @@ from rest_framework.permissions import AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
 from django.views import View
+import threading
 
 from .models import User
 from .serializers import UserListSerializer, UserDetailSerializer
 from .permissions import client_required, admin_required
 from .mixins import ClientRequiredMixin, AdminRequiredMixin
+
+try:
+    from .services.email_service import EmailService
+except ImportError:
+    class EmailService:
+        @staticmethod
+        def send_welcome_email(user_email, username):
+            print(f"Would send welcome email to {user_email} for user {username}")
+            return True
+
+class EmailThread(threading.Thread):
+    """
+    Thread for sending emails asynchronously to avoid blocking the response
+    """
+    def __init__(self, user_email, username):
+        self.user_email = user_email
+        self.username = username
+        threading.Thread.__init__(self)
+
+    def run(self):
+        try:
+            EmailService.send_welcome_email(self.user_email, self.username)
+        except Exception as e:
+            print(f"Error sending welcome email: {str(e)}")
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().select_related('admin_profile', 'client_profile')      
@@ -202,11 +227,19 @@ class UserViewSet(viewsets.ModelViewSet):
             
             print(f"User registered: {user.username} ({user.email})")
             
+            # Send welcome email asynchronously
+            try:
+                EmailThread(user.email, user.username).start()
+                print(f"Welcome email process started for {user.email}")
+            except Exception as e:
+                print(f"Failed to start email thread: {str(e)}")
+                # Don't fail the registration if email fails
+            
             from django.contrib.auth import login
             login(request, user)
             
             return Response({
-                'message': 'Register successful',
+                'message': 'Register successful. Welcome email sent!',
                 'user': {
                     'id': user.id,
                     'username': user.username,
