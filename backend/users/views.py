@@ -304,18 +304,13 @@ class UserViewSet(viewsets.ModelViewSet):
         created_date = req.get("created_at")
         updated_date = req.get("updated_at")
         username = req.get("nickname")
-        last_ip = req.get("last_ip")
-        last_login = req.get("last_login")
         auth0_id = req.get("sub")
-
 
         user, created = User.objects.get_or_create(
             auth0_id=auth0_id,
             defaults={'email': email, 
                       'first_name': firstname,
                       'last_name': firstname,
-                      'last_ip': last_ip,
-                      'last_login': last_login,
                       'created_at': created_date,
                       'modified_at': updated_date,
                       'username': username,

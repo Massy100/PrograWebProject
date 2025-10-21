@@ -34,7 +34,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     status = models.BooleanField(default=True)
     verified = models.BooleanField(default=False)
     user_type = models.CharField(max_length=20, choices=USER_TYPES, default=USER_TYPE_CLIENT)
-    last_ip = models.GenericIPAddressField(blank=True, null=True)
     referred_code = models.CharField(max_length=100, blank=True, null=True)
     used_referred_code = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

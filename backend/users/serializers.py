@@ -71,7 +71,6 @@ class UserDetailSerializer(serializers.ModelSerializer):
             'status',
             'verified',
             'is_active',
-            'last_ip',
             'referred_code',
             'used_referred_code',
             'last_login',
