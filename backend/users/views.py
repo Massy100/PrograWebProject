@@ -297,14 +297,30 @@ class UserViewSet(viewsets.ModelViewSet):
         if not payload:
             return Response({'error': 'Invalid or missing token'}, status=401)
 
-        print(payload)
-        auth0_id = payload.get('sub')
-        email = payload.get('email')
-        name = payload.get('name', '')
+        req = request.data
+        auth0_id = req.get("user_id")
+        email = req.get("email")
+        firstname = req.get("name")
+        created_date = req.get("created_at")
+        updated_date = req.get("updated_at")
+        username = req.get("nickname")
+        last_ip = req.get("last_ip")
+        last_login = req.get("last_login")
+        auth0_id = req.get("sub")
+
 
         user, created = User.objects.get_or_create(
             auth0_id=auth0_id,
-            defaults={'email': email, 'first_name': name.split(" ")[0]}
+            defaults={'email': email, 
+                      'first_name': firstname,
+                      'last_name': firstname,
+                      'last_ip': last_ip,
+                      'last_login': last_login,
+                      'created_at': created_date,
+                      'modified_at': updated_date,
+                      'username': username,
+                      'auth0_id': auth0_id 
+                      }
         )
 
         serializer = UserDetailSerializer(user)

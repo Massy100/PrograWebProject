@@ -10,11 +10,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const dom = process.env.NEXT_PUBLIC_AUTH0_DOMAIN;
   const clientId = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID;
 
-  console.log("dominio")
-  console.log(dom)
-
-  console.log("clioent")
-  console.log(clientId)
   return (
     <Auth0Provider
           domain={dom || ""}

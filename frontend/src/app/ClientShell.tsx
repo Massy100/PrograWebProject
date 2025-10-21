@@ -8,11 +8,12 @@ import SidebarOptions from '@/components/navAdmin';
 import Wallet from '@/components/wallet';
 
 import { useAuth0 } from '@auth0/auth0-react';
+import { json } from 'stream/consumers';
 
 export default function ClientShell({ children }: { children: React.ReactNode }) {
   const [loginOpen, setLoginOpen] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
-  const { user, getAccessTokenSilently } = useAuth0();
+  const { user, getAccessTokenSilently,  } = useAuth0();
   const [role, setRole] = useState<'admin' | 'client' | null>(null);
   const [dbUser, setDbUser] = useState(null);
 
@@ -21,6 +22,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
       const token = await getAccessTokenSilently();
       const response = await fetch("http://localhost:8000/api/users/sync/", {
         method: "POST",
+        body: JSON.stringify(user),
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -40,7 +42,8 @@ export default function ClientShell({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (user) {
-        callApi()
+        console.log(user);
+        callApi();
     }
   }, [user]);
 

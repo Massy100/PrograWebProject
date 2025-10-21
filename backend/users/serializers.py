@@ -74,7 +74,6 @@ class UserDetailSerializer(serializers.ModelSerializer):
             'last_ip',
             'referred_code',
             'used_referred_code',
-            'date_joined',
             'last_login',
             'created_at',
             'modified_at',
