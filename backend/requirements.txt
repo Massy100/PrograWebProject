@@ -10,3 +10,6 @@ psycopg-binary==3.2.9
 python-dotenv==1.1.1
 sqlparse==0.5.3
 typing_extensions==4.15.0
+alpha-vantage==2.3.1
+twilio==9.4.0
+requests==2.32.3  
