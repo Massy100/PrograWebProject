@@ -1,6 +1,6 @@
 /* 🌐 Fondo general */
 body {
-  background-color: #f7f7f9;
+  background-color: #F7F7F9;
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', sans-serif;
@@ -12,13 +12,14 @@ body {
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
+  background-color: #F7F7F9;
 }
 
 .panel__title {
   font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 2rem;
-  color: rgba(43, 43, 43, 0.907);
+  color: #021631;
 }
 
 /* 🎛️ Controles superiores */
@@ -28,25 +29,28 @@ body {
   align-items: center;
   margin-bottom: 2rem;
   flex-wrap: wrap;
+  background-color: #EDEDF2;
+  padding: 1rem;
+  border-radius: 0.75rem;
 }
 
 .dashboard__controls select,
 .dashboard__controls input {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid #DADCE0;
   border-radius: 0.4rem;
   font-size: 0.9rem;
-  background-color: #fff;
-  color: #1f2937;
+  background-color: #FFFFFF;
+  color: #021631;
 }
 
 .dashboard__controls span {
   font-weight: 500;
-  color: #4a5568;
+  color: #646C79;
 }
 
 .alertBtn {
-  background-color: #0078D4;
+  background-color: #021631;
   color: white;
   padding: 0.6rem 1.2rem;
   border: none;
@@ -57,65 +61,96 @@ body {
 }
 
 .alertBtn:hover {
-  background-color: #005EA2;
+  background-color: #4D4E8E;
 }
 
-/* 📦 Contenido del dashboard */
+/* 📦 Contenedor principal del dashboard */
 .dashboard__wrap {
-  background-color: #fff;
+  background-color: #FFFFFF;
   border-radius: 0.75rem;
   box-shadow: 0 0 0 1px #DADCE0;
   padding: 2rem;
 }
 
-/* 💳 Tarjetas de resumen */
-.dashboard__cards {
-  display: flex;
-  flex-wrap: wrap;
+/* 💳 Tarjetas tipo dashboard */
+.fc__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
 }
 
-.card {
-  background-color: #fff;
-  border: 1px solid #DADCE0;
+.fc__card {
+  background-color: #FFFFFF;
   border-radius: 0.75rem;
-  padding: 1rem 1.25rem;
-  flex: 1 1 220px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  box-shadow: 0 0 0 1px #DADCE0;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.fc__title {
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #646C79;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.fc__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #021631;
+  margin-bottom: 0.25rem;
+}
+
+.fc__warranty {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.fc__warranty.green {
+  color: #51AE6E;
+}
+
+.fc__warranty.red {
+  color: #C55B73;
 }
 
 /* 📋 Tabla de órdenes */
 .dashboard__table h3 {
   font-size: 1.2rem;
   margin-bottom: 1rem;
-  color: #0078D4;
+  color: #2779F5;
 }
 
 .dashboard__table table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.95rem;
+  background-color: #FFFFFF;
 }
 
 .dashboard__table th {
   text-align: left;
   padding: 0.75rem;
   font-size: 0.75rem;
-  color: #6A6C75;
+  color: #828692;
   text-transform: uppercase;
-  border-bottom: 1px solid #E6E8EB;
+  border-bottom: 1px solid #EDEDF2;
+  background-color: #F2F2F2;
 }
 
 .dashboard__table td {
   padding: 1rem 0.75rem;
-  border-bottom: 1px solid #F0F1F3;
-  color: #232733;
+  border-bottom: 1px solid #F2F2F2;
+  color: #021631;
 }
 
-/* 📁 Estado */
+/* 📁 Estado visual */
 .pill {
   display: inline-block;
   padding: 0.4rem 0.75rem;
@@ -126,11 +161,11 @@ body {
 }
 
 .pill.done {
-  background-color: #28a745;
+  background-color: #51AE6E;
 }
 
 .pill.pending {
-  background-color: #6c757d;
+  background-color: #C55B73;
 }
 
 /* 📱 Responsive refinado */
@@ -159,8 +194,13 @@ body {
     text-align: center;
   }
 
-  .card {
-    flex: 1 1 100%;
+  .fc__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fc__card {
+    align-items: center;
+    text-align: center;
   }
 
   .dashboard__table table {

@@ -5,48 +5,47 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import './report.css';
 
-type DashboardData = {
+type Order = {
+  invoice: string;
+  customer: string;
+  price: number;
+  status: 'Done' | 'Pending';
+};
+
+type PortfolioData = {
   balance: number;
   sales: number;
-  wallet: number;
   referral: number;
   estimated: number;
-  orders: {
-    invoice: string;
-    customer: string;
-    price: number;
-    status: 'Done' | 'Pending';
-  }[];
+  orders: Order[];
 };
 
 const mockPortfolios = ['Alpha', 'Beta', 'Gamma'];
-const mockProfile = 'analyst'; // Simula perfil actual
+const mockProfile = 'analyst';
 
-export default function MinimalDashboard() {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [dateRange, setDateRange] = useState({ from: '', to: '' });
+export default function DashboardOverview() {
   const [portfolio, setPortfolio] = useState<string>('Alpha');
+  const [dateRange, setDateRange] = useState({ from: '', to: '' });
+  const [data, setData] = useState<PortfolioData | null>(null);
 
   useEffect(() => {
-    // Simula datos del backend según portafolio
-    setTimeout(() => {
-      const base = portfolio === 'Alpha' ? 3000 : portfolio === 'Beta' ? 4000 : 5000;
-      setData({
-        balance: base + 468.96,
-        sales: portfolio === 'Gamma' ? 120 : 82,
-        wallet: base + 567.33,
-        referral: 234.0,
-        estimated: base + 312.5,
-        orders: [
-          { invoice: '#2369', customer: 'Miron', price: 1236, status: 'Done' },
-          { invoice: '#2368', customer: 'John Doe', price: 1236, status: 'Pending' },
-        ],
-      });
-    }, 600);
+    // Simula datos por portafolio
+    const base = portfolio === 'Alpha' ? 3000 : portfolio === 'Beta' ? 4000 : 5000;
+    setData({
+      balance: base + 468.96,
+      sales: portfolio === 'Gamma' ? 120 : 82,
+      referral: 234,
+      estimated: base + 312.5,
+      orders: [
+        { invoice: '#2369', customer: 'Miron', price: 1236, status: 'Done' },
+        { invoice: '#2368', customer: 'John Doe', price: 1236, status: 'Pending' },
+        { invoice: '#2367', customer: 'Angelica', price: 1236, status: 'Done' },
+      ],
+    });
   }, [portfolio]);
 
   const exportPDF = async () => {
-    const element = document.getElementById('minimal-dashboard');
+    const element = document.getElementById('dashboard-pdf');
     if (!element || !data) return;
 
     const canvas = await html2canvas(element);
@@ -56,9 +55,9 @@ export default function MinimalDashboard() {
     pdf.setFontSize(12);
     pdf.text(`Portafolio: ${portfolio}`, 10, 10);
     pdf.text(`Perfil: ${mockProfile}`, 10, 16);
-    pdf.text(`Rango de fechas: ${dateRange.from || '—'} a ${dateRange.to || '—'}`, 10, 22);
+    pdf.text(`Fechas: ${dateRange.from || '—'} a ${dateRange.to || '—'}`, 10, 22);
     pdf.addImage(imgData, 'PNG', 10, 30, 190, 0);
-    pdf.save(`dashboard-${portfolio}.pdf`);
+    pdf.save(`overview-${portfolio}.pdf`);
   };
 
   return (
@@ -83,20 +82,18 @@ export default function MinimalDashboard() {
           value={dateRange.to}
           onChange={e => setDateRange({ ...dateRange, to: e.target.value })}
         />
+
         <button className="alertBtn" onClick={exportPDF}>⬇ Export PDF</button>
       </div>
 
-      <div id="minimal-dashboard" className="dashboard__wrap">
-        {data ? (
+      <div id="dashboard-pdf" className="dashboard__wrap">
+        {data && (
           <>
-            <section className="dashboard__cards">
-              <div className="card">💰 Balance: ${data.balance}</div>
-              <div className="card">📈 Sales: {data.sales}</div>
-              {mockProfile === 'admin' && (
-                <div className="card">🪙 Wallet: ${data.wallet}</div>
-              )}
-              <div className="card">🔗 Referral: ${data.referral}</div>
-              <div className="card">📊 Estimated: ${data.estimated}</div>
+            <section className="fc__grid">
+              <Card title="Balance" value={data.balance} warranty={48} positive />
+              <Card title="Sales" value={data.sales} warranty={48} positive={false} />
+              <Card title="Referral" value={data.referral} warranty={48} positive={false} />
+              <Card title="Estimated" value={data.estimated} warranty={48} positive />
             </section>
 
             <section className="dashboard__table">
@@ -127,10 +124,30 @@ export default function MinimalDashboard() {
               </table>
             </section>
           </>
-        ) : (
-          <p>Loading data...</p>
         )}
       </div>
     </main>
+  );
+}
+
+function Card({
+  title,
+  value,
+  warranty,
+  positive = true,
+}: {
+  title: string;
+  value: number;
+  warranty: number;
+  positive?: boolean;
+}) {
+  return (
+    <div className="fc__card">
+      <div className="fc__title">{title.toUpperCase()}</div>
+      <div className="fc__value">${value.toLocaleString()}</div>
+      <div className={`fc__warranty ${positive ? 'green' : 'red'}`}>
+        {warranty}% garantía
+      </div>
+    </div>
   );
 }
