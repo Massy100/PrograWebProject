@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth0 } from '@auth0/auth0-react';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import UserOverview from '@/components/UserOverview';
@@ -74,6 +75,7 @@ export default function UserOverviewPage() {
   const router = useRouter();
   const userId = params.id;
   
+  const {getAccessTokenSilently} = useAuth0();
   const [userData, setUserData] = useState<{ user: any; wallet: any } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +83,7 @@ export default function UserOverviewPage() {
   useEffect(() => {
     async function fetchUser() {
       try {
+        const token = await getAccessTokenSilently();
         setLoading(true);
         console.log('Fetching user with ID:', userId);
         
@@ -88,6 +91,7 @@ export default function UserOverviewPage() {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+             Authorization: `Bearer ${token}`,
           },
         });
 

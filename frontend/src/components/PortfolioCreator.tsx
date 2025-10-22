@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth0 } from '@auth0/auth0-react';
 import { useState } from 'react';
 import '../styles/PortfolioCreator.css';
 
@@ -9,6 +10,7 @@ type PortfolioCreatorProps = {
 };
 
 export default function PortfolioCreator({ open, onClose }: PortfolioCreatorProps) {
+  const {getAccessTokenSilently} = useAuth0();
   const [portfolioName, setPortfolioName] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingPortfolio, setPendingPortfolio] = useState<any>(null);
@@ -43,11 +45,12 @@ export default function PortfolioCreator({ open, onClose }: PortfolioCreatorProp
     try {
       // para el back
       /*
+      const token = await getAccessTokenSilently();
       const res = await fetch('http://localhost:8000/api/portfolios/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token)}`,
         },
         body: JSON.stringify(pendingPortfolio),
       });

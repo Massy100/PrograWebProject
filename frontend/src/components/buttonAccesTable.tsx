@@ -1,22 +1,25 @@
 'use client';
 
+import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import '../styles/buttonAccessTable.css';
 
 export default function PendingAlert() {
   const [pendingCount, setPendingCount] = useState<number>(0);
+  const { getAccessTokenSilently } = useAuth0();
   const [visible, setVisible] = useState<boolean>(false);
   const router = useRouter();
 
   useEffect(() => {
     const fetchPending = async () => {
       try {
+        const token = await getAccessTokenSilently();
         const res = await fetch('http://localhost:8000/api/requests/pending', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
