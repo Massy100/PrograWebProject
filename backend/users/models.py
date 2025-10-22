@@ -26,8 +26,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     auth0_id = models.CharField(max_length=100, unique=True, db_index=True)
     username = models.CharField(max_length=50, unique=True)
-    first_name = models.CharField(max_length=100, blank=True)
-    last_name = models.CharField(max_length=100, blank=True)
+    full_name = models.CharField(max_length=100, blank=True)
 
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
