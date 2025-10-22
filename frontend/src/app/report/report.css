@@ -1,0 +1,174 @@
+/* 🌐 Fondo general */
+body {
+  background-color: #f7f7f9;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  color: #1f2937;
+}
+
+/* 🧭 Panel principal */
+.panel {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.panel__title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: rgba(43, 43, 43, 0.907);
+}
+
+/* 🎛️ Controles superiores */
+.dashboard__controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.dashboard__controls select,
+.dashboard__controls input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.4rem;
+  font-size: 0.9rem;
+  background-color: #fff;
+  color: #1f2937;
+}
+
+.dashboard__controls span {
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.alertBtn {
+  background-color: #0078D4;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 0.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.alertBtn:hover {
+  background-color: #005EA2;
+}
+
+/* 📦 Contenido del dashboard */
+.dashboard__wrap {
+  background-color: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 0 1px #DADCE0;
+  padding: 2rem;
+}
+
+/* 💳 Tarjetas de resumen */
+.dashboard__cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background-color: #fff;
+  border: 1px solid #DADCE0;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  flex: 1 1 220px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* 📋 Tabla de órdenes */
+.dashboard__table h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #0078D4;
+}
+
+.dashboard__table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.dashboard__table th {
+  text-align: left;
+  padding: 0.75rem;
+  font-size: 0.75rem;
+  color: #6A6C75;
+  text-transform: uppercase;
+  border-bottom: 1px solid #E6E8EB;
+}
+
+.dashboard__table td {
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid #F0F1F3;
+  color: #232733;
+}
+
+/* 📁 Estado */
+.pill {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+}
+
+.pill.done {
+  background-color: #28a745;
+}
+
+.pill.pending {
+  background-color: #6c757d;
+}
+
+/* 📱 Responsive refinado */
+@media (max-width: 768px) {
+  .panel {
+    padding: 1rem;
+  }
+
+  .panel__title {
+    font-size: 1.5rem;
+  }
+
+  .dashboard__controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .dashboard__controls select,
+  .dashboard__controls input {
+    width: 100%;
+  }
+
+  .alertBtn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .card {
+    flex: 1 1 100%;
+  }
+
+  .dashboard__table table {
+    font-size: 0.85rem;
+  }
+
+  .dashboard__table th,
+  .dashboard__table td {
+    padding: 0.5rem;
+  }
+}
