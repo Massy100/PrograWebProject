@@ -36,6 +36,7 @@ export default function SidebarOptions() {
           className="iconLink logoutButton"
           onClick={() => {
             logout();
+            localStorage.clear()
             router.push("/");
           }}
           aria-label="Cerrar sesión"

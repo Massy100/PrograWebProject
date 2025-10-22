@@ -15,7 +15,6 @@ export default function ClientShell({ children }: { children: React.ReactNode })
   const [walletOpen, setWalletOpen] = useState(false);
   const { user, getAccessTokenSilently,  } = useAuth0();
   const [role, setRole] = useState<'admin' | 'client' | null>(null);
-  const [dbUser, setDbUser] = useState(null);
 
   const callApi = async () => {
     try {
@@ -32,9 +31,11 @@ export default function ClientShell({ children }: { children: React.ReactNode })
       if (!data) {
         throw new Error("No se obtuvo respuesta del backend.");
       }
-      setDbUser(data.user);
+      
+      const dbUser = data.user;
+      localStorage.setItem("auth", JSON.stringify({id: dbUser.id}));
+
       setRole(data.user.user_type);
-      console.log(dbUser);
     } catch (e) {
       console.error(e);
     }
@@ -42,7 +43,6 @@ export default function ClientShell({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (user) {
-        console.log(user);
         callApi();
     }
   }, [user]);
