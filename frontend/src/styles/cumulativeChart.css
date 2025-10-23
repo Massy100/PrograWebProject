@@ -1,0 +1,41 @@
+.cumulative-container {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cumulative-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cumulative-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #021631;
+}
+
+.cumulative-range {
+  font-size: 0.85rem;
+  color: #646C79;
+}
+
+.cumulative-tooltip {
+  background: #fff;
+  border: 1px solid #ededf2;
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.cumulative-tooltip-date {
+  margin: 0;
+  font-weight: 600;
+  color: #021631;
+  font-size: 0.9rem;
+}

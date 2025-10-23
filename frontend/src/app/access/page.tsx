@@ -103,7 +103,7 @@ export default function RequestsTable() {
       <div ref={tableRef}>
         <div className="tx__wrap">
           <div className="tx__tabs">
-            <button className={activeTab === 'Pending' ? 'tx__tab active' : 'tx__tab'} onClick={() => setActiveTab('Pending')}>📁 Pending</button>
+            <button className={activeTab === 'Pending' ? 'tx__tab active' : 'tx__tab'} onClick={() => setActiveTab('Pending')}>Pending</button>
             <button className={activeTab === 'Approved' ? 'tx__tab active' : 'tx__tab'} onClick={() => setActiveTab('Approved')}>✔ Approved</button>
             <button className={activeTab === 'Rejected' ? 'tx__tab active' : 'tx__tab'} onClick={() => setActiveTab('Rejected')}>✖ Rejected</button>
           </div>

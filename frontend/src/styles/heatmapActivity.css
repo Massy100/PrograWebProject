@@ -1,0 +1,121 @@
+.heatmap-container {
+  background: #ffffff;
+  border: 1px solid #ededf2;
+  border-radius: 12px;
+  padding: 20px;
+  width: 95%;
+}
+
+.heatmap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.heatmap-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #021631;
+}
+
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-label {
+  font-size: 0.8rem;
+  color: #646C79;
+}
+
+.legend-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.legend-box.green {
+  background: #51ae6e;
+}
+
+.legend-box.red {
+  background: #c55b73;
+}
+
+
+.heatmap-tooltip {
+  position: absolute;
+  margin: 1rem;
+  background: #fff;
+  border: 1px solid #ededf2;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  color: #021631;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 100;
+}
+
+.heatmap-tooltip.visible {
+  opacity: 1;
+}
+
+.recharts-wrapper:active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.recharts-cartesian-grid {
+  border: none !important;
+}
+/* 
+.heatmap-container .recharts-responsive-container {
+  background-color: red;
+  height: 100% !important;
+}
+
+.recharts-wrapper {
+  background-color: green !important;
+  height: auto !important;
+  background: transparent !important;
+}
+
+.recharts-wrapper svg {
+  min-width: 1000px !important;
+  width: 1500px !important;
+  height: auto !important;
+  background-color: rgb(0, 128, 17) !important;
+  overflow-x: hidden !important;
+}
+
+.recharts-cartesian-grid line {
+  stroke: transparent !important;
+  border: none !important;
+}
+
+.recharts-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  min-width: 1000px !important;
+  width: 1600px !important;
+  height: auto !important;
+  background-color: rgb(0, 128, 17) !important;
+  overflow-x: hidden !important;
+}
+
+.heatmap-container {
+  background: #ffffff;
+  border: 1px solid #ededf2;
+  border-radius: 12px;
+  padding: 20px;
+  width: 95%;
+  margin: 0 auto;
+  overflow-x: hidden; 
+} */
