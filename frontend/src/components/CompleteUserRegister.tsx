@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import "../styles/CompleteUserRegister.css";
-import { PhoneNumberUtil } from "google-libphonenumber";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
-export default function CompleteUserRegister() {
+export default function CompleteUserRegister({ onClose }: { onClose: () => void }) {
   const [isOpen, setIsOpen] = useState(true);
   const [hasReferral, setHasReferral] = useState(false);
   const [referralError, setReferralError] = useState("");
@@ -14,8 +13,7 @@ export default function CompleteUserRegister() {
   const [phoneFull, setPhoneFull] = useState("");
 
   const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
+    full_name: "",
     username: "",
     referred_code: "",
   });
@@ -23,7 +21,7 @@ export default function CompleteUserRegister() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!formData.first_name.trim() || !formData.last_name.trim()) {
+    if (!formData.full_name.trim()) {
       setReferralError("Please enter your first and last name");
       return;
     }
@@ -43,7 +41,10 @@ export default function CompleteUserRegister() {
     setIsOpen(false);
   };
 
-  const handleClose = () => setIsOpen(false);
+  const handleClose = () =>  {
+    setIsOpen(false);
+    onClose();
+  };
 
   if (!isOpen) return null;
 
@@ -55,25 +56,17 @@ export default function CompleteUserRegister() {
         </button>
 
         <h2 className="modalTitle">Complete Your Registration</h2>
+        <p>Completing your registration automatically sends an access request to our administration team. 
+          Once it gets accepted you can start managing your stocks. </p>
 
         <form className="form" onSubmit={handleSubmit}>
           <input
             type="text"
-            placeholder="First Name"
+            placeholder="Full Name"
             className="input"
-            value={formData.first_name}
+            value={formData.full_name}
             onChange={(e) =>
-              setFormData({ ...formData, first_name: e.target.value })
-            }
-          />
-
-          <input
-            type="text"
-            placeholder="Last Name"
-            className="input"
-            value={formData.last_name}
-            onChange={(e) =>
-              setFormData({ ...formData, last_name: e.target.value })
+              setFormData({ ...formData, full_name: e.target.value })
             }
           />
 

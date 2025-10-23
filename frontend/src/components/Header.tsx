@@ -33,7 +33,7 @@ export default function Header({
   onSearch,
   onOpenLogin,
 }: HeaderProps) {
-  const { user, isAuthenticated, loginWithRedirect, logout } = useAuth0();
+  const { user } = useAuth0();
   const role = user?.role; // 'admin' | 'user' | undefined
   const isUser = role === 'user';
   const isAdmin = role === 'admin';

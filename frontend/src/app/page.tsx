@@ -1,17 +1,19 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth0 } from '@auth0/auth0-react';
 import StocksRecommendationsTable, { StockItem } from '@/components/stocksTable';
 import PopularStocksCard, { PopularStock } from '@/components/popularCardStocks';
+import CompleteUserRegister from '@/components/CompleteUserRegister';
 import '@/app/page.css';
-// import Login from '@/components/login';
 
 export default function Home() {
   const router = useRouter();
-  // const [loginOpen, setLoginOpen] = useState(false);
-  const { user, isAuthenticated, loginWithRedirect, logout } = useAuth0();
+  const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
+  const [userVerified, setUserVerified] = useState(false);
+  const [completeRegisterOpen, setCompleteRegisterOpen] = useState(false);
 
   const demoRows: StockItem[] = [
     { symbol: 'NIO',  name: 'Nio Inc.-ADR', currentPrice: 6.04,  changePct: -0.48, last30d: [9,8,7,6.5,6.7,6.6], targetPrice: 61.75,  recommendation: 'STRONG BUY' },
@@ -27,20 +29,24 @@ export default function Home() {
     changePct: r.changePct,
   }));
 
+  useEffect(() => {
+    const jsonAuth = localStorage.getItem("auth");
+    if (isAuthenticated && jsonAuth) {
+      const auth = JSON.parse(jsonAuth);
+      setUserVerified(auth.verified);
+      if (auth.role === 'admin') {
+        router.push('/dashboard-admin')
+      } else if (auth.role === 'client' && userVerified) {
+        router.push('/dashboard-user');
+      } 
+    }
+  });
+
   return (
     <main className="landingPage">
-      {/* Login modal controlled by state */}
-      {/*
-      <Login
-        open={loginOpen}
-        onClose={() => setLoginOpen(false)}
-        onSuccess={(role) => {
-          // redirect by role
-          if (role === 'admin') router.push('/dashboard-admin');
-          else router.push('/dashboard-user');
-        }}
-      />
-      */}
+      {completeRegisterOpen && (
+        <CompleteUserRegister onClose={() => setCompleteRegisterOpen(false)} />
+      )}
 
       <section className="div-initial">
         <div className="info">
@@ -58,6 +64,25 @@ export default function Home() {
             >
               Login
             </button>
+          )}
+
+          {isAuthenticated && !userVerified && (
+            <div className='log-buttons'>
+              <button
+                type="button"
+                className="see-more-btn"
+                onClick={() => setCompleteRegisterOpen(true)}
+              >
+                Complete registration
+              </button>
+                <button
+                type="button"
+                className="see-more-btn"
+                onClick={() => {logout(); localStorage.clear()}}
+              >
+                Logout
+              </button>
+            </div>
           )}
         </div>
 

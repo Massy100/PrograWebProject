@@ -2,19 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import SearchResults from '@/components/searchResults';
-// import Login from '@/components/login';
 import OptionsUser from '@/components/navUsers';    
 import SidebarOptions from '@/components/navAdmin';   
+import CompleteUserRegister from '@/components/CompleteUserRegister';
 import Wallet from '@/components/wallet';
 
 import { useAuth0 } from '@auth0/auth0-react';
-import { json } from 'stream/consumers';
 
 export default function ClientShell({ children }: { children: React.ReactNode }) {
-  const [loginOpen, setLoginOpen] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
   const { user, getAccessTokenSilently,  } = useAuth0();
   const [role, setRole] = useState<'admin' | 'client' | null>(null);
+  const [verifiedUser, setVerifiedUser] = useState(false);
 
   const callApi = async () => {
     try {
@@ -33,8 +32,9 @@ export default function ClientShell({ children }: { children: React.ReactNode })
       }
       
       const dbUser = data.user;
-      localStorage.setItem("auth", JSON.stringify({id: dbUser.id}));
-
+      setVerifiedUser(dbUser.verified);
+      localStorage.setItem("auth", JSON.stringify({id: dbUser.id, verified: verifiedUser, role: dbUser.user_type}));
+      
       setRole(data.user.user_type);
     } catch (e) {
       console.error(e);
@@ -52,22 +52,13 @@ export default function ClientShell({ children }: { children: React.ReactNode })
       <SearchResults
         headerProps={{ marketOpen: true, totalAmount: 100 }}
         title="Resultados de la búsqueda"
-        onOpenLogin={() => setLoginOpen(true)} 
       />
 
-      {role === 'client' && (
+      {role === 'client' && verifiedUser && (
         <OptionsUser onOpenWallet={() => setWalletOpen(true)} />
       )}
 
       {role === 'admin' && <SidebarOptions />}
-
-      {/*
-      <Login 
-        open={loginOpen} 
-        onClose={() => setLoginOpen(false)} 
-        onSuccess={(role) => setRole(role)} 
-      />
-      */}
 
       <Wallet open={walletOpen} onClose={() => setWalletOpen(false)} />
 
