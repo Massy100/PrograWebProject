@@ -1,52 +1,56 @@
-/* 🌐 Fondo general */
+/* 🌐 Global layout */
 body {
-  background-color: #F7F7F9;
+  background-color: #f4f6fa;
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', sans-serif;
   color: #1f2937;
 }
 
-/* 🧭 Panel principal */
+/* 🧭 Main panel */
 .panel {
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
-  background-color: #F7F7F9;
 }
 
 .panel__title {
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 700;
   margin-bottom: 2rem;
   color: #021631;
 }
 
-/* 🎛️ Controles superiores */
+/* 🎛️ Top controls */
 .dashboard__controls {
   display: flex;
-  gap: 1rem;
-  align-items: center;
-  margin-bottom: 2rem;
   flex-wrap: wrap;
-  background-color: #EDEDF2;
-  padding: 1rem;
+  gap: 1rem;
+  align-items: flex-end;
+  background-color: #ffffff;
+  padding: 1rem 1.5rem;
   border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+}
+
+.dashboard__controls label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
 }
 
 .dashboard__controls select,
 .dashboard__controls input {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #DADCE0;
+  border: 1px solid #d1d5db;
   border-radius: 0.4rem;
   font-size: 0.9rem;
-  background-color: #FFFFFF;
-  color: #021631;
-}
-
-.dashboard__controls span {
-  font-weight: 500;
-  color: #646C79;
+  background-color: #f9fafb;
+  color: #111827;
+  margin-top: 0.25rem;
 }
 
 .alertBtn {
@@ -64,46 +68,47 @@ body {
   background-color: #4D4E8E;
 }
 
-/* 📦 Contenedor principal del dashboard */
+/* 📦 Dashboard content */
 .dashboard__wrap {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 0.75rem;
-  box-shadow: 0 0 0 1px #DADCE0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   padding: 2rem;
 }
 
-/* 💳 Tarjetas tipo dashboard */
+/* 💳 Metric cards */
 .fc__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
+  gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .fc__card {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 0.75rem;
-  box-shadow: 0 0 0 1px #DADCE0;
+  box-shadow: 0 0 0 1px #e5e7eb;
   padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
+  transition: box-shadow 0.2s ease;
+}
+
+.fc__card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
 .fc__title {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #646C79;
+  color: #6b7280;
   letter-spacing: 0.05em;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
 }
 
 .fc__value {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: #021631;
+  color: #111827;
   margin-bottom: 0.25rem;
 }
 
@@ -113,62 +118,121 @@ body {
 }
 
 .fc__warranty.green {
-  color: #51AE6E;
+  color: #10b981;
 }
 
 .fc__warranty.red {
-  color: #C55B73;
+  color: #ef4444;
 }
 
-/* 📋 Tabla de órdenes */
-.dashboard__table h3 {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-  color: #2779F5;
-}
-
-.dashboard__table table {
+/* 📋 Table layout */
+.tx__wrap {
   width: 100%;
-  border-collapse: collapse;
+  overflow-x: auto;
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 0 1px #e5e7eb;
+}
+
+.tx__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.75rem;
   font-size: 0.95rem;
-  background-color: #FFFFFF;
+  table-layout: fixed;
 }
 
-.dashboard__table th {
-  text-align: left;
-  padding: 0.75rem;
+.tx__table thead th {
+  color: #6b7280;
   font-size: 0.75rem;
-  color: #828692;
   text-transform: uppercase;
-  border-bottom: 1px solid #EDEDF2;
-  background-color: #F2F2F2;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background-color: #f9fafb;
 }
 
-.dashboard__table td {
-  padding: 1rem 0.75rem;
-  border-bottom: 1px solid #F2F2F2;
-  color: #021631;
+.tx__table tbody tr {
+  background: #ffffff;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* 📁 Estado visual */
-.pill {
+.tx__table tbody tr:hover {
+  background: #f3f4f6;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.tx__table td {
+  padding: 1rem;
+  vertical-align: middle;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Pills */
+.tx__pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border-radius: 9999px;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  color: #fff;
+}
+
+.tx__pill.is-buy {
+  background-color: #ef4444;
+}
+
+.tx__pill.is-sell {
+  background-color: #10b981;
+}
+
+/* Status dot */
+.tx__dot {
   display: inline-block;
-  padding: 0.4rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  margin-left: 1rem;
+}
+
+.tx__dot.ok {
+  background-color: #10b981;
+}
+
+.tx__dot.off {
+  background-color: #ef4444;
+}
+
+/* Asset info */
+.tx__assetTitle {
   font-weight: 600;
-  color: white;
+  color: #111827;
+  font-size: 1rem;
 }
 
-.pill.done {
-  background-color: #51AE6E;
+.tx__assetCode {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.15rem;
 }
 
-.pill.pending {
-  background-color: #C55B73;
+/* Gains and losses */
+.is-gain {
+  color: #10b981;
+  font-weight: 600;
 }
 
-/* 📱 Responsive refinado */
+.is-loss {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* 📱 Responsive tweaks */
 @media (max-width: 768px) {
   .panel {
     padding: 1rem;
@@ -180,12 +244,10 @@ body {
 
   .dashboard__controls {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
+    align-items: stretch;
   }
 
-  .dashboard__controls select,
-  .dashboard__controls input {
+  .dashboard__controls label {
     width: 100%;
   }
 
@@ -199,128 +261,15 @@ body {
   }
 
   .fc__card {
-    align-items: center;
     text-align: center;
   }
 
-  .dashboard__table table {
+  .tx__table {
     font-size: 0.85rem;
   }
 
-  .dashboard__table th,
-  .dashboard__table td {
+  .tx__table thead th,
+  .tx__table td {
     padding: 0.5rem;
   }
-}
-
-/* Tabla fluida y alineada */
-.tx__wrap{ 
-  width:100%; 
-  overflow-x:auto; 
-  background-color: #fff;
-  border-radius: 10px;
-}
-
-.tx__table{
-  width:min(100%, 80rem);          
-  margin-inline:auto;
-  border-collapse:separate;
-  border-spacing:0 .75rem;
-  table-layout:fixed;               
-  font-size:0.95rem;
-}
-
-/* Head */
-.tx__table thead th{
-  color:#6A6C75;
-  font-size:.75rem;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  text-align:left;
-  padding:.5rem .75rem;
-  white-space:nowrap;
-}
-
-/* Filas */
-.tx__table tbody tr{
-  background:#fff;
-  transition:background .15s ease, box-shadow .15s ease, transform .06s ease;
-}
-.tx__table tbody tr:hover{ background:#F2F3F7; box-shadow:0 6px 18px rgba(0,0,0,.06); transform:translateY(-1px); }
-
-.tx__table td{
-  padding: .9rem .75rem;
-  vertical-align:middle;
-  overflow:hidden;
-}
-
-
-/* Píldora tipo */
-.tx__pill{
-  display:inline-flex; 
-  align-items:center; 
-  justify-content:center;
-  font-weight:700; 
-  font-size:.82rem;
-  border-radius: 50%; 
-  min-width:3rem; 
-  min-height:3rem;
-  color:#fff;
-}
-.tx__pill.is-buy{ background:#F8191E; }   /* rojo */
-.tx__pill.is-sell{ background:#1AC963; }  /* verde */
-
-/* Activo / inactivo */
-.tx__dot{ display:inline-block; 
-  width:.65rem; 
-  height:.65rem; 
-  border-radius:50%; 
-  margin: 0 1.5rem;
-}
-.tx__dot.ok{ background:#1AC963; }
-.tx__dot.off{ background:#F8191E; }
-
-
-.tx__assetTitle{ 
-  font-weight:600; 
-  color:#13151C; 
-  font-size:1rem; 
-  overflow:hidden;
-  text-overflow:ellipsis; 
-  white-space:nowrap;  
-}
-
-.tx__assetCode{ 
-  margin-top:.15rem; 
-  font-size:.75rem; 
-  color:#6A6C75; 
-  letter-spacing:.04em; 
-  overflow:hidden; 
-  text-overflow:ellipsis; 
-  white-space:nowrap; 
-}
-
-
-.tx__table col:nth-child(1){ 
-  width: 7% !important; 
-}
-
-.tx__table col:nth-child(2){ 
-  width: 23% !important; 
-}
-
-/* Importes */
-.is-gain{ color:#1AC963; font-weight:600; }
-.is-loss{ color:#F8191E; font-weight:600; }
-
-/* Responsivo: reajusta proporciones sin px */
-@media (max-width: 62rem){ /* ~992px */
-  /* Un poco más de ancho para "Acción" en pantallas medianas */
-  .tx__table col:nth-child(2){ width:34% !important; }
-  .tx__table col:nth-child(5),
-  .tx__table col:nth-child(6){ width:13% !important; }
-}
-@media (max-width: 48rem){ /* ~768px */
-  .tx__table{ width:100%; }
-  .tx__table col:nth-child(2){ width:40% !important; }
 }

@@ -5,6 +5,7 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import './report.css';
 
+
 type TxType = 'buy' | 'sell';
 
 type TxRow = {
@@ -47,7 +48,7 @@ export default function DashboardOverview() {
           code: 'BI001',
           transaction_type: 'buy',
           total_amount: 1200,
-          created_at: new Date(),
+          created_at: new Date('2025-10-01'),
           is_active: true,
           quantity: 10,
           unit_price: 120,
@@ -57,7 +58,7 @@ export default function DashboardOverview() {
           code: 'GF002',
           transaction_type: 'sell',
           total_amount: 800,
-          created_at: new Date(),
+          created_at: new Date('2025-10-20'),
           is_active: false,
           quantity: 5,
           unit_price: 160,
@@ -75,9 +76,9 @@ export default function DashboardOverview() {
     const pdf = new jsPDF();
 
     pdf.setFontSize(12);
-    pdf.text(`Portafolio: ${portfolio}`, 10, 10);
-    pdf.text(`Perfil: ${mockProfile}`, 10, 16);
-    pdf.text(`Fechas: ${dateRange.from || '—'} a ${dateRange.to || '—'}`, 10, 22);
+    pdf.text(`Portfolio: ${portfolio}`, 10, 10);
+    pdf.text(`Profile: ${mockProfile}`, 10, 16);
+    pdf.text(`Dates: ${dateRange.from || '—'} to ${dateRange.to || '—'}`, 10, 22);
     pdf.addImage(imgData, 'PNG', 10, 30, 190, 0);
     pdf.save(`overview-${portfolio}.pdf`);
   };
@@ -87,23 +88,32 @@ export default function DashboardOverview() {
       <h1 className="panel__title">📊 Overview</h1>
 
       <div className="dashboard__controls">
-        <select value={portfolio} onChange={e => setPortfolio(e.target.value)}>
-          {mockPortfolios.map(p => (
-            <option key={p} value={p}>{p}</option>
-          ))}
-        </select>
+        <label>
+          <strong>Select portfolio:</strong><br />
+          <select value={portfolio} onChange={e => setPortfolio(e.target.value)}>
+            {mockPortfolios.map(p => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+        </label>
 
-        <input
-          type="date"
-          value={dateRange.from}
-          onChange={e => setDateRange({ ...dateRange, from: e.target.value })}
-        />
-        <span>to</span>
-        <input
-          type="date"
-          value={dateRange.to}
-          onChange={e => setDateRange({ ...dateRange, to: e.target.value })}
-        />
+        <label>
+          <strong>From:</strong><br />
+          <input
+            type="date"
+            value={dateRange.from}
+            onChange={e => setDateRange({ ...dateRange, from: e.target.value })}
+          />
+        </label>
+
+        <label>
+          <strong>To:</strong><br />
+          <input
+            type="date"
+            value={dateRange.to}
+            onChange={e => setDateRange({ ...dateRange, to: e.target.value })}
+          />
+        </label>
 
         <button className="alertBtn" onClick={exportPDF}>⬇ Export PDF</button>
       </div>
@@ -118,7 +128,6 @@ export default function DashboardOverview() {
               <Card title="Estimated" value={data.estimated} warranty={48} positive />
             </section>
 
-            {/* 👇 Tabla pegada directamente */}
             <section className="tx__wrap">
               <table className="tx__table">
                 <colgroup>
@@ -144,46 +153,45 @@ export default function DashboardOverview() {
                 </thead>
 
                 <tbody>
-                  {data.transactions.map((r, i) => {
-                    const pill = r.transaction_type === 'sell' ? 'S' : 'B';
-                    const pillClass = r.transaction_type === 'sell' ? 'is-sell' : 'is-buy';
-                    const gain = Number(r.total_amount) >= 0;
+                  {data.transactions
+                    .filter(r => {
+                      const txDate = new Date(r.created_at).getTime();
+                      const fromDate = dateRange.from ? new Date(dateRange.from).getTime() : -Infinity;
+                      const toDate = dateRange.to ? new Date(dateRange.to).getTime() : Infinity;
+                      return txDate >= fromDate && txDate <= toDate;
+                    })
+                    .map((r, i) => {
+                      const pill = r.transaction_type === 'sell' ? 'S' : 'B';
+                      const pillClass = r.transaction_type === 'sell' ? 'is-sell' : 'is-buy';
+                      const gain = Number(r.total_amount) >= 0;
 
-                    return (
-                      <tr key={i}>
-                        <td>
-                          <span className={`tx__pill ${pillClass}`}>{pill}</span>
-                        </td>
-                        <td className="td-action-name">
-                          <div className="tx__asset">
-                            {r.stock && (
-                              <div className="tx__assetTitle" title={r.stock}>
-                                {r.stock}
-                              </div>
-                            )}
-                            {r.code && (
-                              <div className="tx__assetCode" title={String(r.code)}>
-                                {r.code}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td>
-                          {new Date(r.created_at).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </td>
-                        <td>{r.quantity ?? '—'}</td>
-                        <td>Q.{r.unit_price != null ? r.unit_price : '—'}</td>
-                        <td className={gain ? 'is-gain' : 'is-loss'}>Q.{r.total_amount}</td>
-                        <td>
-                          <i className={`tx__dot ${r.is_active ? 'ok' : 'off'}`} />
-                        </td>
-                      </tr>
-                    );
-                  })}
+                      return (
+                        <tr key={i}>
+                          <td>
+                            <span className={`tx__pill ${pillClass}`}>{pill}</span>
+                          </td>
+                          <td className="td-action-name">
+                            <div className="tx__asset">
+                              {r.stock && <div className="tx__assetTitle" title={r.stock}>{r.stock}</div>}
+                              {r.code && <div className="tx__assetCode" title={String(r.code)}>{r.code}</div>}
+                            </div>
+                          </td>
+                          <td>
+                            {new Date(r.created_at).toLocaleDateString(undefined, {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                          </td>
+                          <td>{r.quantity ?? '—'}</td>
+                          <td>Q.{r.unit_price != null ? r.unit_price : '—'}</td>
+                          <td className={gain ? 'is-gain' : 'is-loss'}>Q.{r.total_amount}</td>
+                          <td>
+                            <i className={`tx__dot ${r.is_active ? 'ok' : 'off'}`} />
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
             </section>
@@ -210,7 +218,7 @@ function Card({
       <div className="fc__title">{title.toUpperCase()}</div>
       <div className="fc__value">${value.toLocaleString()}</div>
       <div className={`fc__warranty ${positive ? 'green' : 'red'}`}>
-        {warranty}% garantía
+        {warranty}% warranty
       </div>
     </div>
   );
