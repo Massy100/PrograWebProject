@@ -32,7 +32,8 @@ class UserListSerializer(serializers.ModelSerializer):
             'date_joined',
             'created_at',
             'balance_available',
-            'balance_blocked'
+            'balance_blocked',
+            'is_completed'
         ]
 
     def get_balance_available(self, obj):
@@ -68,6 +69,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
             'last_login',
             'created_at',
             'modified_at',
+            'is_completed',
             'admin_profile',
             'client_profile'
         ]
