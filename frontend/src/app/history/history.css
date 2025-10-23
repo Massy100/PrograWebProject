@@ -51,7 +51,13 @@
 .title_transactions {
   font-size: 22px;
   font-weight: 500;
-  margin-top: 2rem;
+  margin-top: 3rem;
 }
 
-
+.div-filter {
+  position: absolute;
+  top: 600px;
+  right: 45px;
+  width: 50%;
+  margin-top: 1.5rem;
+}

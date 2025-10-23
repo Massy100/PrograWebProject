@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import './history.css';
 import ChartSwitcher from "@/components/ChartSwitcher";
 import FilterDate from '@/components/filterDate';
 import TransactionsTable from '@/components/tableTrasactions';
 import BigCardKpi from '@/components/BigCardKpi';
+import FilterTransactionType from "@/components/FilterTransactionType"; 
 
 type TxType = 'buy' | 'sell';
 
@@ -29,7 +30,7 @@ type Summary = {
   transactions: TxRow[];
 };
 
-// eliminar esta funcion solo era para la prueba 
+
 function generateMockData(): Summary {
   const stocks = ['AAPL', 'TSLA', 'AMZN', 'MSFT', 'NVDA', 'META', 'GOOGL', 'NFLX'];
   const transactions: TxRow[] = [];
@@ -91,8 +92,9 @@ export default function History() {
   const [loading, setLoading] = useState(true);
 
   const [rangeType, setRangeType] = useState<'Today' | 'Week' | 'Month' | 'Year' | 'Custom'>('Month');
-
   const [rangeDates, setRangeDates] = useState<{ start: string; end: string } | null>(null);
+
+  const [selectedType, setSelectedType] = useState<'purchase' | 'sale' | null>(null);
 
   useEffect(() => {
     const mock = generateMockData();
@@ -100,6 +102,14 @@ export default function History() {
     setRows(mock.transactions);
     setLoading(false);
   }, []);
+
+
+  const filteredRows = useMemo(() => {
+    if (!rows) return [];
+    if (selectedType === 'purchase') return rows.filter(r => r.transaction_type === 'buy');
+    if (selectedType === 'sale') return rows.filter(r => r.transaction_type === 'sell');
+    return rows; 
+  }, [selectedType, rows]);
 
   return (
     <div className="div-purchaseSale">
@@ -115,8 +125,14 @@ export default function History() {
 
         <h3 className="title-history">History</h3>
 
+        {/*
+          El backend debe enviar:
+          - earned_total: total ganado
+          - invested_total: total invertido
+          - buy_count: cantidad de compras
+          - sell_count: cantidad de ventas
+        */}
         <div className="summary-div-transactions">
-          {/* aqui se le tiene que mandar la info de cuanto ha ganado, lo que ha invertido, las acciones que ha comprado y vendido */}
           {summary && (
             <BigCardKpi
               earnedTotal={summary.earned_total}
@@ -127,35 +143,49 @@ export default function History() {
           )}
         </div>
 
-          {/* LA INFO QUE SE LE TIENE QUE MANDAR AL COMPONENTE */}
-          {/* dentro de summary.transactions un arreglo  */}
-          {/* - created_at: fecha y hora exacta de la transacción (en ISO, ej: "2025-10-21T14:30:00Z")
-              - transaction_type: tipo de operación → "buy" o "sell"
-              - total_amount: monto total de la operación
-              - (opcional) stock_symbol: símbolo o nombre del activo (AAPL, TSLA, etc.)
-              que los campos de fecha estén normalizados en UTC.
-          */}
+        {/* 
+          El backend debe enviar dentro de summary.transactions:
+          - created_at: fecha y hora ISO (ej: "2025-10-21T14:30:00Z")
+          - transaction_type: "buy" o "sell"
+          - total_amount: monto total de la operación
+          - (opcional) stock_symbol: símbolo o nombre del activo
+        */}
         <div className="div-grafics-portfolio">
           <div className="div-grafics">
             {summary && (
-              // 
               <ChartSwitcher
                 summary={summary}
                 rangeType={rangeType}
-                rangeDates={rangeDates} 
+                rangeDates={rangeDates}
               />
             )}
           </div>
         </div>
 
-
+        {/* 
+          Aquí se muestran todas las transacciones filtradas por tipo.
+        */}
         <h3 className="title_transactions">Transactions</h3>
+
+        <div className="div-filter">
+          <FilterTransactionType
+            initial={null}            
+            includeAll={true}         
+            labels={{
+              all: 'All Transactions',
+              purchase: 'Only Purchases',
+              sale: 'Only Sales',
+              button: 'Transaction Type',
+            }}
+            onTypeChange={(value) => setSelectedType(value)}
+          />
+        </div>
+
         <div className="div-transactions">
-          {/* aqui todas las trasacciones */}
           {loading ? (
             <p>Loading transactions...</p>
           ) : (
-            <TransactionsTable rows={rows} />
+            <TransactionsTable rows={filteredRows} />
           )}
         </div>
       </div>
