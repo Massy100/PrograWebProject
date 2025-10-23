@@ -5,11 +5,17 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import './report.css';
 
-type Order = {
-  invoice: string;
-  customer: string;
-  price: number;
-  status: 'Done' | 'Pending';
+type TxType = 'buy' | 'sell';
+
+type TxRow = {
+  code?: string | null;
+  stock?: string;
+  transaction_type: TxType;
+  total_amount: number | string;
+  created_at: string | Date;
+  is_active: boolean;
+  quantity?: number;
+  unit_price?: number | string;
 };
 
 type PortfolioData = {
@@ -17,7 +23,7 @@ type PortfolioData = {
   sales: number;
   referral: number;
   estimated: number;
-  orders: Order[];
+  transactions: TxRow[];
 };
 
 const mockPortfolios = ['Alpha', 'Beta', 'Gamma'];
@@ -29,17 +35,33 @@ export default function DashboardOverview() {
   const [data, setData] = useState<PortfolioData | null>(null);
 
   useEffect(() => {
-    // Simula datos por portafolio
     const base = portfolio === 'Alpha' ? 3000 : portfolio === 'Beta' ? 4000 : 5000;
     setData({
       balance: base + 468.96,
       sales: portfolio === 'Gamma' ? 120 : 82,
       referral: 234,
       estimated: base + 312.5,
-      orders: [
-        { invoice: '#2369', customer: 'Miron', price: 1236, status: 'Done' },
-        { invoice: '#2368', customer: 'John Doe', price: 1236, status: 'Pending' },
-        { invoice: '#2367', customer: 'Angelica', price: 1236, status: 'Done' },
+      transactions: [
+        {
+          stock: 'Banco Industrial',
+          code: 'BI001',
+          transaction_type: 'buy',
+          total_amount: 1200,
+          created_at: new Date(),
+          is_active: true,
+          quantity: 10,
+          unit_price: 120,
+        },
+        {
+          stock: 'Grupo Financiero',
+          code: 'GF002',
+          transaction_type: 'sell',
+          total_amount: 800,
+          created_at: new Date(),
+          is_active: false,
+          quantity: 5,
+          unit_price: 160,
+        },
       ],
     });
   }, [portfolio]);
@@ -96,30 +118,72 @@ export default function DashboardOverview() {
               <Card title="Estimated" value={data.estimated} warranty={48} positive />
             </section>
 
-            <section className="dashboard__table">
-              <h3>📦 Orders</h3>
-              <table>
+            {/* 👇 Tabla pegada directamente */}
+            <section className="tx__wrap">
+              <table className="tx__table">
+                <colgroup>
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                </colgroup>
+
                 <thead>
                   <tr>
-                    <th>Invoice</th>
-                    <th>Customer</th>
-                    <th>Price</th>
+                    <th>Type</th>
+                    <th>Asset</th>
+                    <th>Date</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
                     <th>Status</th>
                   </tr>
                 </thead>
+
                 <tbody>
-                  {data.orders.map((order, i) => (
-                    <tr key={i}>
-                      <td>{order.invoice}</td>
-                      <td>{order.customer}</td>
-                      <td>${order.price}</td>
-                      <td>
-                        <span className={`pill ${order.status.toLowerCase()}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {data.transactions.map((r, i) => {
+                    const pill = r.transaction_type === 'sell' ? 'S' : 'B';
+                    const pillClass = r.transaction_type === 'sell' ? 'is-sell' : 'is-buy';
+                    const gain = Number(r.total_amount) >= 0;
+
+                    return (
+                      <tr key={i}>
+                        <td>
+                          <span className={`tx__pill ${pillClass}`}>{pill}</span>
+                        </td>
+                        <td className="td-action-name">
+                          <div className="tx__asset">
+                            {r.stock && (
+                              <div className="tx__assetTitle" title={r.stock}>
+                                {r.stock}
+                              </div>
+                            )}
+                            {r.code && (
+                              <div className="tx__assetCode" title={String(r.code)}>
+                                {r.code}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          {new Date(r.created_at).toLocaleDateString(undefined, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </td>
+                        <td>{r.quantity ?? '—'}</td>
+                        <td>Q.{r.unit_price != null ? r.unit_price : '—'}</td>
+                        <td className={gain ? 'is-gain' : 'is-loss'}>Q.{r.total_amount}</td>
+                        <td>
+                          <i className={`tx__dot ${r.is_active ? 'ok' : 'off'}`} />
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </section>
