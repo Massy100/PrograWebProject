@@ -1,17 +1,8 @@
-/* 🌐 Fondo general de la página */
-body {
-  background-color: #f7f7f9;
-  margin: 0;
-  padding: 0;
-}
-
-/* 🌐 Layout principal */
+/* PANEL GENERAL */
 .panel {
-  padding: 2rem;
-  font-family: 'Segoe UI', sans-serif;
-  color: #fff;
-  max-width: 1400px;
-  margin: 0 auto;
+  color: #646C79;
+  background-color: #F7F7F9;
+  padding: .3rem 2rem 2rem 4.5rem;
 }
 
 /* 🧭 Título */
@@ -22,10 +13,10 @@ body {
   color: rgba(43, 43, 43, 0.907);
 }
 
-/* 🔔 Botón de alerta inicial */
+/* 🔔 Botón de alerta */
 .alertBtn {
-  background-color: #0078D4;
-  color: white;
+  background-color: #021631;
+  color: #FFFFFF;
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 0.25rem;
@@ -36,51 +27,53 @@ body {
 }
 
 .alertBtn:hover {
-  background-color: #005EA2;
+  background-color: #4D4E8E;
 }
 
-/* 📦 Contenedor de tabla con fondo blanco y bordes redondeados */
+/* 📦 Contenedor de tabla */
 .tx__wrap {
-  background-color: #fff;
+  background-color: #FFFFFF;
   border-radius: 0.75rem;
-  box-shadow: 0 0 0 1px #DADCE0;
+  box-shadow: 0 0 0 1px #EDEDF2;
   overflow-x: auto;
   max-width: 100%;
   scroll-margin-top: 80px;
 }
 
-/* 📁 Pestañas integradas al borde superior de la tabla */
+/* 📁 Pestañas superiores */
 .tx__tabs {
   display: flex;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background-color: #fff;
+  background-color: #FFFFFF;
   border-top-left-radius: 0.75rem;
   border-top-right-radius: 0.75rem;
-  border-bottom: 1px solid #DADCE0;
+  border-bottom: 1px solid #EDEDF2;
 }
 
+/* Pestañas individuales */
 .tx__tab {
-  background-color: #e5e7eb;
-  color: #1f2937;
+  background-color: #EDEDF2;
+  color: #021631;
   padding: 0.4rem 1rem;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .tx__tab:hover {
-  background-color: #d1d5db;
+  background-color: #F2F2F2;
+  transform: translateY(-1px);
 }
 
 .tx__tab.active {
-  background-color: #0078D4;
-  color: white;
+  background-color: #021631;
+  color: #FFFFFF;
 }
 
-/* 📊 Tabla minimalista */
+/* 📊 Tabla */
 .tx__table {
   width: 100%;
   border-collapse: collapse;
@@ -90,50 +83,50 @@ body {
 }
 
 .tx__table thead th {
-  color: #6A6C75;
+  color: #828692;
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-align: left;
   padding: 0.75rem;
-  border-bottom: 1px solid #6A6C75;
+  border-bottom: 1px solid #828692;
   font-weight: 500;
 }
 
 .tx__table tbody tr {
-  border-bottom: 1px solid #E6E8EB;
+  border-bottom: 1px solid #EDEDF2;
   transition: background 0.15s ease;
 }
 
 .tx__table tbody tr:hover {
-  background-color: #F9FAFB;
+  background-color: #F7F7F9;
 }
 
 .tx__table td {
   padding: 1rem 0.75rem;
   vertical-align: middle;
-  color: #232733;
+  color: #021631;
 }
 
-/* 🧑 Nombre en negrita + alias debajo */
+/* 🧑 Nombre + alias */
 .tx__name {
   font-weight: 600;
   font-size: 1rem;
-  color: #13151C;
+  color: #021631;
 }
 
 .tx__alias {
   font-size: 0.75rem;
-  color: #6A6C75;
+  color: #828692;
   margin-top: 0.15rem;
 }
 
 .tx__email {
   font-size: 0.85rem;
-  color: #232733;
+  color: #021631;
 }
 
-/* 📁 Botones de estado tipo folder */
+/* 📁 Estado tipo “pill” */
 .tx__pill {
   display: inline-flex;
   align-items: center;
@@ -143,58 +136,52 @@ body {
   font-size: 0.75rem;
   font-weight: 600;
   color: #fff;
-  background-color: #6c757d;
   box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
 .tx__pill.approved {
-  background-color: #28a745;
+  background-color: #02c23e;
 }
 
 .tx__pill.rejected {
-  background-color: #dc3545;
+  background-color: #ff4033;
 }
 
 .tx__pill.pending {
-  background-color: #6c757d;
+  background-color: #646C79;
 }
 
-.tx__pill::before {
-  font-size: 0.9rem;
-}
-
-/* 📛 Rectángulo para decidedBy */
+/* 📛 Badge */
 .tx__badge {
-  background-color: #F2F3F7;
+  background-color: #F2F2F2;
   padding: 0.5rem 1rem;
   border-radius: 0.35rem;
   font-size: 0.8rem;
   font-weight: 500;
-  color: #232733;
+  color: #021631;
   display: inline-block;
   white-space: nowrap;
-  box-shadow: inset 0 0 0 1px #DADCE0;
+  box-shadow: inset 0 0 0 1px #EDEDF2;
   transition: background 0.2s ease;
 }
 
 .tx__badge:hover {
-  background-color: #E6E8EB;
+  background-color: #EDEDF2;
 }
 
-/* 🧾 Contenedor para botones de acción con espacio */
+/* 🧾 Botones de acción */
 .tx__actions {
   display: flex;
   gap: 0.75rem;
 }
 
-/* 🟨 Botones de acción con diseño moderno */
 .tx__actionBtn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: #f3f4f6;
-  color: #1f2937;
-  border: 1px solid #d1d5db;
+  background-color: #F7F7F9;
+  color: #021631;
+  border: 1px solid #EDEDF2;
   padding: 0.6rem 1.2rem;
   border-radius: 0.5rem;
   font-size: 0.8rem;
@@ -205,54 +192,75 @@ body {
 }
 
 .tx__actionBtn:hover {
-  background-color: #e5e7eb;
+  background-color: #F2F2F2;
   transform: translateY(-1px);
 }
 
 .tx__actionBtn.approve {
-  background-color: #e6f4ea;
-  color: #1a7f37;
-  border: 1px solid #c3e6cb;
-}
-
-.tx__actionBtn.approve:hover {
-  background-color: #d1ecd8;
+  background-color: #E3FCF0;
+  color: #51AE6E;
+  border: 1px solid #8BB8A3;
 }
 
 .tx__actionBtn.reject {
-  background-color: #fde8e8;
-  color: #b42318;
-  border: 1px solid #f5c2c7;
+  background-color: #FEF2DC;
+  color: #C55B73;
+  border: 1px solid #EFAE3C;
 }
 
-.tx__actionBtn.reject:hover {
-  background-color: #fad4d4;
-}
-
-
-/* 🔔 Botón minimalista de alerta */
-.alertBtn.full {
-  width: 100%;
-  background-color: #d1fae5;
-  color: #065f46;
-  padding: 0.85rem 1.25rem;
-  border: 1px solid #10b981;
-  border-radius: 0.5rem;
-  font-size: 1rem;
+/* 🔘 BOTONES DE FILTRO (Month / Select Date) */
+.filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.25rem;
   font-weight: 600;
-  text-align: center;
+  font-size: 0.9rem;
+  border-radius: 2rem;
+  border: none;
   cursor: pointer;
-  animation: bounceInRight 0.6s ease-out;
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
-  transition: background-color 0.2s ease;
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 
-.alertBtn.full:hover {
-  background-color: #a7f3d0;
+/* Activo (Month X) */
+.filter-btn.active {
+  background-color: #021631;
+  color: #FFFFFF;
 }
 
+.filter-btn.active:hover {
+  background-color: #4D4E8E;
+  transform: translateY(-1px);
+}
 
-/* 📱 Responsive ajustes */
+/* Inactivo (Select Date) */
+.filter-btn.inactive {
+  background-color: #FFFFFF;
+  color: #646C79;
+  border: 1px solid #EDEDF2;
+}
+
+.filter-btn.inactive:hover {
+  background-color: #F7F7F9;
+  color: #021631;
+}
+
+/* Icono X */
+.filter-btn .close-icon {
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-left: 0.4rem;
+  opacity: 0.8;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.filter-btn.active .close-icon:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* RESPONSIVE */
 @media (max-width: 768px) {
   .panel {
     padding: 1rem;
@@ -285,6 +293,7 @@ body {
   }
 }
 
+/* Animación sutil */
 @keyframes bounceInRight {
   0% {
     opacity: 0;
@@ -301,4 +310,3 @@ body {
     transform: translateX(0%) scale(1);
   }
 }
-

@@ -44,7 +44,7 @@ export default function TransactionsTable({ rows }: { rows: TxRow[] }) {
 
         <tbody>
           {rows.map((r, i) => {
-            const pill = r.transaction_type === 'sell' ? 'S' : 'B';
+            const pill = r.transaction_type === 'sell' ? 'S' : 'P';
             const pillClass = r.transaction_type === 'sell' ? 'is-sell' : 'is-buy';
             const gain = Number(r.total_amount) >= 0;
 

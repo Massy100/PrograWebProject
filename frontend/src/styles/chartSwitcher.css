@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 95%;
-  width: 100%;
+  max-width: 100%;
   border-radius: 12px;
   border: 1px solid #e6e8ef;
   color: #13151C;
@@ -12,7 +12,6 @@
   text-decoration: none;
 }
 
-/* Menú vertical simple */
 .chartMenu{
   display:flex;
   align-items: center;
@@ -44,16 +43,6 @@
   transform: translateY(-1px);
 }
 
-/* Contenedor para la gráfica seleccionada */
-.chartArea{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 50vh;
-  margin:.5rem  1rem  0 1rem;
-}
-
-/* Responsive: menú abajo como fila */
 @media (max-width: 720px){
   .chartPanel{
     grid-template-columns: 1fr;
