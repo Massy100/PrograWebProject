@@ -33,10 +33,22 @@ export default function Header({
   onSearch,
   onOpenLogin,
 }: HeaderProps) {
-  const jsonAuth = localStorage.getItem("auth");
-  const user = JSON.parse(jsonAuth!);
+  const [user, setUser] = useState<any>(null);
+  const [role, setRole] = useState<string | undefined>(undefined);
 
-  const role = user?.role; // 'admin' | 'user' | undefined
+  useEffect(() => {
+    const jsonAuth = localStorage.getItem("auth");
+    if (jsonAuth) {
+      try {
+        const userData = JSON.parse(jsonAuth);
+        setUser(userData);
+        setRole(userData?.role);
+      } catch (error) {
+        console.error("Error parsing auth data:", error);
+        localStorage.removeItem("auth");
+      }
+    }
+  }, []);
   const isUser = role === 'client';
   const isAdmin = role === 'admin';
   const isLoggedIn = Boolean(user);

@@ -13,10 +13,23 @@ export type PopularStock = {
 
 type Props = {
   items: PopularStock[];
+  loading?: boolean;
 };
 
-export default function DobleStockTable({ items }: Props) {
+export default function DobleStockTable({ items, loading = false }: Props) {
   const visibleItems = items.slice(0, 4);
+
+  if (loading) {
+    return (
+      <aside className="popular-stocks-card" aria-label="Most popular stocks">
+        <div className="popular-stocks-card-header">
+          <span className="hdr-left">Stock</span>
+          <span className="hdr-mid">Price</span>
+        </div>
+        <div className="loading-spinner">Loading stocks...</div>
+      </aside>
+    );
+  }
 
   return (
     <aside className="popular-stocks-card" aria-label="Most popular stocks">

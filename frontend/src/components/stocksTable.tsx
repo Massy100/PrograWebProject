@@ -8,16 +8,17 @@ export type StockItem = {
   name: string;
   currentPrice: number;
   changePct: number;
-  last30d: number[]; // los ultimos precios de la accion o de los ultimos precios segun la hora osea a las 9 costa 450 a las 10 400 y asi
+  last30d: number[];
   targetPrice: number;
   recommendation: string;
 };
 
 type Props = {
   rows: StockItem[];
+  loading?: boolean;
 };
 
-export default function StocksRecommendationsTable({ rows }: Props) {
+export default function StocksRecommendationsTable({ rows, loading = false }: Props) {
   const pageSize = 8; 
   const [page, setPage] = useState(0);
 
@@ -27,6 +28,18 @@ export default function StocksRecommendationsTable({ rows }: Props) {
 
   const nextPage = () => setPage((p) => Math.min(p + 1, totalPages - 1));
   const prevPage = () => setPage((p) => Math.max(p - 1, 0));
+
+  if (loading) {
+    return (
+      <section className="stocks-table">
+        <h2>Stock Recommendations</h2>
+        <div className="stocks-table-loading">
+          <div className="loading-spinner"></div>
+          <span>Loading real-time recommendations...</span>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="stocks-table">

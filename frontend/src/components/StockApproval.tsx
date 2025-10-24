@@ -19,34 +19,80 @@ export default function StockManager() {
   const [selected, setSelected] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [tab, setTab] = useState<"pending" | "system">("pending");
+  const [loading, setLoading] = useState(true);
 
-  // esta es la simulacion de datos de las stock que en teoria ya tenemos en nuestro sistema
+  // Función para obtener datos reales de la API
+  const fetchRealStockData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:8000/api/alpha-vantage/stocks/real-data/');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch stock data');
+      }
+      
+      const data = await response.json();
+      
+      // Transformar datos de la API al formato que necesita el componente
+      const realStocks: StockItem[] = data.data.map((stockData: any) => {
+        const variation = parseFloat(stockData.variation) || 0;
+        
+        let recommendation = 'HOLD';
+        if (variation > 5) recommendation = 'STRONG BUY';
+        else if (variation > 2) recommendation = 'BUY';
+        else if (variation < -5) recommendation = 'STRONG SELL';
+        else if (variation < -2) recommendation = 'SELL';
+
+        return {
+          symbol: stockData.symbol,
+          name: stockData.name || stockData.symbol,
+          currentPrice: parseFloat(stockData.last_price) || 0,
+          changePct: variation,
+          last30d: [], // La API actual no proporciona datos históricos
+          targetPrice: 0, // Podrías calcular esto si tienes más datos
+          recommendation: recommendation
+        };
+      });
+
+      // Actualizar systemStocks con datos reales
+      setSystemStocks(realStocks);
+      
+    } catch (error) {
+      console.error('Error fetching real stock data:', error);
+      // Fallback a datos mock si la API falla
+      setSystemStocks(mockSystemStocks);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Datos mock de fallback
   const mockSystemStocks: StockItem[] = [
     {
       symbol: "AAPL",
       name: "Apple Inc.",
-      currentPrice: 175.23,
+      currentPrice: 262.82,
       changePct: 1.25,
-      last30d: [168, 170, 172, 174, 175],
-      targetPrice: 190,
+      last30d: [250, 255, 260, 258, 262],
+      targetPrice: 280,
       recommendation: "BUY",
     },
     {
-      symbol: "TSLA",
-      name: "Tesla Inc.",
-      currentPrice: 250.5,
-      changePct: -2.13,
-      last30d: [260, 258, 255, 253, 250],
-      targetPrice: 300,
-      recommendation: "HOLD",
+      symbol: "MSFT",
+      name: "Microsoft Corp.",
+      currentPrice: 523.61,
+      changePct: 0.59,
+      last30d: [510, 515, 520, 518, 523],
+      targetPrice: 540,
+      recommendation: "BUY",
     },
     {
       symbol: "NVDA",
       name: "NVIDIA Corp.",
-      currentPrice: 895.6,
-      changePct: 3.05,
-      last30d: [820, 850, 870, 890, 895],
-      targetPrice: 950,
+      currentPrice: 112.45,
+      changePct: 3.25,
+      last30d: [105, 108, 110, 111, 112],
+      targetPrice: 120,
       recommendation: "STRONG BUY",
     },
   ];
@@ -56,8 +102,19 @@ export default function StockManager() {
       const stored = localStorage.getItem("stocksToTheSystem");
       setStocks(stored ? JSON.parse(stored) : []);
     } else {
-      // aqui es donde tiene que estar la conexion con el back de donde esten guardadas las stocks que ya estan en el sistema 
-      setSystemStocks(mockSystemStocks);
+      // Cargar datos reales cuando se selecciona la pestaña "In System"
+      fetchRealStockData();
+    }
+  }, [tab]);
+
+  // Función para actualizar precios en tiempo real (cada 30 segundos)
+  useEffect(() => {
+    if (tab === "system") {
+      const interval = setInterval(() => {
+        fetchRealStockData();
+      }, 30000); // Actualizar cada 30 segundos
+
+      return () => clearInterval(interval);
     }
   }, [tab]);
 
@@ -71,37 +128,38 @@ export default function StockManager() {
 
   const handleConfirm = () => {
     if (tab === "pending") {
-      // estas son las acciones que el admin ya confirmó que quiere ingresar al sistema
+      // Estas son las acciones que el admin ya confirmó que quiere ingresar al sistema
       const approved = stocks.filter((s) => selected.includes(s.symbol));
 
-      // aqui se tendria que agregar el back para mandar esas acciones al backend
-      // para que el sistema ya tenga acceso a ellas
+      // Aquí se tendría que agregar el back para mandar esas acciones al backend
       console.log("Approved stocks to send:", approved);
 
-      // elimina del localstorage las acciones que fueron aprobadas
+      // Elimina del localStorage las acciones que fueron aprobadas
       const remaining = stocks.filter((s) => !selected.includes(s.symbol));
       localStorage.setItem("stocksToTheSystem", JSON.stringify(remaining));
       setStocks(remaining);
     } else {
-      // estas son las acciones que el admin decidió eliminar del sistema
+      // Estas son las acciones que el admin decidió eliminar del sistema
       const removedStocks = systemStocks.filter((s) =>
         selected.includes(s.symbol)
       );
 
-      // aqui se tendria que agregar el back para eliminar estas acciones del sistema
+      // Aquí se tendría que agregar el back para eliminar estas acciones del sistema
       console.log("Removed system stocks:", removedStocks);
 
-      // actualiza el estado eliminando las acciones seleccionadas
+      // Actualiza el estado eliminando las acciones seleccionadas
       const remaining = systemStocks.filter(
         (s) => !selected.includes(s.symbol)
       );
       setSystemStocks(remaining);
     }
 
-    // limpia la selección y cierra el modal
+    // Limpia la selección y cierra el modal
     setSelected([]);
     setShowModal(false);
   };
+
+  const currentStocks = tab === "pending" ? stocks : systemStocks;
   
   return (
     <section className="approval-container">
@@ -123,6 +181,7 @@ export default function StockManager() {
           <span className="tab-count">
             ({systemStocks.length > 0 ? systemStocks.length : 0})
           </span>
+          {tab === "system" && loading && " 🔄"}
         </button>
       </div>
 
@@ -137,14 +196,19 @@ export default function StockManager() {
           <div>Change %</div>
         </div>
 
-        {(tab === "pending" ? stocks : systemStocks).length === 0 ? (
+        {loading && tab === "system" ? (
+          <div className="approval-empty">
+            <div className="loading-spinner"></div>
+            <p>Loading real-time stock data...</p>
+          </div>
+        ) : currentStocks.length === 0 ? (
           <div className="approval-empty">
             {tab === "pending"
               ? "No pending stocks to review."
               : "No stocks currently in the system."}
           </div>
         ) : (
-          (tab === "pending" ? stocks : systemStocks).map((s) => {
+          currentStocks.map((s) => {
             const trendUp = s.last30d[s.last30d.length - 1] >= s.last30d[0];
             return (
               <div
@@ -169,8 +233,8 @@ export default function StockManager() {
                     negativeColor={trendUp ? "#1AC963" : "#F8191E"}
                   />
                 </div>
-                <div className="price">Q.{s.currentPrice}</div>
-                <div className="price">Q.{s.targetPrice}</div>
+                <div className="price">Q.{s.currentPrice.toFixed(2)}</div>
+                <div className="price">Q.{s.targetPrice.toFixed(2)}</div>
                 <div>
                   <span
                     className={`change-badge ${
@@ -187,7 +251,7 @@ export default function StockManager() {
         )}
       </div>
 
-      {(tab === "pending" ? stocks : systemStocks).length > 0 && (
+      {currentStocks.length > 0 && !loading && (
         <div className="approval-footer">
           <button
             className={`confirm-btn ${tab === "system" ? "remove-btn" : ""}`}
@@ -227,7 +291,6 @@ export default function StockManager() {
     </section>
   );
 }
-
 
 function Sparkline({
   data,

@@ -3,24 +3,42 @@ import React, { useEffect, useRef } from "react";
 import StockTrendCard from "./StockTrendCard";
 import "../styles/StockGraphCarousel.css";
 
-interface StockData {
-  name: string;
+// Define la interfaz para los stocks que recibe
+export interface StockItem {
   symbol: string;
+  name: string;
   currentPrice: number;
-  changePercent: number;
-  history: number[];
-  status: "up" | "down";
+  changePct: number;
+  last30d: number[];
+  targetPrice: number;
+  recommendation: string;
 }
 
-const StockGraphCarouselLoop: React.FC = () => {
-  const mockStocks: StockData[] = [
+interface StockGraphCarouselProps {
+  stocks?: StockItem[];
+  loading?: boolean;
+}
+
+const StockGraphCarousel: React.FC<StockGraphCarouselProps> = ({ 
+  stocks = [], 
+  loading = false 
+}) => {
+  // Datos de demo como fallback
+  const mockStocks = stocks.length > 0 ? stocks.map(stock => ({
+    name: stock.name,
+    symbol: stock.symbol,
+    currentPrice: stock.currentPrice,
+    changePercent: stock.changePct,
+    history: stock.last30d.length > 0 ? stock.last30d : [stock.currentPrice * 0.9, stock.currentPrice * 0.95, stock.currentPrice],
+    status: stock.changePct >= 0 ? "up" : "down" as "up" | "down",
+  })) : [
     {
       name: "Apple Inc.",
       symbol: "AAPL",
       currentPrice: 185.12,
       changePercent: 2.34,
       history: [180, 181, 183, 184, 185],
-      status: "up",
+      status: "up" as const,
     },
     {
       name: "Tesla Motors",
@@ -28,7 +46,7 @@ const StockGraphCarouselLoop: React.FC = () => {
       currentPrice: 240.76,
       changePercent: -1.8,
       history: [250, 248, 246, 243, 240],
-      status: "down",
+      status: "down" as const,
     },
     {
       name: "Microsoft Corp.",
@@ -36,7 +54,7 @@ const StockGraphCarouselLoop: React.FC = () => {
       currentPrice: 330.56,
       changePercent: 1.12,
       history: [320, 323, 326, 328, 330],
-      status: "up",
+      status: "up" as const,
     },
     {
       name: "Amazon Inc.",
@@ -44,7 +62,7 @@ const StockGraphCarouselLoop: React.FC = () => {
       currentPrice: 129.87,
       changePercent: 3.25,
       history: [123, 125, 127, 128, 129],
-      status: "up",
+      status: "up" as const,
     },
     {
       name: "NVIDIA",
@@ -52,7 +70,7 @@ const StockGraphCarouselLoop: React.FC = () => {
       currentPrice: 410.44,
       changePercent: -0.65,
       history: [420, 417, 415, 412, 410],
-      status: "down",
+      status: "down" as const,
     },
     {
       name: "Meta Platforms",
@@ -60,7 +78,7 @@ const StockGraphCarouselLoop: React.FC = () => {
       currentPrice: 280.34,
       changePercent: -2.1,
       history: [290, 288, 285, 283, 280],
-      status: "down",
+      status: "down" as const,
     },
   ];
 
@@ -77,9 +95,9 @@ const StockGraphCarouselLoop: React.FC = () => {
     let animationFrame: number;
 
     const move = () => {
-      position -= 0.5; // 🔹 Velocidad (puedes ajustar)
+      position -= 0.5;
       if (Math.abs(position) >= track.scrollWidth / 2) {
-        position = 0; // 🔁 Reinicia para loop infinito
+        position = 0;
       }
       track.style.transform = `translateX(${position}px)`;
       animationFrame = requestAnimationFrame(move);
@@ -88,6 +106,15 @@ const StockGraphCarouselLoop: React.FC = () => {
     animationFrame = requestAnimationFrame(move);
     return () => cancelAnimationFrame(animationFrame);
   }, []);
+
+  if (loading) {
+    return (
+      <div className="loop-carousel-container">
+        <h2 className="loop-carousel-title">Live Market Trends</h2>
+        <div className="loading-spinner">Loading market trends...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="loop-carousel-container">
@@ -106,4 +133,4 @@ const StockGraphCarouselLoop: React.FC = () => {
   );
 };
 
-export default StockGraphCarouselLoop;
+export default StockGraphCarousel;

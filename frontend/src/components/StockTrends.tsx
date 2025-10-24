@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import "../styles/StockTrends.css";
 
@@ -10,20 +9,23 @@ interface StockTransaction {
   change_percentage: number;
 }
 
-const stockData: StockTransaction[] = [
-  { is_active: true, stock: "MSFT", amount: 1200, change_percentage: 1.2 },
-  { is_active: true, stock: "AAPL", amount: 980, change_percentage: -0.8 },
-  { is_active: false, stock: "TSLA", amount: 1500, change_percentage: 2.3 },
-  { is_active: true, stock: "AMZN", amount: 2100, change_percentage: 0.9 },
-  { is_active: true, stock: "GOOG", amount: 1400, change_percentage: -1.5 },
-  { is_active: true, stock: "NVDA", amount: 1800, change_percentage: 1.8 },
-  { is_active: true, stock: "META", amount: 1300, change_percentage: 2.1 },
-  { is_active: true, stock: "NFLX", amount: 1100, change_percentage: -0.6 },
-];
+interface StockTrendsProps {
+  loading?: boolean;
+}
 
-export const StockCarousel: React.FC = () => {
+const StockTrends: React.FC<StockTrendsProps> = ({ loading = false }) => {
   const [offset, setOffset] = useState(0);
 
+  const stockData: StockTransaction[] = [
+    { is_active: true, stock: "MSFT", amount: 1200, change_percentage: 1.2 },
+    { is_active: true, stock: "AAPL", amount: 980, change_percentage: -0.8 },
+    { is_active: false, stock: "TSLA", amount: 1500, change_percentage: 2.3 },
+    { is_active: true, stock: "AMZN", amount: 2100, change_percentage: 0.9 },
+    { is_active: true, stock: "GOOG", amount: 1400, change_percentage: -1.5 },
+    { is_active: true, stock: "NVDA", amount: 1800, change_percentage: 1.8 },
+    { is_active: true, stock: "META", amount: 1300, change_percentage: 2.1 },
+    { is_active: true, stock: "NFLX", amount: 1100, change_percentage: -0.6 },
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -31,6 +33,14 @@ export const StockCarousel: React.FC = () => {
     }, 20);
     return () => clearInterval(interval);
   }, []);
+
+  if (loading) {
+    return (
+      <div className="carousel-container">
+        <div className="loading-spinner">Loading market trends...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="carousel-container">
@@ -74,4 +84,4 @@ export const StockCarousel: React.FC = () => {
   );
 };
 
-export default StockCarousel;
+export default StockTrends;
