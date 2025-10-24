@@ -1,13 +1,15 @@
-
 .profile-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 80%; 
-  margin: 40px auto;
-  padding: 30px;
-  background-color: transparent;  
-  border-radius: 12px;
+    padding: 2rem 5rem 2rem 7rem;
+  background-color: #f7f7f9;
+  border-radius: 16px;
+  transition: box-shadow 0.3s ease;
+}
+
+.profile-container:hover {
+  box-shadow: 0 6px 16px rgba(2, 22, 49, 0.12);
 }
 
 .profile-header {
@@ -18,16 +20,23 @@
 }
 
 .profile-picture {
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  background-color: black;  
-  color: white;
+  background-color: #021631;
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;  
-  margin-right: 30px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-right: 25px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-picture:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 4px #DFF1FB;
 }
 
 .profile-info {
@@ -39,22 +48,23 @@
 
 .profile-info h1 {
   margin: 0;
-  font-size: 1.8rem;
-  color: #333;
-  font-weight: bold;
+  font-size: 1.9rem;
+  color: #021631;
+  font-weight: 700;
 }
 
 .profile-info p {
-  color: #888;
-  font-size: 1.1rem;
+  color: #646C79;
+  font-size: 1.05rem;
+  margin-top: 5px;
 }
-
 
 .profile-form {
   width: 100%;
-  background-color: transparent;  
+  background-color: #FFFFFF;
   padding: 25px;
-  border-radius: 10px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px #EDEDF2;
 }
 
 .form-row {
@@ -71,21 +81,25 @@
 .form-group label {
   display: block;
   font-weight: 600;
-  color: #333;
-  margin-bottom: 5px;
+  color: #021631;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
 }
 
 .input {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
-  border: 1px solid #ddd;
+  width: 90%;
+  padding: 10px 12px;
+  border: 1px solid #EDEDF2;
   border-radius: 8px;
   font-size: 1rem;
+  background-color: #FFFFFF;
+  color: #021631;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .input:focus {
-  border: 1px solid #ff6600;
+  box-shadow: 0 0 0 3px rgba(39, 121, 245, 0.15);
+  outline: none;
 }
 
 .passwordContainer {
@@ -102,44 +116,71 @@
   border: none;
   cursor: pointer;
   font-size: 1.2rem;
+  color: #646C79;
   margin-left: 10px;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.submitButton {
-  width: auto;
-  padding: 12px 25px;
-  background-color: black; 
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  margin-top: 20px;
-  transition: background-color 0.3s;
-}
-
-.submitButton:hover {
-  background-color: #333;  
+.eyeButton:hover {
+  transform: scale(1.15);
 }
 
 .phoneContainer {
   margin-top: 10px;
 }
 
+.submitButton {
+  padding: 12px 28px;
+  background-color: #021631;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 25px;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 6px rgba(2, 22, 49, 0.15);
+}
+
+.submitButton:hover {
+  box-shadow: 0 5px 10px rgba(39, 121, 245, 0.25);
+  transform: translateY(-2px);
+}
 
 .backButton {
-  width: auto;
-  padding: 10px 20px;
-  background-color: #333;
-  color: white;
+  padding: 10px 22px;
+  background-color: #646C79;
+  color: #FFFFFF;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
   margin-top: 20px;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
 }
 
 .backButton:hover {
-  background-color: #444;
+  background-color: #828692;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+
+  .profile-picture {
+    width: 65px;
+    height: 65px;
+    font-size: 1.8rem;
+  }
+
+  .profile-info h1 {
+    font-size: 1.5rem;
+  }
 }
