@@ -1,3 +1,244 @@
-export default function Report() {
-  return <h1> --- Hola estoy en Report --</h1>;
+'use client';
+
+import { useEffect, useState } from 'react';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
+import './report.css';
+
+type TxType = 'buy' | 'sell';
+
+type TxRow = {
+  code?: string | null;
+  stock?: string;
+  transaction_type: TxType;
+  total_amount: number | string;
+  created_at: string | Date;
+  is_active: boolean;
+  quantity?: number;
+  unit_price?: number | string;
+};
+
+type PortfolioData = {
+  balance: number;
+  sales: number;
+  referral: number;
+  estimated: number;
+  transactions: TxRow[];
+};
+
+const mockPortfolios = ['Alpha', 'Beta', 'Gamma'];
+const mockProfile = 'analyst';
+
+export default function DashboardOverview() {
+  const [portfolio, setPortfolio] = useState<string>('Alpha');
+  const [dateRange, setDateRange] = useState({ from: '', to: '' });
+  const [data, setData] = useState<PortfolioData | null>(null);
+
+  useEffect(() => {
+    const fetchPortfolioData = async () => {
+      try {
+        const params = new URLSearchParams({
+          name: portfolio,
+          from: dateRange.from || '',
+          to: dateRange.to || '',
+        });
+
+        const response = await fetch(`/api/portfolio?${params.toString()}`);
+        if (!response.ok) throw new Error('Error al obtener los datos');
+
+        const result: PortfolioData = await response.json();
+        setData(result);
+      } catch (error) {
+        console.error('Error al conectar con el backend:', error);
+        setData(null);
+      }
+    };
+
+    fetchPortfolioData();
+  }, [portfolio, dateRange]);
+
+  const exportPDF = async () => {
+    const element = document.getElementById('dashboard-pdf');
+    if (!element || !data) return;
+
+    const canvas = await html2canvas(element, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'pt',
+      format: 'a4',
+    });
+
+    const margin = 40;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(18);
+    pdf.setTextColor('#021631');
+    pdf.text('Resumen del portafolio', margin, margin);
+
+    pdf.setFontSize(11);
+    pdf.setTextColor('#6b7280');
+    pdf.text(`Portafolio: ${portfolio}`, margin, margin + 20);
+    pdf.text(`Perfil: ${mockProfile}`, margin, margin + 35);
+    pdf.text(`Rango de fechas: ${dateRange.from || '—'} a ${dateRange.to || '—'}`, margin, margin + 50);
+
+    const imgWidth = pageWidth - margin * 2;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const imgY = margin + 70;
+
+    if (imgY + imgHeight > pageHeight) {
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
+    } else {
+      pdf.addImage(imgData, 'PNG', margin, imgY, imgWidth, imgHeight);
+    }
+
+    pdf.save(`resumen-${portfolio}.pdf`);
+  };
+
+  return (
+    <main className="panel">
+      <h1 className="panel__title">Resumen</h1>
+
+      <div className="dashboard__controls">
+        <label>
+          <strong>Seleccionar portafolio:</strong><br />
+          <select value={portfolio} onChange={e => setPortfolio(e.target.value)}>
+            {mockPortfolios.map(p => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          <strong>Desde:</strong><br />
+          <input
+            type="date"
+            value={dateRange.from}
+            onChange={e => setDateRange({ ...dateRange, from: e.target.value })}
+          />
+        </label>
+
+        <label>
+          <strong>Hasta:</strong><br />
+          <input
+            type="date"
+            value={dateRange.to}
+            onChange={e => setDateRange({ ...dateRange, to: e.target.value })}
+          />
+        </label>
+
+        <button className="alertBtn" onClick={exportPDF}>⬇ Exportar PDF</button>
+      </div>
+
+      <div id="dashboard-pdf" className="dashboard__wrap">
+        {data && (
+          <>
+            <section className="fc__grid">
+              <Card title="Balance" value={data.balance} warranty={48} positive />
+              <Card title="Ventas" value={data.sales} warranty={48} positive={false} />
+              <Card title="Referidos" value={data.referral} warranty={48} positive={false} />
+              <Card title="Estimado" value={data.estimated} warranty={48} positive />
+            </section>
+
+            <section className="tx__wrap">
+              <table className="tx__table">
+                <colgroup>
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                  <col />
+                </colgroup>
+
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Activo</th>
+                    <th>Fecha</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {data.transactions
+                    .filter(r => {
+                      const txDate = new Date(r.created_at).getTime();
+                      const fromDate = dateRange.from ? new Date(dateRange.from).getTime() : -Infinity;
+                      const toDate = dateRange.to ? new Date(dateRange.to).getTime() : Infinity;
+                      return txDate >= fromDate && txDate <= toDate;
+                    })
+                    .map((r, i) => {
+                      const pill = r.transaction_type === 'sell' ? 'S' : 'B';
+                      const pillClass = r.transaction_type === 'sell' ? 'is-sell' : 'is-buy';
+                      const gain = Number(r.total_amount) >= 0;
+
+                      return (
+                        <tr key={i}>
+                          <td>
+                            <span className={`tx__pill ${pillClass}`}>{pill}</span>
+                          </td>
+                          <td className="td-action-name">
+                            <div className="tx__asset">
+                              {r.stock && <div className="tx__assetTitle" title={r.stock}>{r.stock}</div>}
+                              {r.code && <div className="tx__assetCode" title={String(r.code)}>{r.code}</div>}
+                            </div>
+                          </td>
+                          <td>
+                            {new Date(r.created_at).toLocaleDateString('es-ES', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                          </td>
+                          <td>{r.quantity ?? '—'}</td>
+                          <td>Q.{r.unit_price != null ? r.unit_price : '—'}</td>
+                          <td className={gain ? 'is-gain' : 'is-loss'}>Q.{r.total_amount}</td>
+                          <td>
+                            <i className={`tx__dot ${r.is_active ? 'ok' : 'off'}`} />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </section>
+          </>
+        )}
+      </div>
+    </main>
+  );
+}
+
+function Card({
+  title,
+  value,
+  warranty,
+  positive = true,
+}: {
+  title: string;
+  value: number;
+  warranty: number;
+  positive?: boolean;
+}) {
+  return (
+    <div className="fc__card">
+      <div className="fc__title">{title.toUpperCase()}</div>
+      <div className="fc__value">${value.toLocaleString()}</div>
+      <div className={`fc__warranty ${positive ? 'green' : 'red'}`}>
+        {warranty}% garantía
+      </div>
+    </div>
+  );
 }

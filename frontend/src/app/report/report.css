@@ -1,0 +1,275 @@
+/* 🌐 Global layout */
+body {
+  background-color: #f4f6fa;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  color: #1f2937;
+}
+
+/* 🧭 Main panel */
+.panel {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.panel__title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #021631;
+}
+
+/* 🎛️ Top controls */
+.dashboard__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  background-color: #ffffff;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+}
+
+.dashboard__controls label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.dashboard__controls select,
+.dashboard__controls input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.4rem;
+  font-size: 0.9rem;
+  background-color: #f9fafb;
+  color: #111827;
+  margin-top: 0.25rem;
+}
+
+.alertBtn {
+  background-color: #021631;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 0.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.alertBtn:hover {
+  background-color: #4D4E8E;
+}
+
+/* 📦 Dashboard content */
+.dashboard__wrap {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  padding: 2rem;
+}
+
+/* 💳 Metric cards */
+.fc__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.fc__card {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 0 1px #e5e7eb;
+  padding: 1.25rem;
+  transition: box-shadow 0.2s ease;
+}
+
+.fc__card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.fc__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.fc__value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.fc__warranty {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.fc__warranty.green {
+  color: #10b981;
+}
+
+.fc__warranty.red {
+  color: #ef4444;
+}
+
+/* 📋 Table layout */
+.tx__wrap {
+  width: 100%;
+  overflow-x: auto;
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 0 1px #e5e7eb;
+}
+
+.tx__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.75rem;
+  font-size: 0.95rem;
+  table-layout: fixed;
+}
+
+.tx__table thead th {
+  color: #6b7280;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background-color: #f9fafb;
+}
+
+.tx__table tbody tr {
+  background: #ffffff;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tx__table tbody tr:hover {
+  background: #f3f4f6;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.tx__table td {
+  padding: 1rem;
+  vertical-align: middle;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Pills */
+.tx__pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border-radius: 9999px;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  color: #fff;
+}
+
+.tx__pill.is-buy {
+  background-color: #ef4444;
+}
+
+.tx__pill.is-sell {
+  background-color: #10b981;
+}
+
+/* Status dot */
+.tx__dot {
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  margin-left: 1rem;
+}
+
+.tx__dot.ok {
+  background-color: #10b981;
+}
+
+.tx__dot.off {
+  background-color: #ef4444;
+}
+
+/* Asset info */
+.tx__assetTitle {
+  font-weight: 600;
+  color: #111827;
+  font-size: 1rem;
+}
+
+.tx__assetCode {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.15rem;
+}
+
+/* Gains and losses */
+.is-gain {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.is-loss {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* 📱 Responsive tweaks */
+@media (max-width: 768px) {
+  .panel {
+    padding: 1rem;
+  }
+
+  .panel__title {
+    font-size: 1.5rem;
+  }
+
+  .dashboard__controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard__controls label {
+    width: 100%;
+  }
+
+  .alertBtn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .fc__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fc__card {
+    text-align: center;
+  }
+
+  .tx__table {
+    font-size: 0.85rem;
+  }
+
+  .tx__table thead th,
+  .tx__table td {
+    padding: 0.5rem;
+  }
+}
