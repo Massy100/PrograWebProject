@@ -1,5 +1,5 @@
 'use client';
-
+import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState, useRef } from 'react';
 import './access.css';
 
@@ -18,6 +18,7 @@ type HistoryItem = {
 };
 
 export default function RequestsTable() {
+  const { getAccessTokenSilently } = useAuth0();
   const [pending, setPending] = useState<UserRequest[]>([]);
   const [approved, setApproved] = useState<HistoryItem[]>([]);
   const [rejected, setRejected] = useState<HistoryItem[]>([]);
@@ -44,12 +45,13 @@ export default function RequestsTable() {
   // 🔌 GET /api/requests/pending → obtener solicitudes pendientes
   useEffect(() => {
     const fetchPendingRequests = async () => {
+      const token = await getAccessTokenSilently();
       try {
         const res = await fetch('http://localhost:8000/api/requests/pending', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -73,11 +75,12 @@ export default function RequestsTable() {
     };
 
     try {
+      const token = await getAccessTokenSilently();
       const res = await fetch('http://localhost:8000/api/requests/resolve', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(decision),
       });

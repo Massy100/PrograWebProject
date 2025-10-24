@@ -1,5 +1,5 @@
 'use client';
-
+import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 import '../styles/wallet.css';
 
@@ -9,6 +9,7 @@ type WalletProps = {
 };
 
 export default function Wallet({ open, onClose }: WalletProps) {
+  const { getAccessTokenSilently } = useAuth0();
   const [balance, setBalance] = useState<number | null>(null);
   const [banks, setBanks] = useState<{id: number; name:string; address: string; established_date: string}[]>([]);
   const [selectedBank, setSelectedBank] = useState<number | undefined>();
@@ -29,7 +30,7 @@ export default function Wallet({ open, onClose }: WalletProps) {
 
   (async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = await getAccessTokenSilently();
       const currentUser = localStorage.getItem('auth');
       const userId = currentUser ? JSON.parse(currentUser).id : null;
       const balanceRes = await fetch('http://localhost:8000/users/' + userId.toString(), {
@@ -84,11 +85,12 @@ export default function Wallet({ open, onClose }: WalletProps) {
     if (!pendingDeposit) return;
 
     try {
+      const token = await getAccessTokenSilently();
       const res = await fetch('http://localhost:8000/api/banks/fundstransfers/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(pendingDeposit),
         cache: 'no-store',

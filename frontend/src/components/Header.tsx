@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useSession } from '@/components/SessionProvider';
+import { useAuth0 } from '@auth0/auth0-react';
 import '../styles/header.css';
 import CartSidebar from './CartSidebar';
 
@@ -33,7 +33,7 @@ export default function Header({
   onSearch,
   onOpenLogin,
 }: HeaderProps) {
-  const { user } = useSession();
+  const { user, isAuthenticated, loginWithRedirect, logout } = useAuth0();
   const role = user?.role; // 'admin' | 'user' | undefined
   const isUser = role === 'user';
   const isAdmin = role === 'admin';

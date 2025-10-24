@@ -1,3 +1,4 @@
+/*
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
@@ -108,3 +109,4 @@ export function useSession() {
   if (!ctx) throw new Error("useSession debe usarse dentro de <SessionProvider>");
   return ctx;
 }
+*/

@@ -4,9 +4,13 @@ import StocksRecommendationsTable, { StockItem } from '@/components/stocksTable'
 import PopularStocksCard, { PopularStock } from '@/components/popularCardStocks';
 import './dashboardUser.css';
 import TransactionsTable from '@/components/tableTrasactions';
+import { useAuth0 } from '@auth0/auth0-react';
+import { useEffect } from 'react';
 
 export default function DashboardUser() {
   const router = useRouter();
+  const { getAccessTokenSilently } = useAuth0();
+
 
 
   const demoRows: StockItem[] = [
