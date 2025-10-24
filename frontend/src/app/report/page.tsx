@@ -35,36 +35,27 @@ export default function DashboardOverview() {
   const [data, setData] = useState<PortfolioData | null>(null);
 
   useEffect(() => {
-    const base = portfolio === 'Alpha' ? 3000 : portfolio === 'Beta' ? 4000 : 5000;
-    setData({
-      balance: base + 468.96,
-      sales: portfolio === 'Gamma' ? 120 : 82,
-      referral: 234,
-      estimated: base + 312.5,
-      transactions: [
-        {
-          stock: 'Banco Industrial',
-          code: 'BI001',
-          transaction_type: 'buy',
-          total_amount: 1200,
-          created_at: new Date('2025-10-01'),
-          is_active: true,
-          quantity: 10,
-          unit_price: 120,
-        },
-        {
-          stock: 'Grupo Financiero',
-          code: 'GF002',
-          transaction_type: 'sell',
-          total_amount: 800,
-          created_at: new Date('2025-10-20'),
-          is_active: false,
-          quantity: 5,
-          unit_price: 160,
-        },
-      ],
-    });
-  }, [portfolio]);
+    const fetchPortfolioData = async () => {
+      try {
+        const params = new URLSearchParams({
+          name: portfolio,
+          from: dateRange.from || '',
+          to: dateRange.to || '',
+        });
+
+        const response = await fetch(`/api/portfolio?${params.toString()}`);
+        if (!response.ok) throw new Error('Error al obtener los datos');
+
+        const result: PortfolioData = await response.json();
+        setData(result);
+      } catch (error) {
+        console.error('Error al conectar con el backend:', error);
+        setData(null);
+      }
+    };
+
+    fetchPortfolioData();
+  }, [portfolio, dateRange]);
 
   const exportPDF = async () => {
     const element = document.getElementById('dashboard-pdf');
@@ -89,13 +80,13 @@ export default function DashboardOverview() {
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(18);
     pdf.setTextColor('#021631');
-    pdf.text('Portfolio Overview', margin, margin);
+    pdf.text('Resumen del portafolio', margin, margin);
 
     pdf.setFontSize(11);
     pdf.setTextColor('#6b7280');
-    pdf.text(`Portfolio: ${portfolio}`, margin, margin + 20);
-    pdf.text(`Profile: ${mockProfile}`, margin, margin + 35);
-    pdf.text(`Date range: ${dateRange.from || '—'} to ${dateRange.to || '—'}`, margin, margin + 50);
+    pdf.text(`Portafolio: ${portfolio}`, margin, margin + 20);
+    pdf.text(`Perfil: ${mockProfile}`, margin, margin + 35);
+    pdf.text(`Rango de fechas: ${dateRange.from || '—'} a ${dateRange.to || '—'}`, margin, margin + 50);
 
     const imgWidth = pageWidth - margin * 2;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -108,16 +99,16 @@ export default function DashboardOverview() {
       pdf.addImage(imgData, 'PNG', margin, imgY, imgWidth, imgHeight);
     }
 
-    pdf.save(`overview-${portfolio}.pdf`);
+    pdf.save(`resumen-${portfolio}.pdf`);
   };
 
   return (
     <main className="panel">
-      <h1 className="panel__title">Overview</h1>
+      <h1 className="panel__title">Resumen</h1>
 
       <div className="dashboard__controls">
         <label>
-          <strong>Select portfolio:</strong><br />
+          <strong>Seleccionar portafolio:</strong><br />
           <select value={portfolio} onChange={e => setPortfolio(e.target.value)}>
             {mockPortfolios.map(p => (
               <option key={p} value={p}>{p}</option>
@@ -126,7 +117,7 @@ export default function DashboardOverview() {
         </label>
 
         <label>
-          <strong>From:</strong><br />
+          <strong>Desde:</strong><br />
           <input
             type="date"
             value={dateRange.from}
@@ -135,7 +126,7 @@ export default function DashboardOverview() {
         </label>
 
         <label>
-          <strong>To:</strong><br />
+          <strong>Hasta:</strong><br />
           <input
             type="date"
             value={dateRange.to}
@@ -143,7 +134,7 @@ export default function DashboardOverview() {
           />
         </label>
 
-        <button className="alertBtn" onClick={exportPDF}>⬇ Export PDF</button>
+        <button className="alertBtn" onClick={exportPDF}>⬇ Exportar PDF</button>
       </div>
 
       <div id="dashboard-pdf" className="dashboard__wrap">
@@ -151,9 +142,9 @@ export default function DashboardOverview() {
           <>
             <section className="fc__grid">
               <Card title="Balance" value={data.balance} warranty={48} positive />
-              <Card title="Sales" value={data.sales} warranty={48} positive={false} />
-              <Card title="Referral" value={data.referral} warranty={48} positive={false} />
-              <Card title="Estimated" value={data.estimated} warranty={48} positive />
+              <Card title="Ventas" value={data.sales} warranty={48} positive={false} />
+              <Card title="Referidos" value={data.referral} warranty={48} positive={false} />
+              <Card title="Estimado" value={data.estimated} warranty={48} positive />
             </section>
 
             <section className="tx__wrap">
@@ -170,13 +161,13 @@ export default function DashboardOverview() {
 
                 <thead>
                   <tr>
-                    <th>Type</th>
-                    <th>Asset</th>
-                    <th>Date</th>
-                    <th>Quantity</th>
-                    <th>Unit Price</th>
+                    <th>Tipo</th>
+                    <th>Activo</th>
+                    <th>Fecha</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
                     <th>Total</th>
-                    <th>Status</th>
+                    <th>Estado</th>
                   </tr>
                 </thead>
 
@@ -205,7 +196,7 @@ export default function DashboardOverview() {
                             </div>
                           </td>
                           <td>
-                            {new Date(r.created_at).toLocaleDateString(undefined, {
+                            {new Date(r.created_at).toLocaleDateString('es-ES', {
                               year: 'numeric',
                               month: 'short',
                               day: 'numeric',
@@ -246,7 +237,7 @@ function Card({
       <div className="fc__title">{title.toUpperCase()}</div>
       <div className="fc__value">${value.toLocaleString()}</div>
       <div className={`fc__warranty ${positive ? 'green' : 'red'}`}>
-        {warranty}% warranty
+        {warranty}% garantía
       </div>
     </div>
   );
