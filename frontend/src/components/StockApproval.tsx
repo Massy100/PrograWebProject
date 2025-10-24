@@ -105,11 +105,6 @@ export default function StockManager() {
   
   return (
     <section className="approval-container">
-      <h2 className="approval-title">Stock Management</h2>
-      <p className="approval-subtitle">
-        Manage pending approvals and system stocks
-      </p>
-
       <div className="tabs-container">
         <button
           className={`tab-btn ${tab === "pending" ? "active" : ""}`}

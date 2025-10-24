@@ -5,3 +5,19 @@
     padding: 0 2rem 2rem 4.5rem;
     background-color: #f7f7f9;
 }
+
+.stocks-approval-div .approval-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #021631;
+  margin-top: 1.2rem;
+  margin-left: 2rem;
+  margin-bottom: 0.3rem;
+}
+
+.stocks-approval-div .approval-subtitle {
+  color: #646c79;
+  font-size: 1rem;
+    margin-left: 2rem;
+  margin-bottom: 1.5rem;
+}
