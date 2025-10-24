@@ -7,27 +7,56 @@ from ..services.alpha_vantage_service import AlphaVantageService
 
 @api_view(['GET'])
 def get_real_stocks_data(request):
-    """Obtener datos reales de Alpha Vantage para múltiples stocks"""
+    """Get real stock data from database (fast)"""
     symbols_param = request.query_params.get('symbols', '')
     
     if symbols_param:
         symbols = symbols_param.split(',')
+        stocks = Stock.objects.filter(symbol__in=symbols, is_active=True)
     else:
-        # Stocks por defecto basados en tu frontend
-        symbols = ['NIO', 'BP', 'PEN', 'MPWR']
+        # Default stocks - now from database
+        stocks = Stock.objects.filter(is_active=True)
     
-    stocks_data = get_multiple_stocks_real_data(symbols)
-    return Response(stocks_data)
+    # Use the serializer with data from database
+    serializer = StockSerializer(stocks, many=True)
+    
+    # Add timestamp to show data freshness
+    response_data = {
+        'data': serializer.data,
+        'last_updated': timezone.now().isoformat(),
+        'source': 'database'
+    }
+    
+    return Response(response_data)
 
 @api_view(['GET'])
 def get_stock_real_time_detail(request, symbol):
-    """Obtener datos en tiempo real de un stock específico"""
-    stock_data = get_real_time_stock_data(symbol)
-    
-    if 'error' in stock_data:
-        return Response({"error": stock_data['error']}, status=400)
-    
-    return Response(stock_data)
+    """Get real-time data for specific stock from database"""
+    try:
+        stock = Stock.objects.get(symbol=symbol, is_active=True)
+        serializer = StockSerializer(stock)
+        
+        response_data = {
+            'symbol': stock.symbol,
+            'price': stock.last_price,
+            'change_percent': stock.variation,
+            'last_updated': stock.updated_at.isoformat() if stock.updated_at else None,
+            'source': 'database'
+        }
+        
+        return Response(response_data)
+        
+    except Stock.DoesNotExist:
+        # Fallback to API if stock not in database
+        from ..services.alpha_vantage_service import AlphaVantageService
+        service = AlphaVantageService()
+        api_data = service.get_stock_quote(symbol)
+        
+        if 'error' in api_data:
+            return Response({"error": api_data['error']}, status=400)
+        
+        api_data['source'] = 'api'
+        return Response(api_data)
 
 @api_view(['GET'])
 def search_stocks(request):

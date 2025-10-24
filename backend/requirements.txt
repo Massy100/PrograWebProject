@@ -25,3 +25,4 @@ urllib3==2.5.0
 alpha-vantage==2.3.1
 twilio==9.4.0
 requests==2.32.3  
+django-apscheduler==0.6.3
