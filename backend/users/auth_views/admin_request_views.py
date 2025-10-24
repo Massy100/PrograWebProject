@@ -35,8 +35,8 @@ class AdminPermsReqViewSet(viewsets.ModelViewSet):
     return JsonResponse(serializer.data, safe=False)
 
   @admin_required
-  @action(detail=True, methods=['post'])
-  def approve(self, request, pk=None):
+  @action(detail=True, methods=['post'], url_path='approve')
+  def approve(self, request):
     admin_request = self.get_object()
     admin_request.status = AdminPermissionsRequest.STATUS_APPROVED
     admin_request.reviewer = request.user
@@ -51,7 +51,7 @@ class AdminPermsReqViewSet(viewsets.ModelViewSet):
   
   @admin_required
   @action(detail=True, methods=['post'])
-  def reject(self, request, pk=None):
+  def reject(self, request):
     admin_request = self.get_object()
     admin_request.status = AdminPermissionsRequest.STATUS_REJECTED
     admin_request.reviewer = request.user
@@ -69,6 +69,3 @@ class AdminPermsReqViewSet(viewsets.ModelViewSet):
     admin_request = AdminPermissionsRequest.objects.create(user=user)
     serializer = self.get_serializer(admin_request)
     return JsonResponse(serializer.data, status=201)
-
-    
-  

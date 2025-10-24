@@ -33,9 +33,11 @@ export default function Header({
   onSearch,
   onOpenLogin,
 }: HeaderProps) {
-  const { user } = useAuth0();
+  const jsonAuth = localStorage.getItem("auth");
+  const user = JSON.parse(jsonAuth!);
+
   const role = user?.role; // 'admin' | 'user' | undefined
-  const isUser = role === 'user';
+  const isUser = role === 'client';
   const isAdmin = role === 'admin';
   const isLoggedIn = Boolean(user);
 

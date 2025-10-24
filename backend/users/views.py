@@ -10,7 +10,7 @@ from django.views import View
 from django.utils import timezone
 import threading
 
-from .models import User, ClientProfile, AdminProfile
+from .models import User, ClientProfile, AdminProfile, AdminPermissionsRequest
 from .serializers import UserListSerializer, UserDetailSerializer
 from .permissions import client_required, admin_required
 from .mixins import ClientRequiredMixin, AdminRequiredMixin
@@ -365,6 +365,16 @@ class UserViewSet(viewsets.ModelViewSet):
             'created': created,
             'user': serializer.data
         })
+    
+    def partial_update(self, request, *args, **kwargs):
+        response = super().partial_update(request, *args, **kwargs)
+        instance = self.get_object()
+
+        AdminPermissionsRequest.objects.create(
+            user=instance            
+        )
+
+        return response
 
 @client_required
 def client_portfolio(request):
