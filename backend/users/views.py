@@ -7,17 +7,43 @@ from rest_framework.permissions import AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
 from django.views import View
+from django.utils import timezone
+import threading
 
-from .models import User
+from .models import User, ClientProfile, AdminProfile
 from .serializers import UserListSerializer, UserDetailSerializer
 from .permissions import client_required, admin_required
 from .mixins import ClientRequiredMixin, AdminRequiredMixin
+
+try:
+    from .services.email_service import EmailService
+except ImportError:
+    class EmailService:
+        @staticmethod
+        def send_welcome_email(user_email, username):
+            print(f"Would send welcome email to {user_email} for user {username}")
+            return True
+
+class EmailThread(threading.Thread):
+    """
+    Thread for sending emails asynchronously to avoid blocking the response
+    """
+    def __init__(self, user_email, username):
+        self.user_email = user_email
+        self.username = username
+        threading.Thread.__init__(self)
+
+    def run(self):
+        try:
+            EmailService.send_welcome_email(self.user_email, self.username)
+        except Exception as e:
+            print(f"Error sending welcome email: {str(e)}")
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().select_related('admin_profile', 'client_profile')      
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_type', 'status', 'verified', 'is_active']
-    search_fields = ['username', 'email', 'first_name', 'last_name']
+    search_fields = ['username', 'email', 'full_name']
     ordering_fields = ['created_at', 'date_joined', 'username']
     ordering = ['-created_at']
     permission_classes = [AllowAny]
@@ -122,8 +148,7 @@ class UserViewSet(viewsets.ModelViewSet):
                         'email': user.email,
                         'user_type': user.user_type,
                         'verified': user.verified,
-                        'first_name': user.first_name,
-                        'last_name': user.last_name
+                        'full_name': user.full_name
                     }
                 }, status=status.HTTP_200_OK)
             else:
@@ -253,12 +278,20 @@ class UserViewSet(viewsets.ModelViewSet):
             ClientProfile.objects.create(user=user)
             
             print(f"User registered: {user.username} ({user.email})")
+
+            # Send welcome email asynchronously
+            try:
+                EmailThread(user.email, user.username).start()
+                print(f"Welcome email process started for {user.email}")
+            except Exception as e:
+                print(f"Failed to start email thread: {str(e)}")
+                # Don't fail the registration if email fails
             
             from django.contrib.auth import login
             login(request, user)
             
             return Response({
-                'message': 'Register successful',
+                'message': 'Register successful. Welcome email sent!',
                 'user': {
                     'id': user.id,
                     'username': user.username,
@@ -290,6 +323,48 @@ class UserViewSet(viewsets.ModelViewSet):
         )
         
         return response
+    
+    @action(detail=False, methods=['POST'], url_path="sync")
+    def sync_user(self, request):
+        payload = getattr(request, 'auth0_payload', None)
+        if not payload:
+            return Response({'error': 'Invalid or missing token'}, status=401)
+
+        req = request.data
+        auth0_id = req.get("user_id")
+        email = req.get("email")
+        fullname = req.get("name")
+        created_date = req.get("created_at")
+        updated_date = req.get("updated_at")
+        username = req.get("nickname")
+        auth0_id = req.get("sub")
+        last_login = timezone.now()
+
+        user, created = User.objects.get_or_create(
+            auth0_id=auth0_id,
+            defaults={'email': email, 
+                      'full_name': fullname, 
+                      'created_at': created_date,
+                      'modified_at': updated_date,
+                      'last_login': last_login,
+                      'username': username,
+                      'auth0_id': auth0_id 
+                      }
+        )
+
+        serializer = UserDetailSerializer(user)     
+
+        if created:
+            ClientProfile.objects.create(
+                user=user,
+                balance_available=0,
+                balance_blocked=0                          
+                )
+
+        return Response({
+            'created': created,
+            'user': serializer.data
+        })
 
 @client_required
 def client_portfolio(request):
