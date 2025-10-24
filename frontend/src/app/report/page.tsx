@@ -5,7 +5,6 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import './report.css';
 
-
 type TxType = 'buy' | 'sell';
 
 type TxRow = {
@@ -71,21 +70,50 @@ export default function DashboardOverview() {
     const element = document.getElementById('dashboard-pdf');
     if (!element || !data) return;
 
-    const canvas = await html2canvas(element);
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF();
+    const canvas = await html2canvas(element, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+    });
 
-    pdf.setFontSize(12);
-    pdf.text(`Portfolio: ${portfolio}`, 10, 10);
-    pdf.text(`Profile: ${mockProfile}`, 10, 16);
-    pdf.text(`Dates: ${dateRange.from || '—'} to ${dateRange.to || '—'}`, 10, 22);
-    pdf.addImage(imgData, 'PNG', 10, 30, 190, 0);
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'pt',
+      format: 'a4',
+    });
+
+    const margin = 40;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(18);
+    pdf.setTextColor('#021631');
+    pdf.text('Portfolio Overview', margin, margin);
+
+    pdf.setFontSize(11);
+    pdf.setTextColor('#6b7280');
+    pdf.text(`Portfolio: ${portfolio}`, margin, margin + 20);
+    pdf.text(`Profile: ${mockProfile}`, margin, margin + 35);
+    pdf.text(`Date range: ${dateRange.from || '—'} to ${dateRange.to || '—'}`, margin, margin + 50);
+
+    const imgWidth = pageWidth - margin * 2;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const imgY = margin + 70;
+
+    if (imgY + imgHeight > pageHeight) {
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
+    } else {
+      pdf.addImage(imgData, 'PNG', margin, imgY, imgWidth, imgHeight);
+    }
+
     pdf.save(`overview-${portfolio}.pdf`);
   };
 
   return (
     <main className="panel">
-      <h1 className="panel__title">📊 Overview</h1>
+      <h1 className="panel__title">Overview</h1>
 
       <div className="dashboard__controls">
         <label>
