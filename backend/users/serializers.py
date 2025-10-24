@@ -29,7 +29,6 @@ class UserListSerializer(serializers.ModelSerializer):
             'status',
             'verified',
             'is_active',
-            'date_joined',
             'created_at',
             'balance_available',
             'balance_blocked',

@@ -1,24 +1,56 @@
 "use client";
 
+import { useAuth0 } from "@auth0/auth0-react";
 import { useState } from "react";
 import "../styles/CompleteUserRegister.css";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
-export default function CompleteUserRegister({ onClose }: { onClose: () => void }) {
+interface CompleteUserRegisterProps {
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+export default function CompleteUserRegister({ onClose, onSuccess }: CompleteUserRegisterProps) {
+  const { getAccessTokenSilently } = useAuth0();
   const [isOpen, setIsOpen] = useState(true);
   const [hasReferral, setHasReferral] = useState(false);
   const [referralError, setReferralError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [phoneFull, setPhoneFull] = useState("");
-
   const [formData, setFormData] = useState({
     full_name: "",
     username: "",
-    referred_code: "",
+    used_referred_code: "",
+    is_completed: true,
+    phone: ""
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const callApiWithData = async (strAuth: string, dataToSend: typeof formData) => {
+    try {
+      const auth = JSON.parse(strAuth);
+      const token = await getAccessTokenSilently();
+
+      const response = await fetch(`http://localhost:8000/api/users/${auth.id}/`, {
+        method: "PATCH",
+        body: JSON.stringify(dataToSend),
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+
+      const data = await response.json();
+      if (!data) {
+        throw new Error("No se obtuvo respuesta del backend.");
+      }
+      console.log("User updated:", data);
+    } catch (e) {
+      console.error("Error updating user:", e);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!formData.full_name.trim()) {
@@ -36,12 +68,22 @@ export default function CompleteUserRegister({ onClose }: { onClose: () => void 
       return;
     }
 
+    const updatedFormData = { ...formData, phone: phoneFull };
+
+    const strAuth = localStorage.getItem("auth");
+    if (strAuth) {
+      await callApiWithData(strAuth, updatedFormData);
+      onSuccess();
+    } else {
+      throw new Error("User data was not fetched from storage.");
+    }
+
     setPhoneError("");
     setReferralError("");
     setIsOpen(false);
   };
 
-  const handleClose = () =>  {
+  const handleClose = () => {
     setIsOpen(false);
     onClose();
   };
@@ -56,8 +98,10 @@ export default function CompleteUserRegister({ onClose }: { onClose: () => void 
         </button>
 
         <h2 className="modalTitle">Complete Your Registration</h2>
-        <p>Completing your registration automatically sends an access request to our administration team. 
-          Once it gets accepted you can start managing your stocks. </p>
+        <p>
+          Completing your registration automatically sends an access request to our administration
+          team. Once it gets accepted you can start managing your stocks.
+        </p>
 
         <form className="form" onSubmit={handleSubmit}>
           <input
@@ -82,11 +126,13 @@ export default function CompleteUserRegister({ onClose }: { onClose: () => void 
 
           <div className="phoneContainer">
             <PhoneInput
-              country={"gt"} 
+              country={"gt"}
               value={phoneFull}
-              onChange={(value) => setPhoneFull(value)}
-              inputClass="input"
+              onChange={(value, data, event, formattedValue) => {
+                setPhoneFull(formattedValue || value);
+              }}
               enableSearch
+              inputClass="input"
               placeholder="Phone number"
             />
           </div>
@@ -108,9 +154,9 @@ export default function CompleteUserRegister({ onClose }: { onClose: () => void 
                 type="text"
                 placeholder="Referral code"
                 className="input referralInput"
-                value={formData.referred_code}
+                value={formData.used_referred_code}
                 onChange={(e) =>
-                  setFormData({ ...formData, referred_code: e.target.value })
+                  setFormData({ ...formData, used_referred_code: e.target.value })
                 }
               />
             </div>

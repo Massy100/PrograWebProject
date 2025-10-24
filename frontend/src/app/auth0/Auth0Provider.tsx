@@ -14,6 +14,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <Auth0Provider
           domain={dom || ""}
           clientId={clientId || ""}
+          useRefreshTokens={true}
+          cacheLocation="localstorage"
           authorizationParams={{
             redirect_uri: "http://localhost:3000/",
             audience: apiIdentifier,
