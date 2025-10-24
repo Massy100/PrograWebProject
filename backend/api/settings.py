@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'django_apscheduler',
     'users',
     'stocks',
     'portfolio',
@@ -169,14 +170,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
-
-import os
-from dotenv import load_dotenv
-
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+ALPHA_VANTAGE_API_KEY = 'SGM4RNK305HEN7ZM'
 
 # SendGrid Configuration
 SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
@@ -194,3 +188,10 @@ DEFAULT_FROM_EMAIL = SENDGRID_FROM_EMAIL
 # Para desarrollo - ver emails en consola
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
