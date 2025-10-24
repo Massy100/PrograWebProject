@@ -52,6 +52,19 @@
   color:#232733;            
 }
 
+.log-buttons {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  
+  .see-more-btn {
+    width: 40%;
+    margin: 2px;
+  }
+}
+
+
+
 
 
 @media (max-width:900px){
