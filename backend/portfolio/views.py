@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import Portfolio, Investment
-from serializers import PortfolioCreateSerializer, PortfolioSerializer, InvestmentSerializer
+from .serializers import PortfolioCreateSerializer, PortfolioSerializer, InvestmentSerializer
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -19,3 +19,10 @@ class PortfolioViewSet(viewsets.ModelViewSet):
       return PortfolioCreateSerializer
     return PortfolioSerializer
 
+class InvestmentViewSet(viewsets.ModelViewSet):
+  queryset = Investment.objects.all
+  serializer_class = InvestmentSerializer
+  filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+  filterset_fields = ['portfolio', 'stock', 'purchased_at']
+  ordering_fields = ['average_price']
+  order = ['-average_price']
