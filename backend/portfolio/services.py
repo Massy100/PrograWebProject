@@ -1,5 +1,6 @@
 from django.db.models import Sum, F, ExpressionWrapper, DecimalField
-from .models import Portfolio, Investment
+from .models import PortfolioValueUpdates
+from collections import defaultdict
 
 class PortfolioService:
     @staticmethod
@@ -28,4 +29,18 @@ class PortfolioService:
             portfolio.average_price = 0
             
         portfolio.save()
-        
+        PortfolioValueUpdates.objects.create(
+            portfolio=portfolio,
+            value=portfolio.current_value
+        )
+
+    def format_portfolio_values(data):
+        grouped = defaultdict(lambda: {"portfolio_name": "", "values": []})
+        for entry in data:
+            pid = entry["portfolio_id"]
+            grouped[pid]["portfolio_name"] = entry["portfolio__name"]
+            grouped[pid]["values"].append({
+                "month": entry["month"].strftime("%Y-%m"),
+                "total_value": float(entry["total_value"]),
+            })
+        return [{"portfolio_id": pid, **info} for pid, info in grouped.items()]  

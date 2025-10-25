@@ -7,6 +7,7 @@ from ..serializers import TransactionSerializer
 from users.models import ClientProfile
 from stocks.models import Stock
 from portfolio.models import Portfolio, Investment
+from portfolio.services import PortfolioService
 
 
 class TransactionService:
@@ -70,6 +71,8 @@ class TransactionService:
             )
 
             investment.save()
+            updater = PortfolioService()
+            updater.update_portfolio_values(portfolio=portfolio)
 
         client.balance_available -= Decimal(self.total_amount)
         client.save()
@@ -121,6 +124,8 @@ class TransactionService:
                 investment.is_active = False
 
             investment.save()
+            updater = PortfolioService()
+            updater.update_portfolio_values(portfolio=portfolio)
 
         client.balance_available += Decimal(self.total_amount)
         client.save()

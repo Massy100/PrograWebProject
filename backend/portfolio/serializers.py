@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from stocks.serializers import StockSerializer
-from .models import Portfolio, Investment
+from .models import Portfolio, Investment, PortfolioValueUpdates
 
 class InvestmentSerializer(serializers.ModelSerializer):
     stock = StockSerializer(read_only=True)
@@ -56,3 +56,8 @@ class PortfolioCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Portfolio
         fields = ['name', 'client']
+
+class PortfolioUpdatesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PortfolioValueUpdates
+        fields = '__all__'
