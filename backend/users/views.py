@@ -17,7 +17,7 @@ from .models import User, ClientProfile, AdminPermissionsRequest
 from .serializers import UserListSerializer, UserDetailSerializer
 from .permissions import client_required, admin_required
 from .mixins import ClientRequiredMixin, AdminRequiredMixin
-from .services.mgm_token_service import get_management_token
+from .services.mgm_token_service import ManagementService
 
 try:
     from .services.email_service import EmailService
@@ -333,9 +333,11 @@ class UserViewSet(viewsets.ModelViewSet):
         payload = getattr(request, 'auth0_payload', None)
         if not payload:
             return Response({'error': 'Invalid or missing token'}, status=401)
+        
+        roles = payload.get('https://api.stockstraderapp.com/roles', [])
+        user_type = 'admin' if 'admin' in roles else 'client'
 
         req = request.data
-        auth0_id = req.get("user_id")
         email = req.get("email")
         fullname = req.get("name")
         created_date = req.get("created_at")
@@ -352,18 +354,16 @@ class UserViewSet(viewsets.ModelViewSet):
                       'modified_at': updated_date,
                       'last_login': last_login,
                       'username': username,
-                      'auth0_id': auth0_id 
+                      'auth0_id': auth0_id,
+                      'user_type': user_type
                       }
         )
 
         serializer = UserDetailSerializer(user)     
 
-        if created:
-            ClientProfile.objects.create(
-                user=user,
-                balance_available=0,
-                balance_blocked=0                          
-                )
+        if not created and user.user_type != user_type:
+            user.user_type = user_type
+            user.save()
 
         return Response({
             'created': created,
@@ -378,7 +378,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({"error": "Unauthorized"}, status=403)
 
         data = request.data
-        token = get_management_token()
+        token = ManagementService.get_management_token()
 
         url = f"https://{settings.AUTH0_DOMAIN}/api/v2/users"
         payload = {
@@ -393,6 +393,11 @@ class UserViewSet(viewsets.ModelViewSet):
         res = requests.post(url, json=payload, headers=headers)
         res.raise_for_status()
         auth0_user = res.json()
+
+        ManagementService.auth0_assign_role(
+            auth0_user['user_id'], 
+            settings.AUTH0_ADMIN_ROLE_ID
+        )
 
         User.objects.create(
             username=data.get["username"],

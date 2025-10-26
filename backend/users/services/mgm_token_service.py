@@ -13,3 +13,20 @@ class ManagementService:
       res = requests.post(url, json=payload)
       res.raise_for_status()
       return res.json()["access_token"]
+
+  def auth0_get_roles(self):
+    token = self.get_management_token()
+    url = f"https://{settings.AUTH0_DOMAIN}/api/v2/roles"
+    headers = {"Authorization": f"Bearer {token}"}
+    r = requests.get(url, headers=headers, timeout=10)
+    r.raise_for_status()
+    return r.json()  
+  
+  def auth0_assign_role(self, user_id, role_id):
+    token = self.get_management_token()
+    url = f"https://{settings.AUTH0_DOMAIN}/api/v2/users/{user_id}/roles"
+    headers = {"Authorization": f"Bearer {token}"}
+    payload = {"roles": [role_id]}
+    r = requests.post(url, json=payload, headers=headers, timeout=10)
+    r.raise_for_status()
+
