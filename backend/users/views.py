@@ -3,17 +3,21 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets, filters, renderers
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
 from django.views import View
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password
 import threading
+import requests
+from django.conf import settings
 
-from .models import User, ClientProfile, AdminProfile, AdminPermissionsRequest
+from .models import User, ClientProfile, AdminPermissionsRequest
 from .serializers import UserListSerializer, UserDetailSerializer
 from .permissions import client_required, admin_required
 from .mixins import ClientRequiredMixin, AdminRequiredMixin
+from .services.mgm_token_service import get_management_token
 
 try:
     from .services.email_service import EmailService
@@ -366,6 +370,45 @@ class UserViewSet(viewsets.ModelViewSet):
             'user': serializer.data
         })
     
+    @action(detail=False, methods='POST', url_path='create-admin')
+    @permission_classes([IsAuthenticated])
+    def create_admin(request):
+        current_user = request.user
+        if current_user.user_type != 'admin':
+            return Response({"error": "Unauthorized"}, status=403)
+
+        data = request.data
+        token = get_management_token()
+
+        url = f"https://{settings.AUTH0_DOMAIN}/api/v2/users"
+        payload = {
+            "email": data["email"],
+            "password": data["password"],
+            "connection": "Username-Password-Authentication",  
+            "given_name": data.get("full_name"),
+            "family_name": data.get("full_name")
+        }
+
+        headers = {"Authorization": f"Bearer {token}"}
+        res = requests.post(url, json=payload, headers=headers)
+        res.raise_for_status()
+        auth0_user = res.json()
+
+        User.objects.create(
+            username=data.get["username"],
+            email=data["email"],
+            full_name=data.get("full_name", ""),
+            phone=data.get("phone", ""),
+            user_type='admin',
+            password=make_password(data["password"]),
+            auth0_id=auth0_user['user_id'],
+            verified=True,
+            is_staff=True,
+            is_completed=True
+        )
+
+        return Response({"message": "Admin created successfully", "auth0_id": auth0_user["user_id"]})
+    
     def partial_update(self, request, *args, **kwargs):
         response = super().partial_update(request, *args, **kwargs)
         instance = self.get_object()
@@ -375,6 +418,7 @@ class UserViewSet(viewsets.ModelViewSet):
         )
 
         return response
+    
 
 @client_required
 def client_portfolio(request):
