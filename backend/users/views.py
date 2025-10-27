@@ -58,6 +58,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserListSerializer
     
     def get_permissions(self):
+        permission_classes = []
         if self.action == 'retrieve':
             permission_classes = [IsAdminRole, IsClientRole]
         elif self.action == 'destroy':
@@ -97,19 +98,15 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
-    @action(detail=False, methods='POST', url_path='sync_user', 
-            permission_classes=[IsClientRole, IsAdminRole])
-    
     @action(detail=False, methods=['POST'], url_path="sync")
     def sync_user(self, request):
         payload = getattr(request, 'auth0_payload', None)
         if not payload:
             return Response({'error': 'Invalid or missing token'}, status=401)
         
-        roles = payload.get('https://api.stockstraderapp.com/roles', [])
-        user_type = 'admin' if 'admin' in roles else 'client'
 
         req = request.data
+        print(req)
         email = req.get("email")
         fullname = req.get("name")
         created_date = req.get("created_at")
@@ -117,6 +114,10 @@ class UserViewSet(viewsets.ModelViewSet):
         username = req.get("nickname")
         auth0_id = req.get("sub")
         last_login = timezone.now()
+        service = ManagementService()
+        roles = service.auth0_get_roles(auth0_id)
+        user_type = roles[0]['name']
+        print(roles)
 
         user, created = User.objects.get_or_create(
             auth0_id=auth0_id,
@@ -142,32 +143,42 @@ class UserViewSet(viewsets.ModelViewSet):
             'user': serializer.data
         })
     
-    @action(detail=False, methods='POST', url_path='create-admin', 
-            permission_classes=[IsAdminRole])
-    
-    def create_admin(request):
+    @action(detail=False, methods=['POST'], url_path='create-admin')
+    def create_admin(self, request):
         current_user = request.user
-        if current_user.user_type != 'admin':
-            return Response({"error": "Unauthorized"}, status=403)
+        service = ManagementService()
 
         data = request.data
-        token = ManagementService.get_management_token()
+        token = service.get_management_token()
 
+        print(data)
         url = f"https://{settings.AUTH0_DOMAIN}/api/v2/users"
         payload = {
             "email": data["email"],
-            "password": data["password"],
-            "connection": "Username-Password-Authentication",  
+            "phone_number": data.get("phone", ""),
+            "user_metadata": {},
+            "blocked": False,
+            "email_verified": False,
+            "phone_verified": False,
+            "app_metadata": {},
             "given_name": data.get("full_name"),
-            "family_name": data.get("full_name")
+            "family_name": data.get("full_name"),
+            "name": data.get("full_name"),
+            "nickname": data.get("username"),
+            "picture": "https://example.com/avatar.png",
+            "connection": "Username-Password-Authentication",  
+            "password": data["password"],
+            "verify_email": False,
+            "username": data["username"]
         }
 
-        headers = {"Authorization": f"Bearer {token}"}
+        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
+        
         res = requests.post(url, json=payload, headers=headers)
         res.raise_for_status()
         auth0_user = res.json()
 
-        ManagementService.auth0_assign_role(
+        service.auth0_assign_role(
             auth0_user['user_id'], 
             settings.AUTH0_ADMIN_ROLE_ID
         )

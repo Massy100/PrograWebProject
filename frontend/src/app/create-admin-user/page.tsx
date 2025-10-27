@@ -6,6 +6,8 @@ import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { useRouter } from 'next/navigation'; 
 import '../../styles/createadminusers.css';
+import { useAuth0 } from '@auth0/auth0-react';
+import { parsePhoneNumberFromString, formatNumber, E164Number  } from 'libphonenumber-js';
 
 type LoginProps = {
   open: boolean;
@@ -13,16 +15,26 @@ type LoginProps = {
   onSuccess?: (role: "admin" | "user") => void;
 };
 
+const convertToE164 = (rawNumber: string, countryCode: string): string | undefined => {
+  const parsed = parsePhoneNumberFromString(rawNumber);
+  if (parsed?.isValid()) {
+    return parsed.format('E.164');
+  }
+  return undefined;
+};
+
 export default function Createadminuser({ open, onClose, onSuccess }: LoginProps) {
+  const {getAccessTokenSilently} = useAuth0();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [phoneFull, setPhoneFull] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [userData, setUserData] = useState({
     username: '',
     email: '',
     password: '',
-    confirmPassword: '', 
     phone: '',
+    full_name: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -38,6 +50,9 @@ export default function Createadminuser({ open, onClose, onSuccess }: LoginProps
     });
   };
 
+  const handleConfirmChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setConfirmPassword(e.target.value);
+  };
 
   const togglePassword = () => {
     setShowPassword(!showPassword);
@@ -61,7 +76,7 @@ export default function Createadminuser({ open, onClose, onSuccess }: LoginProps
     setSuccessMessage('');
 
 
-    if (userData.password !== userData.confirmPassword) {
+    if (userData.password !== confirmPassword) {
       setErrorMessage('Passwords do not match');
       return;
     }
@@ -77,16 +92,18 @@ export default function Createadminuser({ open, onClose, onSuccess }: LoginProps
       email: userData.email,
       password: userData.password,
       phone: phoneFull,
+      full_name: userData.full_name
     };
 
     setLoading(true);
 
     try {
-
-      const response = await fetch('http://localhost:8000/api/usersadmin/register/', {
+      const token = await getAccessTokenSilently();
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/create-admin/` , {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify(formData),
       });
@@ -158,6 +175,31 @@ export default function Createadminuser({ open, onClose, onSuccess }: LoginProps
 
           <div className="form-row">
             <div className="form-group">
+              <label>Phone Number</label>
+              <PhoneInput
+                country={'gt'}
+                value={phoneFull}
+                onChange={(value, data, event, formattedValue) => {
+                setPhoneFull(formattedValue || value);
+                }}
+                inputClass="input"
+                enableSearch
+                placeholder="Phone Number"
+              />
+              <label>Full Name</label>
+              <input
+                type="text"
+                name="full_name"
+                placeholder="Full name"
+                className="input"
+                value={userData.full_name}
+                onChange={(e) => handleInputChange(e, 'full_name')}
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
               <label>Password</label>
               <div className="passwordContainer">
                 <input
@@ -186,8 +228,8 @@ export default function Createadminuser({ open, onClose, onSuccess }: LoginProps
                   name="confirmPassword"
                   placeholder="Confirm Password"
                   className="input"
-                  value={userData.confirmPassword}
-                  onChange={(e) => handleInputChange(e, 'confirmPassword')}
+                  value={confirmPassword}
+                  onChange={(e) => handleConfirmChange(e)}
                 />
                 <button
                   type="button"
@@ -200,18 +242,6 @@ export default function Createadminuser({ open, onClose, onSuccess }: LoginProps
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Phone Number</label>
-              <PhoneInput
-                value={phoneFull}
-                onChange={setPhoneFull}
-                inputClass="input"
-                enableSearch
-                placeholder="Phone Number"
-              />
-            </div>
-          </div>
 
           <button type="submit" className="submitButton" disabled={loading}>
             {loading ? 'Registering...' : 'Save Changes'}

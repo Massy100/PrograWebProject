@@ -15,7 +15,7 @@
     "google-libphonenumber": "^3.2.43",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.3",
-    "libphonenumber-js": "^1.12.24",
+    "libphonenumber-js": "^1.12.25",
     "next": "15.5.2",
     "react": "19.1.0",
     "react-chartjs-2": "^5.3.0",

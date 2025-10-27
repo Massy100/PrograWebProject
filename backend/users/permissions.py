@@ -6,11 +6,13 @@ import os
 class IsAdminRole(BasePermission):
     def has_permission(self, request, view):
         token = getattr(request, 'auth', {}) or {}
-        roles = token.get(f"{os.getenv("AUTH0_API_IDENTIFIER")}/roles", [])
+        api_id = os.getenv("AUTH0_API_IDENTIFIER")
+        roles = token.get(f"{api_id}/roles", [])
         return 'admin' in roles
 
 class IsClientRole(BasePermission):
     def has_permission(self, request, view):
         token = getattr(request, 'auth', {}) or {}
-        roles = token.get(f"{os.getenv("AUTH0_API_IDENTIFIER")}/roles", [])
+        api_id = os.getenv("AUTH0_API_IDENTIFIER")
+        roles = token.get(f"{api_id}/roles", [])
         return 'client' in roles
