@@ -132,6 +132,13 @@ export default function Home() {
         role: dbUser.user_type, 
         completed: dbUser.is_completed
       }));
+
+      document.cookie = `auth=${encodeURIComponent(JSON.stringify({
+      role: dbUser.user_type,
+      verified: dbUser.verified,
+      completed: dbUser.is_completed
+    }))}; path=/; max-age=86400; samesite=lax`;
+
       
       setVerifiedUser(dbUser.verified);
       setCompletedUser(dbUser.is_completed);
@@ -141,6 +148,8 @@ export default function Home() {
     } catch (e) {
       console.error(e);
     }
+  
+  
   };
 
   useEffect(() => {
