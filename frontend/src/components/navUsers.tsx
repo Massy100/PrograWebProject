@@ -12,7 +12,7 @@ type OptionItem =
 
 export default function OptionsUser({ onOpenWallet }: { onOpenWallet?: () => void }) {
   const { logout } = useAuth0();
-  const router = useRouter(); // <-- AÑADIDO
+  const router = useRouter();
 
   const options: OptionItem[] = [
     { name: "Dashboard", icon: <FaTachometerAlt className="optionIcon" />, href: "/dashboard-user", type: "link" },
