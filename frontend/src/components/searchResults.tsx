@@ -10,6 +10,7 @@ import {
   type Stock,
 } from '@/services/stocks';
 import '@/styles/searchResults.css';
+import { useMarketStatus } from '@/hook/useMarketStatus';
 
 // adapt backend JSON (Stock) to a simple row
 function toRow(s: Stock) {
@@ -41,6 +42,7 @@ export default function SearchResults({
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [open, setOpen] = useState(false);
+  const marketOpen = useMarketStatus();
 
   const panelRef = useRef<HTMLDivElement | null>(null);
 
@@ -104,7 +106,7 @@ export default function SearchResults({
   return (
     <>
       <Header
-        marketOpen={headerProps.marketOpen}
+        marketOpen={marketOpen}
         totalAmount={headerProps.totalAmount ?? 0}
         onSearch={onSearch}
         onOpenLogin={onOpenLogin} // pass it down to Header

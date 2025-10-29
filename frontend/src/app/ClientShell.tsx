@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import SidebarOptions from "@/components/navAdmin";
 import OptionsUser from "@/components/navUsers";
 import Wallet from "@/components/wallet";
+import { useMarketStatus } from "@/hook/useMarketStatus";
 import { useEffect, useState } from "react";
 
 export default function ClientShell({ children }: { children: React.ReactNode }) {
@@ -10,7 +11,8 @@ export default function ClientShell({ children }: { children: React.ReactNode })
   const [verified, setVerified] = useState<boolean>(false);
   const [completed, setCompleted] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
-  const [walletOpen, setWalletOpen] = useState(false); // 👈 estado para abrir/cerrar wallet
+  const [walletOpen, setWalletOpen] = useState(false); 
+  const marketOpen = useMarketStatus();
 
   useEffect(() => {
     const raw = document.cookie.split("; ").find((c) => c.startsWith("auth="));
@@ -34,7 +36,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
 
   return (
     <div className="appLayout">
-      {(isAdmin || isClientVerified) && <Header marketOpen={false} />}
+      {(isAdmin || isClientVerified) && <Header marketOpen={marketOpen} />}
 
       <div className="appBody">
         {isAdmin && <SidebarOptions />}
