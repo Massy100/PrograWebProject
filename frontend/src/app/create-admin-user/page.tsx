@@ -7,20 +7,11 @@ import 'react-phone-input-2/lib/style.css';
 import { useRouter } from 'next/navigation'; 
 import '../../styles/createadminusers.css';
 import { useAuth0 } from '@auth0/auth0-react';
-import { parsePhoneNumberFromString, formatNumber, E164Number  } from 'libphonenumber-js';
 
 type LoginProps = {
   open: boolean;
   onClose?: () => void;
   onSuccess?: (role: "admin" | "user") => void;
-};
-
-const convertToE164 = (rawNumber: string, countryCode: string): string | undefined => {
-  const parsed = parsePhoneNumberFromString(rawNumber);
-  if (parsed?.isValid()) {
-    return parsed.format('E.164');
-  }
-  return undefined;
 };
 
 export default function Createadminuser({ open, onClose, onSuccess }: LoginProps) {
@@ -177,15 +168,17 @@ export default function Createadminuser({ open, onClose, onSuccess }: LoginProps
             <div className="form-group">
               <label>Phone Number</label>
               <PhoneInput
-                country={'gt'}
+                country='gt'
                 value={phoneFull}
-                onChange={(value, data, event, formattedValue) => {
-                setPhoneFull(formattedValue || value);
+                onChange={(value) => {
+                  setPhoneFull("+" + value);
                 }}
                 inputClass="input"
                 enableSearch
                 placeholder="Phone Number"
               />
+            </div>
+            <div className="form-group">
               <label>Full Name</label>
               <input
                 type="text"

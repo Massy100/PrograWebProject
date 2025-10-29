@@ -17,9 +17,22 @@ class ManagementService:
 
   def auth0_get_roles(self, user_id):
     token = self.get_management_token()
-    print(token)
     url = f"https://{settings.AUTH0_DOMAIN}/api/v2/users/{user_id}/roles"
     headers = {"Authorization": f"Bearer {token}"}
     r = requests.get(url, headers=headers, timeout=10)
     r.raise_for_status()
     return r.json()
+  
+  def auth0_assign_role(self, user_id, role_id):
+    token = self.get_management_token()
+    url = f"https://{settings.AUTH0_DOMAIN}/api/v2/users/{user_id}/roles"
+    payload = {
+      "roles": [role_id]
+    }
+    headers = {
+      "Content-Type": "application/json",
+      "Authorization": f"Bearer {token}"
+    }
+    r = requests.post(url, json=payload, headers=headers, timeout=10)
+    r.raise_for_status()
+    return r

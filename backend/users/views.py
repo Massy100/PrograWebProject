@@ -17,6 +17,8 @@ from .serializers import UserListSerializer, UserDetailSerializer
 from .permissions import IsAdminRole, IsClientRole
 from .services.mgm_token_service import ManagementService
 
+import os
+
 try:
     from .services.email_service import EmailService
 except ImportError:
@@ -56,22 +58,12 @@ class UserViewSet(viewsets.ModelViewSet):
         elif self.action == 'retrieve':
             return UserDetailSerializer
         return UserListSerializer
-    
-    def get_permissions(self):
-        permission_classes = []
-        if self.action == 'retrieve':
-            permission_classes = [IsAdminRole, IsClientRole]
-        elif self.action == 'destroy':
-            permission_classes = [IsAdminRole]
-        return [permission() for permission in permission_classes]
 
     def list(self, request, *args, **kwargs):
         self.queryset = self.queryset.filter(verified=True, is_active=True)
         return super().list(request, *args, **kwargs)
 
-
-    @action(detail=True, methods=['PATCH'],  
-            permission_classes=[IsAdminRole])
+    @action(detail=True, methods=['PATCH'])
     def deactivate(self, request, pk=None):
         """
         Endpoint para desactivar un usuario
@@ -103,10 +95,8 @@ class UserViewSet(viewsets.ModelViewSet):
         payload = getattr(request, 'auth0_payload', None)
         if not payload:
             return Response({'error': 'Invalid or missing token'}, status=401)
-        
 
         req = request.data
-        print(req)
         email = req.get("email")
         fullname = req.get("name")
         created_date = req.get("created_at")
@@ -114,10 +104,6 @@ class UserViewSet(viewsets.ModelViewSet):
         username = req.get("nickname")
         auth0_id = req.get("sub")
         last_login = timezone.now()
-        service = ManagementService()
-        roles = service.auth0_get_roles(auth0_id)
-        user_type = roles[0]['name']
-        print(roles)
 
         user, created = User.objects.get_or_create(
             auth0_id=auth0_id,
@@ -128,15 +114,24 @@ class UserViewSet(viewsets.ModelViewSet):
                       'last_login': last_login,
                       'username': username,
                       'auth0_id': auth0_id,
-                      'user_type': user_type
+                      'user_type': "client"
                       }
         )
 
-        serializer = UserDetailSerializer(user)     
+        serializer = UserDetailSerializer(user)   
 
-        if not created and user.user_type != user_type:
+        service = ManagementService()
+
+        if not created:
+            roles = service.auth0_get_roles(auth0_id)
+            user_type = roles[0]['name']
             user.user_type = user_type
             user.save()
+        else:
+            service.auth0_assign_role(
+                auth0_id, 
+                os.getenv("AUTH0_CLIENT_ROLE_ID")
+            )
 
         return Response({
             'created': created,
@@ -145,32 +140,28 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['POST'], url_path='create-admin')
     def create_admin(self, request):
-        current_user = request.user
         service = ManagementService()
 
         data = request.data
         token = service.get_management_token()
 
-        print(data)
+
         url = f"https://{settings.AUTH0_DOMAIN}/api/v2/users"
         payload = {
             "email": data["email"],
-            "phone_number": data.get("phone", ""),
             "user_metadata": {},
             "blocked": False,
             "email_verified": False,
-            "phone_verified": False,
             "app_metadata": {},
             "given_name": data.get("full_name"),
             "family_name": data.get("full_name"),
             "name": data.get("full_name"),
             "nickname": data.get("username"),
-            "picture": "https://example.com/avatar.png",
             "connection": "Username-Password-Authentication",  
             "password": data["password"],
             "verify_email": False,
-            "username": data["username"]
         }
+        print(payload)
 
         headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
         
@@ -180,11 +171,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
         service.auth0_assign_role(
             auth0_user['user_id'], 
-            settings.AUTH0_ADMIN_ROLE_ID
+            os.getenv("AUTH0_ADMIN_ROLE_ID")
         )
 
         User.objects.create(
-            username=data.get["username"],
+            username=data["username"],
             email=data["email"],
             full_name=data.get("full_name", ""),
             phone=data.get("phone", ""),
@@ -193,7 +184,8 @@ class UserViewSet(viewsets.ModelViewSet):
             auth0_id=auth0_user['user_id'],
             verified=True,
             is_staff=True,
-            is_completed=True
+            is_completed=True,
+            is_superuser=True
         )
 
         return Response({"message": "Admin created successfully", "auth0_id": auth0_user["user_id"]})
