@@ -4,7 +4,7 @@ from .models import User, AdminProfile, ClientProfile, AdminPermissionsRequest
 class ClientProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClientProfile
-        fields = ['balance_available', 'balance_blocked']
+        fields = ['id', 'balance_available', 'balance_blocked']
 
 class AdminProfileSerializer(serializers.ModelSerializer):
     class Meta:
