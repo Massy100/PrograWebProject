@@ -10,7 +10,6 @@ from django.views import View
 
 from .models import Bank, FundsTransfer
 from .serializers import BankSerializer, FundsTransferSerializer
-from users.permissions import client_required, admin_required
 from users.mixins import ClientRequiredMixin, AdminRequiredMixin
 
 # Create your views here.
