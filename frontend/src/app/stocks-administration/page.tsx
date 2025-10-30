@@ -31,7 +31,7 @@ export default function StocksAdministration() {
     try {
       setLoading(true);
       setError(null);
-      
+      // SOLO AQUI SE MANDA A LLAMAR LA API REAL
       const response = await fetch('http://localhost:8000/api/alpha-vantage/stocks/real-data/');
       
       if (!response.ok) {

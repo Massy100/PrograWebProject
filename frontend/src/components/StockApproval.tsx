@@ -25,6 +25,8 @@ export default function StockManager() {
   const fetchRealStockData = async () => {
     try {
       setLoading(true);
+      // AQUI SE GUARDAN LAS STONKS DE API EN LA BASE DE DATOS SI ESTAN APROBADAS
+      // TAMBIEN SE PUEDEN VER LAS QUE ESTAN EN A DB Y CAMBIAR EL ESTADO (ACTIVO O INACTIVO)
       const response = await fetch('http://localhost:8000/api/alpha-vantage/stocks/real-data/');
       
       if (!response.ok) {

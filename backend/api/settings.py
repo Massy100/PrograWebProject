@@ -195,3 +195,17 @@ CACHES = {
         'LOCATION': 'unique-snowflake',
     }
 }
+
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Cargar variables del entorno
+load_dotenv()
+
+# Alpha Vantage configuration
+ALPHA_VANTAGE_API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY')
+
+# Verificar que la API key esté configurada
+if not ALPHA_VANTAGE_API_KEY:
+    raise ValueError("ALPHA_VANTAGE_API_KEY no está configurada en las variables de entorno")
