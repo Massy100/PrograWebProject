@@ -1,154 +1,141 @@
-"use client";
+  "use client";
 
-import React, { useEffect, useState } from "react";
-import PortfolioCard from "@/components/PortfolioCard";
-import "./portfolio.css";
-import PortfolioList from "@/components/PortfolioList";
-import PortfolioGrowthChart from "@/components/PortfolioGrowthChart";
+  import React, { useEffect, useState } from "react";
+  import PortfolioCard from "@/components/PortfolioCard";
+  import PortfolioList from "@/components/PortfolioList";
+  import PortfolioGrowthChart from "@/components/PortfolioGrowthChart";
+  import { useAuth0 } from "@auth0/auth0-react";
+  import "./portfolio.css";
 
-interface Portfolio {
-  id: number;
-  name: string;
-  created_at: string;
-  avg_price: number;
-  total_invested: number;
-  current_value: number;
-  is_active: boolean;
-}
+  interface Portfolio {
+    id: number;
+    name: string;
+    created_at: string;
+    avg_price: number;
+    total_invested: number;
+    current_value: number;
+    is_active: boolean;
+  }
 
-const PortfolioCarousel: React.FC = () => {
-  const mockData: Portfolio[] = [
-    {
-      id: 1,
-      name: "Growth 2025",
-      created_at: "2024-03-12",
-      avg_price: 150.4,
-      total_invested: 5000,
-      current_value: 6100,
-      is_active: true,
-    },
-    {
-      id: 2,
-      name: "Tech Global",
-      created_at: "2024-06-05",
-      avg_price: 98.2,
-      total_invested: 4200,
-      current_value: 3600,
-      is_active: false,
-    },
-    {
-      id: 3,
-      name: "Dividend Pro",
-      created_at: "2023-11-18",
-      avg_price: 73.5,
-      total_invested: 2500,
-      current_value: 3100,
-      is_active: true,
-    },
-    {
-      id: 4,
-      name: "Balanced Crypto",
-      created_at: "2024-01-20",
-      avg_price: 22.7,
-      total_invested: 1800,
-      current_value: 950,
-      is_active: false,
-    },
-    {
-      id: 5,
-      name: "National Bonds",
-      created_at: "2023-08-30",
-      avg_price: 45.9,
-      total_invested: 3000,
-      current_value: 3100,
-      is_active: true,
-    },
-    {
-      id: 6,
-      name: "Emerging Stocks",
-      created_at: "2023-12-01",
-      avg_price: 67.2,
-      total_invested: 4000,
-      current_value: 5400,
-      is_active: true,
-    },
-  ];
+  interface GrowthPoint {
+    month: string;
+    [key: string]: number | string;
+  }
 
-  const growthData = [
-  { month: "Jan", "Growth 2025": 5000, "Tech Global": 4200, "Dividend Pro": 2500 },
-  { month: "Feb", "Growth 2025": 5200, "Tech Global": 4000, "Dividend Pro": 2600 },
-  { month: "Mar", "Growth 2025": 5400, "Tech Global": 3800, "Dividend Pro": 2800 },
-  { month: "Apr", "Growth 2025": 5600, "Tech Global": 3600, "Dividend Pro": 2900 },
-  { month: "May", "Growth 2025": 5800, "Tech Global": 3700, "Dividend Pro": 3000 },
-  { month: "Jun", "Growth 2025": 6100, "Tech Global": 3600, "Dividend Pro": 3100 },
-];
+  const PortfolioCarousel: React.FC = () => {
+    const { getAccessTokenSilently } = useAuth0();
 
+    const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+    const [growthData, setGrowthData] = useState<GrowthPoint[]>([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+    const visibleCards = 3;
 
-  const visibleCards = 3; 
-  const totalSlides = Math.ceil(mockData.length / visibleCards);
+    useEffect(() => {
+      if (!getAccessTokenSilently) return;
 
+      (async () => {
+        try {
+          const token = await getAccessTokenSilently();
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % totalSlides);
-    }, 15000);
-    return () => clearInterval(interval);
-  }, [totalSlides]);
+          const currentUser = localStorage.getItem("auth");
+          const userId = currentUser ? JSON.parse(currentUser).id : null;
+          if (!userId) {
+            console.error("User not found in localStorage");
+            return;
+          }
 
-  const goToSlide = (index: number) => setCurrentIndex(index);
+          const portfoliosRes = await fetch("http://localhost:8000/api/portfolio/portfolios/", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            cache: "no-store",
+          });
 
-  return (
-    <div className="div-portfolio">
-      <div className="div-portfolio-info">
+          const growthRes = await fetch(
+            `http://localhost:8000/api/portfolio/value/year-summary/?client_id=${userId}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              cache: "no-store",
+            }
+          );
 
-        {/* aqui tiene que ir el id y el nombre de los portafolios y tambien la data de lo que han gano y el mes*/}
-        <PortfolioGrowthChart
-          portfolios={[
-            { id: 1, name: "Growth 2025" },
-            { id: 2, name: "Tech Global" },
-            { id: 3, name: "Dividend Pro" },
-          ]}
-          growthData={growthData}
-        />
-        <div className="carousel-container">
-          <h2 className="carousel-title">Most Used Portfolios</h2>
+          if (!portfoliosRes.ok) throw new Error("Error fetching portfolios");
+          if (!growthRes.ok) throw new Error("Error fetching growth data");
 
-          <div className="carousel-wrapper">
-            <div
-              className="carousel-track"
-              style={{
-                transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
-                width: `${(mockData.length * 100) / visibleCards}%`,
-              }}
-            >
-              {mockData.map((p) => (
-                <div className="carousel-slide" key={p.id}>
-                  {/* este componente solo debe recibir  6 portafolio (pueden ser chance los que tienen mas movimientos)*/}
-                  <PortfolioCard data={p} />
-                </div>
+          const portfoliosData = await portfoliosRes.json();
+          const growthDataJson = await growthRes.json();
+
+          const finalPortfolios = Array.isArray(portfoliosData)
+            ? portfoliosData
+            : portfoliosData.results || [];
+          setPortfolios(finalPortfolios);
+
+          setGrowthData(Array.isArray(growthDataJson) ? growthDataJson : []);
+        } catch (err) {
+          console.error("❌ Error loading portfolios:", err);
+        }
+      })();
+    }, [getAccessTokenSilently]);
+
+    const totalSlides = Math.ceil(portfolios.length / visibleCards);
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % totalSlides);
+      }, 15000);
+      return () => clearInterval(interval);
+    }, [totalSlides]);
+
+    const goToSlide = (index: number) => setCurrentIndex(index);
+
+    return (
+      <div className="div-portfolio">
+        <div className="div-portfolio-info">
+          <PortfolioGrowthChart
+            portfolios={portfolios.map((p) => ({ id: p.id, name: p.name }))}
+            growthData={growthData}
+          />
+
+          <div className="carousel-container">
+            <h2 className="carousel-title">Most Used Portfolios</h2>
+
+            <div className="carousel-wrapper">
+              <div
+                className="carousel-track"
+                style={{
+                  transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
+                  width: `${(portfolios.length * 100) / visibleCards}%`,
+                }}
+              >
+                {portfolios.slice(0, 6).map((p) => (
+                  <div className="carousel-slide" key={p.id}>
+                    <PortfolioCard data={p} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="carousel-dots">
+              {Array.from({ length: totalSlides }).map((_, idx) => (
+                <span
+                  key={idx}
+                  className={`dot ${idx === currentIndex ? "active" : ""}`}
+                  onClick={() => goToSlide(idx)}
+                ></span>
               ))}
             </div>
           </div>
-
-          <div className="carousel-dots">
-            {Array.from({ length: totalSlides }).map((_, idx) => (
-              <span
-                key={idx}
-                className={`dot ${idx === currentIndex ? "active" : ""}`}
-                onClick={() => goToSlide(idx)}
-              ></span>
-            ))}
-          </div>
+          <PortfolioList portfolios={portfolios} />
         </div>
-        {/* a este componente se le tendria que mandar la informacion del todos los portafolios */}
-        <PortfolioList portfolios={mockData} />
       </div>
-      
-    </div>
+    );
+  };
 
-  );
-};
-
-export default PortfolioCarousel;
+  export default PortfolioCarousel;

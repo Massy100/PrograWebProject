@@ -20,6 +20,14 @@ type Props = {
 };
 
 export default function StockCard({ rows }: Props) {
+  if (!rows || rows.length === 0) {
+    return (
+      <div className="stock-table no-data">
+        <p>No investments found for this portfolio.</p>
+      </div>
+    );
+  }
+
   return (
     <section className="stock-table">
       <header className="stock-table-header">
@@ -49,44 +57,50 @@ export default function StockCard({ rows }: Props) {
         <div>Change</div>
       </header>
 
+      {rows.map((s) => {
+        const quantity = Number(s.quantity || 0);
+        const purchasePrice = Number(s.purchasePrice || 0);
+        const averagePrice = Number(s.averagePrice || 0);
+        const totalInvested = Number(s.totalInvested || 0);
+        const change = !isNaN(Number(s.change)) ? Number(s.change) : 0;
+        const lastPurchaseDate = s.lastPurchaseDate
+          ? new Date(s.lastPurchaseDate).toLocaleDateString()
+          : "N/A";
 
-      {rows.map((s) => (
-        <div key={s.symbol} className="stock-table-row">
-          <div className="stock-info">
-            <strong className="symbol">{s.symbol}</strong>
-            <span className="name">{s.name}</span>
-          </div>
+        return (
+          <div key={s.symbol} className="stock-table-row">
+            <div className="stock-info">
+              <strong className="symbol">{s.symbol}</strong>
+              <span className="name">{s.name}</span>
+            </div>
 
-          <div>{s.quantity}</div>
-          <div>Q.{s.purchasePrice.toFixed(2)}</div>
-          <div>Q.{s.averagePrice.toFixed(2)}</div>
-          <div>Q.{s.totalInvested.toFixed(2)}</div>
+            <div>{quantity}</div>
+            <div>Q.{purchasePrice.toFixed(2)}</div>
+            <div>Q.{averagePrice.toFixed(2)}</div>
+            <div>Q.{totalInvested.toFixed(2)}</div>
 
-          <div>
-            <span
-              className={`status-pill ${s.isActive ? "active" : "inactive"}`}
+            <div>
+              <span
+                className={`status-pill ${s.isActive ? "active" : "inactive"}`}
+              >
+                {s.isActive ? "Active" : "Inactive"}
+              </span>
+            </div>
+
+            <div>{lastPurchaseDate}</div>
+
+            <div
+              className={`change ${
+                change > 0 ? "positive" : change < 0 ? "negative" : ""
+              }`}
             >
-              {s.isActive ? "Active" : "Inactive"}
-            </span>
+              {change !== 0
+                ? `${change > 0 ? "+" : ""}${change.toFixed(2)}%`
+                : "0.00%"}
+            </div>
           </div>
-
-          <div>{new Date(s.lastPurchaseDate).toLocaleDateString()}</div>
-
-          <div
-            className={`change ${
-              s.change && s.change > 0
-                ? "positive"
-                : s.change && s.change < 0
-                ? "negative"
-                : ""
-            }`}
-          >
-            {s.change !== undefined
-              ? `${s.change > 0 ? "+" : ""}${s.change.toFixed(2)}%`
-              : "-"}
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </section>
   );
 }

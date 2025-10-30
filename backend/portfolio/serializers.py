@@ -57,6 +57,13 @@ class PortfolioCreateSerializer(serializers.ModelSerializer):
         model = Portfolio
         fields = ['name', 'client']
 
+    def create(self, validated_data):
+        validated_data['average_price'] = 0
+        validated_data['total_inversion'] = 0
+        validated_data['current_value'] = 0
+        return super().create(validated_data)
+
+
 class PortfolioUpdatesSerializer(serializers.ModelSerializer):
     class Meta:
         model = PortfolioValueUpdates
