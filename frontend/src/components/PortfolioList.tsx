@@ -81,10 +81,10 @@ export default function PortfolioList({ portfolios }: PortfolioListProps) {
 
               <div className="portfolio-card-body">
                 <p>
-                  <strong>Invested:</strong> ${p.total_invested.toLocaleString()}
+                  <strong>Invested:</strong> ${p.total_invested}
                 </p>
                 <p>
-                  <strong>Current:</strong> ${p.current_value.toLocaleString()}
+                  <strong>Current:</strong> ${p.current_value}
                 </p>
               </div>
 
