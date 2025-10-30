@@ -1,7 +1,8 @@
 "use client";
-import Header from "@/components/Header";
+
 import SidebarOptions from "@/components/navAdmin";
 import OptionsUser from "@/components/navUsers";
+import SearchResults from "@/components/searchResults";
 import Wallet from "@/components/wallet";
 import { useMarketStatus } from "@/hook/useMarketStatus";
 import { useEffect, useState } from "react";
@@ -11,7 +12,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
   const [verified, setVerified] = useState<boolean>(false);
   const [completed, setCompleted] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
-  const [walletOpen, setWalletOpen] = useState(false); 
+  const [walletOpen, setWalletOpen] = useState(false);
   const marketOpen = useMarketStatus();
 
   useEffect(() => {
@@ -36,18 +37,27 @@ export default function ClientShell({ children }: { children: React.ReactNode })
 
   return (
     <div className="appLayout">
-      {(isAdmin || isClientVerified) && <Header marketOpen={marketOpen} />}
+      {(isAdmin || isClientVerified) && (
+        <SearchResults
+          headerProps={{
+            isLoggedIn: Boolean(role),
+            marketOpen,
+            totalAmount: 0, 
+          }}
+          title="Search Results"
+        />
+      )}
 
       <div className="appBody">
         {isAdmin && <SidebarOptions />}
         {isClientVerified && (
-          <OptionsUser onOpenWallet={() => setWalletOpen(true)} /> // ✅ pasa la función
+          <OptionsUser onOpenWallet={() => setWalletOpen(true)} />
         )}
 
         <main className="appMain">{children}</main>
       </div>
 
-      <Wallet open={walletOpen} onClose={() => setWalletOpen(false)} /> {/* ✅ usa open y onClose */}
+      <Wallet open={walletOpen} onClose={() => setWalletOpen(false)} />
     </div>
   );
 }
