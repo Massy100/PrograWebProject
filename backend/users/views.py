@@ -45,6 +45,7 @@ class UserViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'created_at', 'username']
     ordering = ['-created_at']
     renderer_classes = [renderers.JSONRenderer]
+    http_method_names = ['get', 'post', 'patch']
     
     def get_serializer_class(self):
         if self.action == 'list':
