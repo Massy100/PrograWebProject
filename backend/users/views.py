@@ -1,22 +1,16 @@
-from django.contrib.auth import authenticate, login
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets, filters, renderers
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import JsonResponse
-from django.views import View
-from django.utils import timezone
+
 from django.contrib.auth.hashers import make_password
 import threading
-import requests
-from django.conf import settings
 
 from .models import User, AdminPermissionsRequest
 from .serializers import UserListSerializer, UserDetailSerializer
-from .permissions import IsAdminRole, IsClientRole
 from .services.mgm_token_service import ManagementService
-
+from .services.dto_service import DtoService
 import os
 
 try:
@@ -70,6 +64,10 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         try:
             user = self.get_object()
+            
+            service = ManagementService()
+            service.auth0_user_lock(user.auth0_id, deactivate=True)
+            
             user.is_active = False
             user.save()
             
@@ -90,40 +88,60 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
+    @action(detail=True, methods=['PATCH'])
+    def activate(self, request, pk=None):
+        """
+        Endpoint para activar un usuario
+        """
+        try:
+            user = self.get_object()
+            
+            service = ManagementService()
+            service.auth0_user_lock(user.auth0_id, deactivate=False)
+            
+            user.is_active = True
+            user.save()
+            
+            return Response(
+                {'message': 'Usuario activado correctamente', 'user_id': user.id},
+                status=status.HTTP_200_OK
+            )
+            
+        except User.DoesNotExist:
+            return Response(
+                {'message': 'Usuario no encontrado'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            print(f"Error en activate: {str(e)}")
+            return Response(
+                {'message': 'Error interno del servidor'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
     @action(detail=False, methods=['POST'], url_path="sync")
     def sync_user(self, request):
         payload = getattr(request, 'auth0_payload', None)
         if not payload:
             return Response({'error': 'Invalid or missing token'}, status=401)
+        
+        dto_service = DtoService()
 
         req = request.data
-        email = req.get("email")
-        fullname = req.get("name")
-        created_date = req.get("created_at")
-        updated_date = req.get("updated_at")
-        username = req.get("nickname")
         auth0_id = req.get("sub")
-        last_login = timezone.now()
+
+        defaults = dto_service.UserDefaults(req, auth0_id)
 
         user, created = User.objects.get_or_create(
             auth0_id=auth0_id,
-            defaults={'email': email, 
-                      'full_name': fullname, 
-                      'created_at': created_date,
-                      'modified_at': updated_date,
-                      'last_login': last_login,
-                      'username': username,
-                      'auth0_id': auth0_id,
-                      'user_type': "client"
-                      }
+            defaults=defaults
         )
 
         serializer = UserDetailSerializer(user)   
-
         service = ManagementService()
 
         if not created:
-            roles = service.auth0_get_roles(auth0_id)
+            roles = service.auth0_get_roles(auth0_id).json()
             user_type = roles[0]['name']
             user.user_type = user_type
             user.save()
@@ -141,52 +159,22 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path='create-admin')
     def create_admin(self, request):
         service = ManagementService()
+        dto_service = DtoService()
 
         data = request.data
-        token = service.get_management_token()
+        payload = dto_service.Auth0AdminPayload(data)
 
-
-        url = f"https://{settings.AUTH0_DOMAIN}/api/v2/users"
-        payload = {
-            "email": data["email"],
-            "user_metadata": {},
-            "blocked": False,
-            "email_verified": False,
-            "app_metadata": {},
-            "given_name": data.get("full_name"),
-            "family_name": data.get("full_name"),
-            "name": data.get("full_name"),
-            "nickname": data.get("username"),
-            "connection": "Username-Password-Authentication",  
-            "password": data["password"],
-            "verify_email": False,
-        }
-        print(payload)
-
-        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
-        
-        res = requests.post(url, json=payload, headers=headers)
-        res.raise_for_status()
-        auth0_user = res.json()
+        auth0_user = service.auth0_create_user(payload)
 
         service.auth0_assign_role(
             auth0_user['user_id'], 
             os.getenv("AUTH0_ADMIN_ROLE_ID")
         )
 
-        User.objects.create(
-            username=data["username"],
-            email=data["email"],
-            full_name=data.get("full_name", ""),
-            phone=data.get("phone", ""),
-            user_type='admin',
-            password=make_password(data["password"]),
-            auth0_id=auth0_user['user_id'],
-            verified=True,
-            is_staff=True,
-            is_completed=True,
-            is_superuser=True
-        )
+        passwd = make_password(data["password"])
+        auth0_id = auth0_user['user_id']
+
+        dto_service.SaveFullDBUser(data, passwd, auth0_id)
 
         return Response({"message": "Admin created successfully", "auth0_id": auth0_user["user_id"]})
     

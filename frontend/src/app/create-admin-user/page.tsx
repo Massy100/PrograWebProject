@@ -103,7 +103,7 @@ export default function Createadminuser({ open, onClose, onSuccess }: LoginProps
 
       if (response.ok) {
         setSuccessMessage('Registration successful!');
-        router.push('/dashboard-user');  
+        router.push('/dashboard-admin');  
       } else {
         setErrorMessage(data.message || 'Something went wrong, please try again.');
       }
@@ -116,7 +116,7 @@ export default function Createadminuser({ open, onClose, onSuccess }: LoginProps
 
 
   const handleGoBack = () => {
-    router.push('/dashboard-user');  
+    router.push('/dashboard-admin');  
   };
 
   return (
