@@ -17,22 +17,22 @@ export default function StocksPage() {
   const [popularStocks, setPopularStocks] = useState<PopularStock[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Función para obtener datos reales de stocks
-  const fetchRealStockData = async () => {
+  // Función para obtener stocks aprobados de la BD
+  const fetchApprovedStocks = async () => {
     try {
       setLoading(true);
-      // OBTENER STONKS DE LA BASE DE DATOS (FETCH ALL)
-      const response = await fetch('http://localhost:8000/api/alpha-vantage/stocks/real-data/');
+      // CAMBIO: Usar endpoint de stocks aprobados
+      const response = await fetch('http://localhost:8000/api/stocks/approved/');
       
       if (!response.ok) {
-        throw new Error('Failed to fetch stock data');
+        throw new Error('Failed to fetch approved stocks');
       }
       
       const data = await response.json();
       
       // Convertir datos de la API al formato del frontend
       const formattedStocks: StockItem[] = data.data.map((stockData: any) => {
-        const variation = parseFloat(stockData.variation) || 0;
+        const variation = stockData.changePct || 0;
         
         let recommendation = 'HOLD';
         if (variation > 5) recommendation = 'STRONG BUY';
@@ -43,7 +43,7 @@ export default function StocksPage() {
         return {
           symbol: stockData.symbol,
           name: stockData.name || stockData.symbol,
-          currentPrice: parseFloat(stockData.last_price) || 0,
+          currentPrice: stockData.currentPrice || 0,
           changePct: variation,
           last30d: [],
           targetPrice: 0,
@@ -64,7 +64,7 @@ export default function StocksPage() {
       setPopularStocks(popularItems);
       
     } catch (error) {
-      console.error('Error fetching real stock data:', error);
+      console.error('Error fetching approved stocks:', error);
       // Fallback a datos de demo
       setRealStocks(getDemoStocks());
       setPopularStocks(getDemoStocks().slice(0, 14).map(stock => ({
@@ -100,10 +100,10 @@ export default function StocksPage() {
 
   // Cargar datos al montar el componente
   useEffect(() => {
-    fetchRealStockData();
+    fetchApprovedStocks();
     
     // Opcional: Actualizar datos cada 30 segundos
-    const interval = setInterval(fetchRealStockData, 30000);
+    const interval = setInterval(fetchApprovedStocks, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -133,7 +133,7 @@ export default function StocksPage() {
         <div className='info-title'>
           <h2>Trending Stocks</h2>
           <p className="carousel-subtitle">
-            {loading ? 'Loading live market data...' : 'Live overview of active market assets'}
+            {loading ? 'Loading approved stocks data...' : 'Live overview of approved market assets'}
           </p>
         </div>
 

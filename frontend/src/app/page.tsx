@@ -27,8 +27,8 @@ export default function Home() {
   const fetchRealStockData = async () => {
     try {
       setLoading(true);
-      // OBTENER STONKS DE LA BASE DE DATOS (FETCH ALL)
-      const response = await fetch('http://localhost:8000/api/alpha-vantage/stocks/real-data/');
+      // CAMBIO: Usar stocks aprobados en lugar de todos los de Alpha Vantage
+      const response = await fetch('http://localhost:8000/api/stocks/approved/');
       
       if (!response.ok) {
         throw new Error('Failed to fetch stock data');

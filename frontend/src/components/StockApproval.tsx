@@ -21,50 +21,96 @@ export default function StockManager() {
   const [tab, setTab] = useState<"pending" | "system">("pending");
   const [loading, setLoading] = useState(true);
 
-  // Función para obtener datos reales de la API
-  const fetchRealStockData = async () => {
+  // Función para obtener stocks aprobados de la BD
+  const fetchApprovedStocks = async () => {
     try {
       setLoading(true);
-      // AQUI SE GUARDAN LAS STONKS DE API EN LA BASE DE DATOS SI ESTAN APROBADAS
-      // TAMBIEN SE PUEDEN VER LAS QUE ESTAN EN A DB Y CAMBIAR EL ESTADO (ACTIVO O INACTIVO)
-      const response = await fetch('http://localhost:8000/api/alpha-vantage/stocks/real-data/');
+      const response = await fetch('http://localhost:8000/api/stocks/approved/');
       
       if (!response.ok) {
-        throw new Error('Failed to fetch stock data');
+        throw new Error('Failed to fetch approved stocks');
       }
       
       const data = await response.json();
       
       // Transformar datos de la API al formato que necesita el componente
-      const realStocks: StockItem[] = data.data.map((stockData: any) => {
-        const variation = parseFloat(stockData.variation) || 0;
-        
-        let recommendation = 'HOLD';
-        if (variation > 5) recommendation = 'STRONG BUY';
-        else if (variation > 2) recommendation = 'BUY';
-        else if (variation < -5) recommendation = 'STRONG SELL';
-        else if (variation < -2) recommendation = 'SELL';
-
+      const approvedStocks: StockItem[] = data.data.map((stockData: any) => {
         return {
           symbol: stockData.symbol,
-          name: stockData.name || stockData.symbol,
-          currentPrice: parseFloat(stockData.last_price) || 0,
-          changePct: variation,
+          name: stockData.name,
+          currentPrice: stockData.currentPrice,
+          changePct: stockData.changePct,
           last30d: [], // La API actual no proporciona datos históricos
           targetPrice: 0, // Podrías calcular esto si tienes más datos
-          recommendation: recommendation
+          recommendation: stockData.recommendation || 'HOLD'
         };
       });
 
-      // Actualizar systemStocks con datos reales
-      setSystemStocks(realStocks);
+      setSystemStocks(approvedStocks);
       
     } catch (error) {
-      console.error('Error fetching real stock data:', error);
+      console.error('Error fetching approved stocks:', error);
       // Fallback a datos mock si la API falla
       setSystemStocks(mockSystemStocks);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Función para aprobar stocks (guardar en BD)
+  const approveStocks = async (stocksToApprove: StockItem[]) => {
+    try {
+      const response = await fetch('http://localhost:8000/api/stocks/approve/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          stocks: stocksToApprove.map(stock => ({
+            symbol: stock.symbol,
+            name: stock.name
+          }))
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to approve stocks');
+      }
+
+      const result = await response.json();
+      console.log('Stocks approved:', result);
+      return result;
+      
+    } catch (error) {
+      console.error('Error approving stocks:', error);
+      throw error;
+    }
+  };
+
+  // Función para eliminar stocks del sistema
+  const removeStocks = async (symbolsToRemove: string[]) => {
+    try {
+      const response = await fetch('http://localhost:8000/api/stocks/remove/', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          symbols: symbolsToRemove
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove stocks');
+      }
+
+      const result = await response.json();
+      console.log('Stocks removed:', result);
+      return result;
+      
+    } catch (error) {
+      console.error('Error removing stocks:', error);
+      throw error;
     }
   };
 
@@ -87,16 +133,7 @@ export default function StockManager() {
       last30d: [510, 515, 520, 518, 523],
       targetPrice: 540,
       recommendation: "BUY",
-    },
-    {
-      symbol: "NVDA",
-      name: "NVIDIA Corp.",
-      currentPrice: 112.45,
-      changePct: 3.25,
-      last30d: [105, 108, 110, 111, 112],
-      targetPrice: 120,
-      recommendation: "STRONG BUY",
-    },
+    }
   ];
 
   useEffect(() => {
@@ -104,16 +141,16 @@ export default function StockManager() {
       const stored = localStorage.getItem("stocksToTheSystem");
       setStocks(stored ? JSON.parse(stored) : []);
     } else {
-      // Cargar datos reales cuando se selecciona la pestaña "In System"
-      fetchRealStockData();
+      // Cargar stocks aprobados de la BD
+      fetchApprovedStocks();
     }
   }, [tab]);
 
-  // Función para actualizar precios en tiempo real (cada 30 segundos)
+  // Función para actualizar stocks aprobados en tiempo real (cada 30 segundos)
   useEffect(() => {
     if (tab === "system") {
       const interval = setInterval(() => {
-        fetchRealStockData();
+        fetchApprovedStocks();
       }, 30000); // Actualizar cada 30 segundos
 
       return () => clearInterval(interval);
@@ -128,32 +165,41 @@ export default function StockManager() {
     );
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (tab === "pending") {
-      // Estas son las acciones que el admin ya confirmó que quiere ingresar al sistema
-      const approved = stocks.filter((s) => selected.includes(s.symbol));
-
-      // Aquí se tendría que agregar el back para mandar esas acciones al backend
-      console.log("Approved stocks to send:", approved);
-
-      // Elimina del localStorage las acciones que fueron aprobadas
-      const remaining = stocks.filter((s) => !selected.includes(s.symbol));
-      localStorage.setItem("stocksToTheSystem", JSON.stringify(remaining));
-      setStocks(remaining);
+      // Aprobar stocks seleccionados
+      const stocksToApprove = stocks.filter((s) => selected.includes(s.symbol));
+      
+      try {
+        await approveStocks(stocksToApprove);
+        
+        // Eliminar del localStorage las acciones que fueron aprobadas
+        const remaining = stocks.filter((s) => !selected.includes(s.symbol));
+        localStorage.setItem("stocksToTheSystem", JSON.stringify(remaining));
+        setStocks(remaining);
+        
+        // Recargar stocks del sistema para mostrar los nuevos
+        fetchApprovedStocks();
+        
+      } catch (error) {
+        console.error('Error approving stocks:', error);
+        alert('Error approving stocks. Please try again.');
+      }
     } else {
-      // Estas son las acciones que el admin decidió eliminar del sistema
-      const removedStocks = systemStocks.filter((s) =>
-        selected.includes(s.symbol)
-      );
-
-      // Aquí se tendría que agregar el back para eliminar estas acciones del sistema
-      console.log("Removed system stocks:", removedStocks);
-
-      // Actualiza el estado eliminando las acciones seleccionadas
-      const remaining = systemStocks.filter(
-        (s) => !selected.includes(s.symbol)
-      );
-      setSystemStocks(remaining);
+      // Eliminar stocks seleccionados del sistema
+      try {
+        await removeStocks(selected);
+        
+        // Actualizar el estado eliminando las acciones seleccionadas
+        const remaining = systemStocks.filter(
+          (s) => !selected.includes(s.symbol)
+        );
+        setSystemStocks(remaining);
+        
+      } catch (error) {
+        console.error('Error removing stocks:', error);
+        alert('Error removing stocks. Please try again.');
+      }
     }
 
     // Limpia la selección y cierra el modal
@@ -179,7 +225,7 @@ export default function StockManager() {
           className={`tab-btn ${tab === "system" ? "active" : ""}`}
           onClick={() => setTab("system")}
         >
-          In System{" "}
+          Approved Stocks{" "}
           <span className="tab-count">
             ({systemStocks.length > 0 ? systemStocks.length : 0})
           </span>
@@ -201,13 +247,13 @@ export default function StockManager() {
         {loading && tab === "system" ? (
           <div className="approval-empty">
             <div className="loading-spinner"></div>
-            <p>Loading real-time stock data...</p>
+            <p>Loading approved stocks...</p>
           </div>
         ) : currentStocks.length === 0 ? (
           <div className="approval-empty">
             {tab === "pending"
               ? "No pending stocks to review."
-              : "No stocks currently in the system."}
+              : "No approved stocks in the system."}
           </div>
         ) : (
           currentStocks.map((s) => {
