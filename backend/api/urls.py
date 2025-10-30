@@ -17,6 +17,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view as swagger_get_schema_view
+
+schema_view = swagger_get_schema_view(
+    openapi.Info(
+        title="API Documentation",
+        default_version='v1',
+        description="API documentation for the Stock Trading Platform",
+    ),
+    public=True,
+)
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
@@ -26,5 +39,7 @@ urlpatterns = [
     path('api/', include('transactions.urls')),
     path('api/banks/', include('banks.urls')),
     path('api/alpha-vantage/', include('stocks.urls_alpha_vantage')),
-    path('api/portfolio/', include('portfolio.urls'))
+    path('api/portfolio/', include('portfolio.urls')),
+
+    path('swagger/schema/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]

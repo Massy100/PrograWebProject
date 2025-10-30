@@ -36,7 +36,7 @@ class InvestmentViewSet(viewsets.ModelViewSet):
 
 class PortfolioValueUpdatesViewSet(viewsets.ModelViewSet):
   queryset = PortfolioValueUpdates.objects.all()
-  serializer_class = PortfolioUpdatesSerializer()
+  serializer_class = PortfolioUpdatesSerializer
 
   @action(detail=False, methods=['get'], url_path='year-summary')
   def yearly_value_summary(self, request):

@@ -42,7 +42,7 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['user_type', 'status', 'verified', 'is_active']
     search_fields = ['username', 'email', 'full_name']
-    ordering_fields = ['created_at', 'date_joined', 'username']
+    ordering_fields = ['created_at', 'created_at', 'username']
     ordering = ['-created_at']
     renderer_classes = [renderers.JSONRenderer]
     
