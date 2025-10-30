@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Header from "../components/Header";
 import {
   getActiveStocks,
@@ -29,12 +30,13 @@ type HeaderPublicProps = {
 export default function SearchResults({
   headerProps,
   title = "Search Results",
-  inlineResults = false, 
+  inlineResults = false,
 }: {
   headerProps: HeaderPublicProps;
   title?: string;
   inlineResults?: boolean;
 }) {
+  const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
   const [verified, setVerified] = useState<boolean>(false);
   const [completed, setCompleted] = useState<boolean>(false);
@@ -148,7 +150,12 @@ export default function SearchResults({
               <ul className="search-list">
                 {rows.map((r) => (
                   <li key={r.symbol}>
-                    <strong>{r.symbol}</strong> — {r.name} · Q.{r.price}
+                    <button
+                      className="search-item"
+                      onClick={() => router.push(`/stocks/${r.symbol}`)} 
+                    >
+                      <strong>{r.symbol}</strong> — {r.name} · Q.{r.price}
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -177,15 +184,16 @@ export default function SearchResults({
 
                 {loading && <p>Loading…</p>}
                 {error && <p style={{ color: "crimson" }}>{error}</p>}
-                {!loading && !error && rows.length === 0 && (
-                  <p>No results found.</p>
-                )}
+                {!loading && !error && rows.length === 0 && <p>No results found.</p>}
 
                 {!loading && !error && rows.length > 0 && (
                   <ul className="search-list">
                     {rows.map((r) => (
                       <li key={r.symbol}>
-                        <button className="search-item">
+                        <button
+                          className="search-item"
+                          onClick={() => router.push(`/stocks/${r.symbol}`)} 
+                        >
                           <strong>{r.symbol}</strong> — {r.name} · Q.{r.price}
                         </button>
                       </li>
