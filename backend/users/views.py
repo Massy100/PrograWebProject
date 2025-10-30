@@ -1,19 +1,17 @@
-from django.contrib.auth import authenticate, login
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets, filters, renderers
-from rest_framework.permissions import AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import JsonResponse
-from django.views import View
-from django.utils import timezone
+
+from django.contrib.auth.hashers import make_password
 import threading
 
-from .models import User, ClientProfile, AdminProfile, AdminPermissionsRequest
+from .models import User, AdminPermissionsRequest
 from .serializers import UserListSerializer, UserDetailSerializer
-from .permissions import client_required, admin_required
-from .mixins import ClientRequiredMixin, AdminRequiredMixin
+from .services.mgm_token_service import ManagementService
+from .services.dto_service import DtoService
+import os
 
 try:
     from .services.email_service import EmailService
@@ -46,7 +44,6 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ['username', 'email', 'full_name']
     ordering_fields = ['created_at', 'date_joined', 'username']
     ordering = ['-created_at']
-    permission_classes = [AllowAny]
     renderer_classes = [renderers.JSONRenderer]
     
     def get_serializer_class(self):
@@ -55,31 +52,10 @@ class UserViewSet(viewsets.ModelViewSet):
         elif self.action == 'retrieve':
             return UserDetailSerializer
         return UserListSerializer
-    
+
     def list(self, request, *args, **kwargs):
         self.queryset = self.queryset.filter(verified=True, is_active=True)
         return super().list(request, *args, **kwargs)
-    
-    @action(detail=False, methods=['GET'])
-    def registered_users(self, request):
-        """
-        Endpoint para obtener solo usuarios verificados y activos
-        """
-        try:
-            registered_users = User.objects.filter(
-                verified=True, 
-                is_active=True
-            ).select_related('client_profile').order_by('-created_at')
-            
-            serializer = UserListSerializer(registered_users, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-            
-        except Exception as e:
-            print(f"Error en registered_users: {str(e)}")
-            return Response(
-                {'message': 'Error interno del servidor'}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
 
     @action(detail=True, methods=['PATCH'])
     def deactivate(self, request, pk=None):
@@ -88,6 +64,10 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         try:
             user = self.get_object()
+            
+            service = ManagementService()
+            service.auth0_user_lock(user.auth0_id, deactivate=True)
+            
             user.is_active = False
             user.save()
             
@@ -108,263 +88,95 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
-    @action(detail=False, methods=['POST'], permission_classes=[AllowAny])
-    def login(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-        
-        if not email or not password:
-            return Response(
-                {'message': 'Email and password are required'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
+    @action(detail=True, methods=['PATCH'])
+    def activate(self, request, pk=None):
+        """
+        Endpoint para activar un usuario
+        """
         try:
-            user = User.objects.get(email=email)
-            if not user.is_active:
-                return Response(
-                    {'message': 'Dseactivated account. Contact administrator.'}, 
-                    status=status.HTTP_403_FORBIDDEN
-                )
+            user = self.get_object()
             
-            authenticated_user = authenticate(
-                username=user.username, 
-                password=password
+            service = ManagementService()
+            service.auth0_user_lock(user.auth0_id, deactivate=False)
+            
+            user.is_active = True
+            user.save()
+            
+            return Response(
+                {'message': 'Usuario activado correctamente', 'user_id': user.id},
+                status=status.HTTP_200_OK
             )
             
-            if authenticated_user is not None:
-                login(request, authenticated_user)
-                
-                redirect_path = '/dashboard'
-                if user.is_admin():
-                    redirect_path = '/admin-dashboard'
-                
-                return Response({
-                    'message': 'Login successful',
-                    'redirect_to': redirect_path,
-                    'user': {
-                        'id': user.id,
-                        'username': user.username,
-                        'email': user.email,
-                        'user_type': user.user_type,
-                        'verified': user.verified,
-                        'full_name': user.full_name
-                    }
-                }, status=status.HTTP_200_OK)
-            else:
-                return Response(
-                    {'message': 'Invalid password'}, 
-                    status=status.HTTP_401_UNAUTHORIZED
-                )
-                
         except User.DoesNotExist:
             return Response(
-                {'message': 'Does not exist a user with this email'}, 
+                {'message': 'Usuario no encontrado'}, 
                 status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
-            print(f"Error en login: {str(e)}")
+            print(f"Error en activate: {str(e)}")
             return Response(
-                {'message': 'Internal server error'}, 
+                {'message': 'Error interno del servidor'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-    
-    @action(detail=False, methods=['POST'])
-    def logout(self, request):
-        from django.contrib.auth import logout
-        logout(request)
-        return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
-    
-    @action(detail=False, methods=['GET'])
-    def check_auth(self, request):
-        if request.user.is_authenticated:
-            return Response({
-                'authenticated': True,
-                'user': {
-                    'id': request.user.id,
-                    'username': request.user.username,
-                    'email': request.user.email,
-                    'user_type': request.user.user_type,
-                    'verified': request.user.verified,
-                }
-            })
-        else:
-            return Response({'authenticated': False})
-        
-    @action(detail=False, methods=['GET'], permission_classes=[AllowAny])
-    def session_status(self, request):
-        session_info = {
-            'has_session': bool(request.session.session_key),
-            'session_key': request.session.session_key,
-            'authenticated': request.user.is_authenticated,
-            'user': None,
-        }
-        
-        if request.user.is_authenticated:
-            session_info['user'] = {
-                'username': request.user.username,
-                'user_type': request.user.user_type,
-            }
-        
-        return Response(session_info)
 
-    @action(detail=False, methods=['POST'], permission_classes=[AllowAny])
-    def reset_session(self, request):
-        old_session_key = request.session.session_key
-        user_was_authenticated = request.user.is_authenticated
-        
-        request.session.flush()
-        request.session.cycle_key()
-        
-        return Response({
-            'message': 'Sesion reset successful',
-            'old_session': old_session_key,
-            'new_session': request.session.session_key,
-            'was_authenticated': user_was_authenticated,
-        })
-        
-    @action(detail=False, methods=['POST'], permission_classes=[AllowAny])
-    def register(self, request):
-        print("=== REGISTER ENDPOINT HIT ===")
-        print("Request method:", request.method)
-        print("Request path:", request.path)
-        print("Request content type:", request.content_type)
-        print("Request headers:", dict(request.headers))
-        print("Request data:", request.data)
-        print("User authenticated:", request.user.is_authenticated)
-        print("CSRF processing done:", getattr(request, 'csrf_processing_done', 'Not set'))
-        print("REGISTER ENDPOINT CALLED")
-        print("Request data:", request.data)
-        
-        request.csrf_processing_done = True
-        
-        username = request.data.get('username')
-        email = request.data.get('email')
-        password = request.data.get('password')
-        phone = request.data.get('phone', '')
-        referred_code = request.data.get('referred_code', '')
-        
-        if not username or not email or not password:
-            return Response(
-                {'message': 'Username, email and password are required'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        try:
-            if User.objects.filter(username=username).exists():
-                return Response(
-                    {'message': 'Username is already taken'}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            if User.objects.filter(email=email).exists():
-                return Response(
-                    {'message': 'Email is already registered'}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password,
-                phone=phone,
-                referred_code=referred_code,
-                user_type=User.USER_TYPE_CLIENT,  
-                is_active=True,
-                verified=False  
-            )
-            
-            from users.models import ClientProfile
-            ClientProfile.objects.create(user=user)
-            
-            print(f"User registered: {user.username} ({user.email})")
-
-            # Send welcome email asynchronously
-            try:
-                EmailThread(user.email, user.username).start()
-                print(f"Welcome email process started for {user.email}")
-            except Exception as e:
-                print(f"Failed to start email thread: {str(e)}")
-                # Don't fail the registration if email fails
-            
-            from django.contrib.auth import login
-            login(request, user)
-            
-            return Response({
-                'message': 'Register successful. Welcome email sent!',
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'email': user.email,
-                    'user_type': user.user_type,
-                    'verified': user.verified
-                }
-            }, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
-            print(f"Register error: {str(e)}")
-            return Response(
-                {'message': 'Internal server error'}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-            
-    @action(detail=False, methods=['GET'], permission_classes=[AllowAny])
-    def csrf(self, request):
-        from django.middleware.csrf import get_token
-        csrf_token = get_token(request)
-        
-        response = Response({'csrfToken': csrf_token})
-        response.set_cookie(
-            'csrftoken', 
-            csrf_token, 
-            max_age=3600, 
-            httponly=False,  
-            samesite='Lax'
-        )
-        
-        return response
-    
     @action(detail=False, methods=['POST'], url_path="sync")
     def sync_user(self, request):
         payload = getattr(request, 'auth0_payload', None)
         if not payload:
             return Response({'error': 'Invalid or missing token'}, status=401)
+        
+        dto_service = DtoService()
 
         req = request.data
-        auth0_id = req.get("user_id")
-        email = req.get("email")
-        fullname = req.get("name")
-        created_date = req.get("created_at")
-        updated_date = req.get("updated_at")
-        username = req.get("nickname")
         auth0_id = req.get("sub")
-        last_login = timezone.now()
+
+        defaults = dto_service.UserDefaults(req, auth0_id)
 
         user, created = User.objects.get_or_create(
             auth0_id=auth0_id,
-            defaults={'email': email, 
-                      'full_name': fullname, 
-                      'created_at': created_date,
-                      'modified_at': updated_date,
-                      'last_login': last_login,
-                      'username': username,
-                      'auth0_id': auth0_id 
-                      }
+            defaults=defaults
         )
 
-        serializer = UserDetailSerializer(user)     
+        serializer = UserDetailSerializer(user)   
+        service = ManagementService()
 
-        if created:
-            ClientProfile.objects.create(
-                user=user,
-                balance_available=0,
-                balance_blocked=0                          
-                )
+        if not created:
+            roles = service.auth0_get_roles(auth0_id).json()
+            user_type = roles[0]['name']
+            user.user_type = user_type
+            user.save()
+        else:
+            service.auth0_assign_role(
+                auth0_id, 
+                os.getenv("AUTH0_CLIENT_ROLE_ID")
+            )
 
         return Response({
             'created': created,
             'user': serializer.data
         })
+    
+    @action(detail=False, methods=['POST'], url_path='create-admin')
+    def create_admin(self, request):
+        service = ManagementService()
+        dto_service = DtoService()
+
+        data = request.data
+        payload = dto_service.Auth0AdminPayload(data)
+
+        auth0_user = service.auth0_create_user(payload)
+
+        service.auth0_assign_role(
+            auth0_user['user_id'], 
+            os.getenv("AUTH0_ADMIN_ROLE_ID")
+        )
+
+        passwd = make_password(data["password"])
+        auth0_id = auth0_user['user_id']
+
+        dto_service.SaveFullDBUser(data, passwd, auth0_id)
+
+        return Response({"message": "Admin created successfully", "auth0_id": auth0_user["user_id"]})
     
     def partial_update(self, request, *args, **kwargs):
         response = super().partial_update(request, *args, **kwargs)
@@ -375,23 +187,4 @@ class UserViewSet(viewsets.ModelViewSet):
         )
 
         return response
-
-@client_required
-def client_portfolio(request):
-    print(f"VISTA client_portfolio - User: {request.user}, Type: {getattr(request.user, 'user_type', 'None')}")
-    return JsonResponse({'message': 'Client portfolio'})
-
-class TransactionHistoryView(ClientRequiredMixin, View):
-    def get(self, request):
-        print(f"VISTA TransactionHistoryView - User: {request.user}, Type: {getattr(request.user, 'user_type', 'None')}")
-        return JsonResponse({'message': 'Transaction history'})
-
-@admin_required
-def user_management(request):
-    print(f"VISTA user_management - User: {request.user}, Type: {getattr(request.user, 'user_type', 'None')}")
-    return JsonResponse({'message': 'User management'})
-
-class StockManagementView(AdminRequiredMixin, View):
-    def post(self, request):
-        print(f"VISTA StockManagementView - User: {request.user}, Type: {getattr(request.user, 'user_type', 'None')}")
-        return JsonResponse({'message': 'Action added/modified'})
+    

@@ -1,26 +1,18 @@
-from functools import wraps
-from django.http import JsonResponse
+from rest_framework.permissions import BasePermission
+from rest_framework import status
+from rest_framework.response import Response
+import os
 
-def client_required(view_func):
-    @wraps(view_func)
-    def _wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'error': 'Authentication required'}, status=401)
-        
-        if not hasattr(request.user, 'is_client') or not request.user.is_client():
-            return JsonResponse({'error': 'Client access required'}, status=403)
-        
-        return view_func(request, *args, **kwargs)
-    return _wrapped_view
+class IsAdminRole(BasePermission):
+    def has_permission(self, request, view):
+        token = getattr(request, 'auth', {}) or {}
+        api_id = os.getenv("AUTH0_API_IDENTIFIER")
+        roles = token.get(f"{api_id}/roles", [])
+        return 'admin' in roles
 
-def admin_required(view_func):
-    @wraps(view_func)
-    def _wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return JsonResponse({'error': 'Authentication required'}, status=401)
-        
-        if not hasattr(request.user, 'is_admin') or not request.user.is_admin():
-            return JsonResponse({'error': 'Admin access required'}, status=403)
-        
-        return view_func(request, *args, **kwargs)
-    return _wrapped_view
+class IsClientRole(BasePermission):
+    def has_permission(self, request, view):
+        token = getattr(request, 'auth', {}) or {}
+        api_id = os.getenv("AUTH0_API_IDENTIFIER")
+        roles = token.get(f"{api_id}/roles", [])
+        return 'client' in roles

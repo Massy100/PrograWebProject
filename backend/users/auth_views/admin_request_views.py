@@ -6,7 +6,6 @@ import threading
 
 from ..models import AdminPermissionsRequest
 from ..serializers import AdminPermissionsRequestSerialzer
-from ..permissions import client_required, admin_required
 from ..mixins import ClientRequiredMixin, AdminRequiredMixin
 
 # Importar el servicio de email
@@ -38,28 +37,24 @@ class AdminPermsReqViewSet(viewsets.ModelViewSet):
     queryset = AdminPermissionsRequest.objects.all()
     serializer_class = AdminPermissionsRequestSerialzer
 
-    @admin_required
     @action(detail=False, methods=['get'], url_path='pending')
     def list_pending(self, request):
         queryset = AdminPermissionsRequest.objects.filter(status=AdminPermissionsRequest.STATUS_PENDING).order_by('-issued_at')
         serializer = self.get_serializer(queryset, many=True)
         return JsonResponse(serializer.data, safe=False)
 
-    @admin_required
     @action(detail=False, methods=['get'], url_path='approved')
     def list_approved(self, request):
         queryset = AdminPermissionsRequest.objects.filter(status=AdminPermissionsRequest.STATUS_APPROVED).order_by('-issued_at')
         serializer = self.get_serializer(queryset, many=True)
         return JsonResponse(serializer.data, safe=False)
 
-    @admin_required
     @action(detail=False, methods=['get'], url_path='rejected')
     def list_rejected(self, request):
         queryset = AdminPermissionsRequest.objects.filter(status=AdminPermissionsRequest.STATUS_REJECTED).order_by('-issued_at')
         serializer = self.get_serializer(queryset, many=True)
         return JsonResponse(serializer.data, safe=False)
 
-    @admin_required
     @action(detail=True, methods=['post'], url_path='approve')
     def approve(self, request, pk=None):
         try:
@@ -94,7 +89,6 @@ class AdminPermsReqViewSet(viewsets.ModelViewSet):
                 'error': 'Internal server error'
             }, status=500)
   
-    @admin_required
     @action(detail=True, methods=['post'])
     def reject(self, request, pk=None):
         admin_request = self.get_object()
@@ -104,7 +98,6 @@ class AdminPermsReqViewSet(viewsets.ModelViewSet):
         admin_request.save()
         return JsonResponse({'status': 'rejected'})
   
-    @client_required
     @action(detail=False, methods=['post'])
     def request_admin(self, request):
         user = request.user
