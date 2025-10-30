@@ -218,3 +218,20 @@ def remove_stocks(request):
         
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def get_inactive_stocks(request):
+    """Obtener las acciones desactivadas (is_active=False)."""
+    try:
+        stocks = Stock.objects.filter(is_active=False)
+        serializer = StockSerializer(stocks, many=True)
+        return Response({
+            "data": serializer.data,
+            "count": len(serializer.data),
+            "last_updated": timezone.now().isoformat(),
+            "source": "database"
+        })
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
