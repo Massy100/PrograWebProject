@@ -107,6 +107,8 @@ export default function PortfolioCreator({ open, onClose }: PortfolioCreatorProp
       setPendingPortfolio(null);
       setShowConfirm(false);
       onClose();
+      window.location.reload();
+
     } catch (err) {
       console.error('❌ Error creating portfolio:', err);
       alert('There was a problem creating the portfolio.');
