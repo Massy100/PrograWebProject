@@ -91,7 +91,7 @@ export default function AddStocksTable({ rows }: Props) {
                     }
                   >
                     ({s.changePct >= 0 ? "+" : ""}
-                    {s.changePct.toFixed(2)}%)
+                    {s.changePct}%)
                   </span>
                 </div>
               </div>

@@ -4,24 +4,35 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { FiClipboard, FiShare2 } from 'react-icons/fi';
 import '../styles/Referral.css';
 
+interface ReferralData {
+  referralCode: string;
+  referralsCount?: number;
+  expiresAt?: string;
+  created?: boolean;
+}
+
 export default function ReferralCard() {
   const { user, isAuthenticated, getAccessTokenSilently } = useAuth0();
-  const [referralCode, setReferralCode] = useState<string>('');
-  const [rewardAmount, setRewardAmount] = useState<string>('$5'); 
+  const [referralData, setReferralData] = useState<ReferralData | null>(null);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const appName = "Stocks";
   const appLink = "https://stocks.com/signup";
-
+  const rewardAmount = "$5";
 
   useEffect(() => {
     async function fetchReferralData() {
       if (!isAuthenticated || !user) return;
 
       try {
+        setLoading(true);
+        setError(null);
+
         const token = await getAccessTokenSilently();
 
-        const response = await fetch(`http://localhost:8000/api/referral`, {
+        const response = await fetch(`http://localhost:8000/api/referrals/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -29,39 +40,42 @@ export default function ReferralCard() {
           },
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          setReferralCode(data.referralCode || '');
-          setRewardAmount('$5'); 
-        } else {
-          console.error('Error al obtener el código de referido');
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || 'Error fetching referral data');
         }
-      } catch (error) {
-        console.error('Error al comunicarse con el backend:', error);
+
+        const data = await response.json();
+        setReferralData(data);
+      } catch (error: any) {
+        console.error('❌ Error fetching referral:', error);
+        setError('Could not load your referral code');
+      } finally {
+        setLoading(false);
       }
     }
 
     fetchReferralData();
   }, [isAuthenticated, user, getAccessTokenSilently]);
 
-
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(referralCode);
+    if (!referralData?.referralCode) return;
+    navigator.clipboard.writeText(referralData.referralCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
 
-
   const shareLink = () => {
+    if (!referralData?.referralCode) return;
     const message = `Hi there! \n\n` +
-                `I’m inviting you to join ${appName} and enjoy exclusive benefits.\n\n` +
-                `Referral code: ${referralCode}\n\n` +
-                `Sign up here: ${appLink}\n\n` +
-                `Don’t miss this opportunity!`;
+      `I'm inviting you to join ${appName} and enjoy exclusive benefits.\n\n` +
+      `Referral code: ${referralData.referralCode}\n\n` +
+      `Sign up here: ${appLink}\n\n` +
+      `Don't miss this opportunity!`;
 
     if (navigator.share) {
       navigator.share({
-        title: `Únete a ${appName}`,
+        title: `Join ${appName}`,
         text: message,
       }).catch(() => {
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
@@ -76,32 +90,56 @@ export default function ReferralCard() {
   return (
     <div className="referral-container">
       <div className="referral-card">
-        <h1 className="referral-title">Refer and earn!</h1>
-
-        <p className="referral-description">
-          Earn<span className="highlight">{rewardAmount}</span> when your referral joins and completes the registration through their account
-        </p>
-
-        <div className="referral-box">
-          <p className="referral-label">Your referral code</p>
-          <div className="referral-code-box">
-            <span className="referral-code">{referralCode || 'Loading...'}</span>
-            <button className="referral-copy" onClick={copyToClipboard} title="Copiar código">
-              <FiClipboard size={20} />
-            </button>
+        {loading ? (
+          <div className="referral-loading">
+            <div className="spinner"></div>
+            <p>Loading your referral info...</p>
           </div>
-          {copied && <p className="referral-copied">Copied!</p>}
-        </div>
+        ) : error ? (
+          <div className="referral-error">
+            <p>{error}</p>
+          </div>
+        ) : (
+          <>
+            <h1 className="referral-title">Refer and Earn!</h1>
 
-        <div className="referral-actions">
-          <button className="referral-share" onClick={shareLink} disabled={!referralCode}>
-            <FiShare2 size={18} /> Share
-          </button>
-        </div>
+            <p className="referral-description">
+              Earn <span className="highlight">{rewardAmount}</span> when your friend joins and completes registration.
+            </p>
 
-        <div className="referral-note">
-          <p>This code can only be used once.</p>
-        </div>
+            <div className="referral-box">
+              <p className="referral-label">Your Referral Code</p>
+              <div className="referral-code-box">
+                <span className="referral-code">{referralData?.referralCode || '—'}</span>
+                <button className="referral-copy" onClick={copyToClipboard} title="Copy code">
+                  <FiClipboard size={20} />
+                </button>
+              </div>
+              {copied && <p className="referral-copied">Copied!</p>}
+            </div>
+
+            <div className="referral-actions">
+              <button
+                className="referral-share"
+                onClick={shareLink}
+                disabled={!referralData?.referralCode}
+              >
+                <FiShare2 size={18} /> Share
+              </button>
+            </div>
+
+            {referralData?.referralsCount !== undefined && (
+              <p className="referral-stats">
+                You have invited <strong>{referralData.referralsCount}</strong> friends 🎉
+              </p>
+            )}
+
+            <div className="referral-note">
+              <p>This code expires on {new Date(referralData?.expiresAt || '').toLocaleDateString()}.</p>
+              <p>Each referral can use it once.</p>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
