@@ -209,3 +209,11 @@ ALPHA_VANTAGE_API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY')
 # Verificar que la API key esté configurada
 if not ALPHA_VANTAGE_API_KEY:
     raise ValueError("ALPHA_VANTAGE_API_KEY no está configurada en las variables de entorno")
+
+print("=" * 50)
+print("🎯 SETTINGS.PY CARGADO")
+print(f"DEBUG: {DEBUG}")
+print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
+print(f"RENDER: {os.environ.get('RENDER')}")
+print(f"ENV DEBUG: {os.environ.get('DEBUG')}")
+print("=" * 50)
