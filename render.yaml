@@ -17,19 +17,47 @@ services:
     # Start command
     startCommand: gunicorn api.wsgi:application --bind 0.0.0.0:$PORT
     
-    # Variables de entorno
+    # Variables de entorno 
     envVars:
+      # Database
       - key: DATABASE_URL
-        value: psql 'postgresql://neondb_owner:npg_sMkq4Z9iuyhO@ep-empty-tooth-ad8oe3x3-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+        value: "postgresql://neondb_owner:npg_sMkq4Z9iuyhO@ep-empty-tooth-ad8oe3x3-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
       
+      # Django
       - key: SECRET_KEY
-        generateValue: true
-      
-      - key: DEBUG
-        value: "False"
-      
+        value: "PrograWeb"  
+        value: "False"  
       - key: ALLOWED_HOSTS
         value: "django-backend.onrender.com,.onrender.com,localhost,127.0.0.1"
-      
       - key: DJANGO_SETTINGS_MODULE
-        value: api.settings.production
+        value: "api.settings.production"
+      
+      # CORS
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://progra-web-project-delta.vercel.app/"
+      
+      # Auth0
+      - key: AUTH0_DOMAIN
+        value: "dev-cpp5kajkfx6m7vzf.us.auth0.com"
+      - key: AUTH0_CLIENT_ID
+        value: "HZSagdojlui22Hib25IwEPON5E7nPyBo"
+      - key: AUTH0_API_IDENTIFIER
+        value: "https://api.stockstraderapp.com"
+      - key: AUTH0_ALGORITHMS
+        value: "RS256"
+      
+      # Email (SendGrid)
+      - key: SENDGRID_API_KEY
+        value: "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"
+      - key: SENDGRID_FROM_EMAIL
+        value: "massielle.coti@gmail.com"
+      - key: DEFAULT_FROM_EMAIL
+        value: "massielle.coti@gmail.com"
+      
+      # Alpha Vantage
+      - key: ALPHA_VANTAGE_API_KEY
+        value: "8392QWEF44E623PC"
+      
+      # API URL para el backend (apunta a sí mismo)
+      - key: NEXT_PUBLIC_API_URL
+        value: "https://django-backend.onrender.com/api"  
