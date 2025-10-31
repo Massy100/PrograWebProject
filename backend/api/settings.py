@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'referrals',
     'admin_dashboard',
     'banks',
+    'drf_yasg',
 ]
 
 

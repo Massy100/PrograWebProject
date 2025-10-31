@@ -19,6 +19,7 @@ class PortfolioViewSet(viewsets.ModelViewSet):
   filterset_fields = ['client']
   ordering_fields = ['name', 'created_at']
   order = ['name']
+  http_method_names = ['get', 'post']
 
   def get_serializer_class(self):
     if self.action == "create":
@@ -32,11 +33,14 @@ class InvestmentViewSet(viewsets.ModelViewSet):
   filterset_fields = ['portfolio', 'stock', 'purchased_at']
   ordering_fields = ['average_price']
   order = ['-average_price']
+  http_method_names = ['get', 'post']
 
 
 class PortfolioValueUpdatesViewSet(viewsets.ModelViewSet):
   queryset = PortfolioValueUpdates.objects.all()
-  serializer_class = PortfolioUpdatesSerializer()
+  serializer_class = PortfolioUpdatesSerializer
+
+  http_method_names = ['get', 'post']
 
   @action(detail=False, methods=['get'], url_path='year-summary')
   def yearly_value_summary(self, request):

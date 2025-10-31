@@ -16,32 +16,12 @@ class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
 
+    http_method_names = ['get', 'post']
+
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return FullTransactionSerializer
         return TransactionSerializer
-    
-    '''
-    json structure for buy/sell:
-    {
-        "client_id": 1,
-        "total_amount": 1000.00,
-        "details": [
-            {
-                "stock_id": 1,
-                "quantity": 10,
-                "unit_price": 100.00,
-                "portfolio_id": 1
-            },
-            {
-                "stock_id": 2,
-                "quantity": 5,
-                "unit_price": 200.00,
-                "portfolio_id": 1
-            }
-        ]
-    }
-    '''
 
     @transaction.atomic
     @action(detail=False, methods=['post'], url_path='buy')

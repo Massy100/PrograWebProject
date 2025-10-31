@@ -37,6 +37,8 @@ class AdminPermsReqViewSet(viewsets.ModelViewSet):
     queryset = AdminPermissionsRequest.objects.all()
     serializer_class = AdminPermissionsRequestSerialzer
 
+    http_method_names = ['get', 'post']
+
     @action(detail=False, methods=['get'], url_path='pending')
     def list_pending(self, request):
         queryset = AdminPermissionsRequest.objects.filter(status=AdminPermissionsRequest.STATUS_PENDING).order_by('-issued_at')

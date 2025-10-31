@@ -23,16 +23,9 @@ class BankViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'address']
     ordering_fields = ['name', 'established_date']
     ordering = ['name']
+    http_method_names = ['get', 'post']
 
 class FundsTransferViewSet(viewsets.ModelViewSet):
-    """
-      - GET    /fundstransfers/           
-      - POST   /fundstransfers/           
-      - GET    /fundstransfers/{id}/      
-      - PUT    /fundstransfers/{id}/      
-      - PATCH  /fundstransfers/{id}/      
-      - DELETE /fundstransfers/{id}/      
-    """
     queryset = FundsTransfer.objects.all()
     serializer_class = FundsTransferSerializer
     permission_classes = [AllowAny]
@@ -41,6 +34,7 @@ class FundsTransferViewSet(viewsets.ModelViewSet):
     search_fields = ['user__username', 'bank__name']
     ordering_fields = ['amount', 'transfer_date']
     ordering = ['-transfer_date']
+    http_method_names = ['get', 'post']
 
     def get_queryset(self):
         user = self.request.user
