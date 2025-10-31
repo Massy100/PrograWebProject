@@ -26,6 +26,7 @@ services:
       # Django
       - key: SECRET_KEY
         value: "PrograWeb"  
+      - key: DEBUG
         value: "False"  
       - key: ALLOWED_HOSTS
         value: "django-backend.onrender.com,.onrender.com,localhost,127.0.0.1"
@@ -34,7 +35,7 @@ services:
       
       # CORS
       - key: CORS_ALLOWED_ORIGINS
-        value: "https://progra-web-project-delta.vercel.app/"
+        value: "https://progra-web-project-delta.vercel.app" 
       
       # Auth0
       - key: AUTH0_DOMAIN
@@ -60,4 +61,4 @@ services:
       
       # API URL para el backend (apunta a sí mismo)
       - key: NEXT_PUBLIC_API_URL
-        value: "https://django-backend.onrender.com/api"  
+        value: "https://django-backend.onrender.com/api"
