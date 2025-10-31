@@ -16,6 +16,8 @@ urlpatterns = [
     path('stocks/<int:stock_id>/toggle/', stock_views.toggle_stock_status, name='toggle_stock_status'),
     path('stocks/remove/', stock_views.remove_stocks, name='remove_stocks'),
 
+    path('stocks/refresh/', stock_views.refresh_stocks_prices, name='refresh_stocks_prices'),
+
     # Mantén esta al final
     path('stocks/<str:symbol>/', alpha_vantage_views.get_stock_real_time_detail, name='stock_real_time_detail'),
 ]

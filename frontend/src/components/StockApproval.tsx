@@ -16,8 +16,7 @@ type StockItem = {
 
 export default function StockManager() {
   const BASE_URL = "http://localhost:8000/api/alpha-vantage/stocks";
-  const BATCH_SIZE = 2; 
-  const UPDATE_INTERVAL = 24000; 
+  const REFRESH_INTERVAL = 60000;
 
   const [stocks, setStocks] = useState<StockItem[]>([]);
   const [systemStocks, setSystemStocks] = useState<StockItem[]>([]);
@@ -27,78 +26,57 @@ export default function StockManager() {
   const [tab, setTab] = useState<"pending" | "system" | "inactive">("pending");
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
-  const updateIndex = useRef(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 2500);
   };
-
-  const toggleStockStatus = async (ids: number[], activate: boolean) => {
-    try {
-      const results = await Promise.all(
-        ids.map(async (id) => {
-          const res = await fetch(`${BASE_URL}/${id}/toggle/`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-          });
-          return res.ok ? await res.json() : null;
-        })
-      );
-      const updated = results.filter((r) => r !== null);
-
-      if (activate) {
-        const reactivated = inactiveStocks.filter((s) =>
-          selected.includes(s.symbol)
-        );
-        setInactiveStocks((prev) =>
-          prev.filter((s) => !selected.includes(s.symbol))
-        );
-        setSystemStocks((prev) => [
-          ...prev,
-          ...reactivated.map((s) => ({ ...s, is_active: true })),
-        ]);
-        showToast(`✅ ${updated.length} stock(s) reactivadas`);
-      } else {
-        const removed = systemStocks.filter((s) =>
-          selected.includes(s.symbol)
-        );
-        setSystemStocks((prev) =>
-          prev.filter((s) => !selected.includes(s.symbol))
-        );
-        setInactiveStocks((prev) => [
-          ...prev,
-          ...removed.map((s) => ({ ...s, is_active: false })),
-        ]);
-        showToast(`⚠️ ${updated.length} stock(s) desactivadas`);
-      }
-    } catch {
-      showToast("Error cambiando estado de stocks");
-    }
-  };
-
   const fetchApprovedStocks = async () => {
     try {
       setLoading(true);
+
       const response = await fetch(`${BASE_URL}/approved/`);
-      if (!response.ok) throw new Error("Error al obtener stocks aprobadas");
+      if (!response.ok) throw new Error("Error al obtener stocks activas");
       const data = await response.json();
 
       const approved: StockItem[] = (data.data || []).map((d: any) => ({
         id: d.id,
         symbol: d.symbol,
         name: d.name,
-        currentPrice: d.currentPrice,
-        changePct: d.changePct,
+        currentPrice: d.currentPrice ?? d.last_price ?? 0,
+        changePct: d.changePct ?? d.variation ?? 0,
         last30d: [],
         targetPrice: 0,
         recommendation: d.recommendation || "HOLD",
-        is_active: d.is_active,
+        is_active: d.is_active ?? true,
       }));
 
-      setSystemStocks(approved);
-    } catch {
+      const localRes = await fetch(`${BASE_URL}/inactive/`);
+      const localData = localRes.ok ? await localRes.json() : { data: [] };
+
+      const localStocks: StockItem[] = (localData.data || []).map((s: any) => ({
+        id: s.id,
+        symbol: s.symbol,
+        name: s.name,
+        currentPrice: s.last_price ?? 0,
+        changePct: s.variation ?? 0,
+        last30d: [],
+        targetPrice: 0,
+        recommendation: s.recommendation || "HOLD",
+        is_active: s.is_active ?? false,
+      }));
+
+      const merged = [
+        ...approved,
+        ...localStocks.filter(
+          (s) => !approved.some((a) => a.symbol === s.symbol)
+        ),
+      ];
+
+      setSystemStocks(merged);
+    } catch (err) {
+      console.error("Error cargando stocks:", err);
       setSystemStocks([]);
     } finally {
       setLoading(false);
@@ -146,6 +124,50 @@ export default function StockManager() {
     return await response.json();
   };
 
+  const toggleStockStatus = async (ids: number[], activate: boolean) => {
+    try {
+      const results = await Promise.all(
+        ids.map(async (id) => {
+          const res = await fetch(`${BASE_URL}/${id}/toggle/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          });
+          return res.ok ? await res.json() : null;
+        })
+      );
+
+      const updated = results.filter((r) => r !== null);
+
+      if (activate) {
+        const reactivated = inactiveStocks.filter((s) =>
+          selected.includes(s.symbol)
+        );
+        setInactiveStocks((prev) =>
+          prev.filter((s) => !selected.includes(s.symbol))
+        );
+        setSystemStocks((prev) => [
+          ...prev,
+          ...reactivated.map((s) => ({ ...s, is_active: true })),
+        ]);
+        showToast(`✅ ${updated.length} stock(s) reactivadas`);
+      } else {
+        const removed = systemStocks.filter((s) =>
+          selected.includes(s.symbol)
+        );
+        setSystemStocks((prev) =>
+          prev.filter((s) => !selected.includes(s.symbol))
+        );
+        setInactiveStocks((prev) => [
+          ...prev,
+          ...removed.map((s) => ({ ...s, is_active: false })),
+        ]);
+        showToast(`⚠️ ${updated.length} stock(s) desactivadas`);
+      }
+    } catch {
+      showToast("Error cambiando estado de stocks");
+    }
+  };
+
   useEffect(() => {
     if (tab === "pending") {
       const stored = localStorage.getItem("stocksToTheSystem");
@@ -159,42 +181,26 @@ export default function StockManager() {
   }, [tab]);
 
   useEffect(() => {
-    if (tab !== "system" || systemStocks.length === 0) return;
+    if (tab !== "system") return;
 
     if (intervalRef.current) clearInterval(intervalRef.current);
 
-    intervalRef.current = setInterval(() => {
-      const start = updateIndex.current;
-      const end = Math.min(start + BATCH_SIZE, systemStocks.length);
-      const stocksToUpdate = systemStocks.slice(start, end);
-
-      stocksToUpdate.forEach(async (stock) => {
-        try {
-          const res = await fetch(`${BASE_URL}/${stock.symbol}/`);
-          if (!res.ok) return;
-          const data = await res.json();
-          setSystemStocks((prev) =>
-            prev.map((s) =>
-              s.symbol === stock.symbol
-                ? {
-                    ...s,
-                    currentPrice: data.price || s.currentPrice,
-                    changePct: data.change_percent || s.changePct,
-                  }
-                : s
-            )
-          );
-        } catch {}
-      });
-
-      updateIndex.current =
-        end >= systemStocks.length ? 0 : updateIndex.current + BATCH_SIZE;
-    }, UPDATE_INTERVAL);
+    intervalRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/refresh/`, { method: "POST" });
+        if (res.ok) {
+          console.log("✅ Stocks updated in DB");
+          fetchApprovedStocks();
+        }
+      } catch (err) {
+        console.error("Error refreshing stocks:", err);
+      }
+    }, REFRESH_INTERVAL);
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [tab, systemStocks]);
+  }, [tab]);
 
   const toggleSelect = (symbol: string) => {
     setSelected((prev) =>
@@ -248,18 +254,15 @@ export default function StockManager() {
           className={`tab-btn ${tab === "system" ? "active" : ""}`}
           onClick={() => setTab("system")}
         >
-          Approved Stocks{" "}
-          <span className="tab-count">({systemStocks.length})</span>
+          All Stocks <span className="tab-count">({systemStocks.length})</span>
         </button>
         <button
           className={`tab-btn ${tab === "inactive" ? "active" : ""}`}
           onClick={() => setTab("inactive")}
         >
-          Inactive Stocks{" "}
-          <span className="tab-count">({inactiveStocks.length})</span>
+          Inactive <span className="tab-count">({inactiveStocks.length})</span>
         </button>
       </div>
-
       <div className="approval-table">
         <div className="approval-header">
           <div></div>
@@ -281,7 +284,7 @@ export default function StockManager() {
             {tab === "pending"
               ? "No pending stocks to review."
               : tab === "system"
-              ? "No approved stocks."
+              ? "No stocks found in system."
               : "No inactive stocks."}
           </div>
         ) : (
@@ -301,8 +304,8 @@ export default function StockManager() {
               </div>
               <div className="symbol-cell">{s.symbol}</div>
               <div>{s.name}</div>
-              <div className="price">$.{s.currentPrice?.toFixed(2) || 0}</div>
-              <div className="price">$.{s.targetPrice?.toFixed(2) || 0}</div>
+              <div className="price">Q.{s.currentPrice?.toFixed(2) || 0}</div>
+              <div className="price">Q.{s.targetPrice?.toFixed(2) || 0}</div>
               <div>
                 <span
                   className={`change-badge ${
@@ -329,9 +332,7 @@ export default function StockManager() {
       {currentStocks.length > 0 && (
         <div className="approval-footer">
           <button
-            className={`confirm-btn ${
-              tab === "system" ? "remove-btn" : ""
-            }`}
+            className={`confirm-btn ${tab === "system" ? "remove-btn" : ""}`}
             onClick={() => setShowModal(true)}
             disabled={selected.length === 0}
           >
@@ -364,7 +365,10 @@ export default function StockManager() {
               <strong>{selected.length}</strong> stock(s)?
             </p>
             <div className="modal-actions">
-              <button className="cancel-btn" onClick={() => setShowModal(false)}>
+              <button
+                className="cancel-btn"
+                onClick={() => setShowModal(false)}
+              >
                 Cancel
               </button>
               <button className="approve-btn" onClick={handleConfirm}>

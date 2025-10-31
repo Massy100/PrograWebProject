@@ -28,6 +28,11 @@
   white-space: nowrap;
   transition: transform 0.1s linear;
   will-change: transform;
+  width: max-content;
+}
+
+.loop-carousel-wrapper:hover .loop-carousel-track {
+  animation-play-state: paused;
 }
 
 .loop-carousel-slide {

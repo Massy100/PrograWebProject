@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import "./StockPage.css";
 import { StockChart } from "@/components/StockChart";
 import { BuyStockSidebar } from "@/components/BuyStockSidebar";
 
-// Tipo de datos para el carrito (las acciones que el usuario agrega)
 type CartItem = {
   portfolio: string;
   stockName: string;
@@ -16,40 +16,104 @@ type CartItem = {
   date: string;
 };
 
+interface StockInfo {
+  symbol: string;
+  name: string;
+  category?: string;
+  last_price: number;
+  variation: number;
+  updated_at: string;
+  created_at: string;
+  is_active: boolean;
+}
+
+interface StockHistoryPoint {
+  date: string;
+  value: number;
+}
+
 export default function StockOverviewPage() {
+  const params = useParams();
+  const router = useRouter();
+  const symbol = params.id as string;
+
+  const [stock, setStock] = useState<StockInfo | null>(null);
+  const [history, setHistory] = useState<StockHistoryPoint[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showSidebar, setShowSidebar] = useState(false);
 
-  // esta es la info que se tiene que fijooo recibir para la grafica osea, la hora o la fecha y el precio tiene que existir varios datos
-  // para que se pueda ver mejor la grafica
-  const stockData = [
-    { date: "9 AM", value: 120 },
-    { date: "10 AM", value: 135 },
-    { date: "11 AM", value: 150 },
-    { date: "12 PM", value: 160 },
-    { date: "1 PM", value: 158 },
-    { date: "2 PM", value: 165 },
-    { date: "3 PM", value: 172 },
-  ];
+  const [role, setRole] = useState<string | null>(null);
+  const [verified, setVerified] = useState<boolean>(false);
+  const [completed, setCompleted] = useState<boolean>(false);
 
-  // es la info que se esta simulando que se le tiene que enviar al carrito de compras pero aqui tiene que ir la de la stock en donde estemos
-  const stockInfo = {
-    symbol: "TSLA",
-    name: "Tesla Inc.",
-    category: "Automotive / Technology",
-    lastPrice: 172.35,
-    variation: 1.45,
-    updatedAt: "15/10/2025, 14:32",
-    createdAt: "10/01/2020, 09:00",
-    status: "Active",
+  const isClientVerified = role === "client" && verified && completed;
+
+  useEffect(() => {
+    const raw = document.cookie.split("; ").find((c) => c.startsWith("auth="));
+    if (raw) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(raw.split("=")[1]));
+        setRole(parsed.role || null);
+        setVerified(parsed.verified || false);
+        setCompleted(parsed.completed || false);
+      } catch (err) {
+        console.error("Error parsing auth cookie:", err);
+      }
+    }
+  }, []);
+
+  const fetchStockData = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`http://localhost:8000/api/stocks/${symbol}/`);
+      if (!res.ok) throw new Error("Stock not found");
+      const data = await res.json();
+
+      setStock({
+        symbol: data.symbol,
+        name: data.name,
+        category: data.category?.name || "Uncategorized",
+        last_price: data.last_price || 0,
+        variation: data.variation || 0,
+        updated_at: data.updated_at || "-",
+        created_at: data.created_at || "-",
+        is_active: data.is_active,
+      });
+    } catch (error) {
+      console.error("Error fetching stock info:", error);
+      setStock(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const isPositive = stockInfo.variation >= 0;
+  const fetchStockHistory = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/stocks/${symbol}/history/`);
+      if (!res.ok) throw new Error("Failed to fetch price history");
+      const data = await res.json();
+
+      const formatted = data.map((p: any) => ({
+        date: new Date(p.recorded_at).toLocaleDateString(),
+        value: p.price,
+      }));
+      setHistory(formatted);
+    } catch (error) {
+      console.error("Error fetching stock history:", error);
+      setHistory([]);
+    }
+  };
+
+  useEffect(() => {
+    if (!symbol) return;
+    fetchStockData();
+    fetchStockHistory();
+  }, [symbol]);
 
   const handleAddToCart = (newItem: CartItem) => {
     const storedCart = localStorage.getItem("shoppingCart");
     const cart: CartItem[] = storedCart ? JSON.parse(storedCart) : [];
 
-    // Verificar si ya existe la misma acción en el mismo portafolio
     const existingIndex = cart.findIndex(
       (item) =>
         item.stockSymbol === newItem.stockSymbol &&
@@ -57,7 +121,6 @@ export default function StockOverviewPage() {
     );
 
     if (existingIndex !== -1) {
-      // Sobrescribe la accion existente con los nuevos datos
       cart[existingIndex] = {
         ...cart[existingIndex],
         quantity: newItem.quantity,
@@ -65,12 +128,33 @@ export default function StockOverviewPage() {
         date: newItem.date,
       };
     } else {
-      // Agregar una nueva acción si no existe
       cart.push(newItem);
     }
 
     localStorage.setItem("shoppingCart", JSON.stringify(cart));
-    console.log("🛒 Carrito actualizado:", cart);
+  };
+
+  if (loading) {
+    return (
+      <div className="stock-page">
+        <p className="loading-text">Loading stock data...</p>
+      </div>
+    );
+  }
+
+  if (!stock) {
+    return (
+      <div className="stock-page">
+        <p className="error-text">Stock not found.</p>
+      </div>
+    );
+  }
+
+  const isPositive = stock.variation >= 0;
+
+  const handleUnauthorized = () => {
+    alert("❌ You must be a verified client to buy stocks.");
+    router.push("/");
   };
 
   return (
@@ -82,94 +166,71 @@ export default function StockOverviewPage() {
       <section className="stock-hero">
         <div>
           <h1 className="hero-title">
-            {stockInfo.name} <br /> ({stockInfo.symbol})
+            {stock.name} <br /> ({stock.symbol})
           </h1>
-          <p className="hero-subtitle">{stockInfo.category}</p>
+          <p className="hero-subtitle">{stock.category}</p>
         </div>
 
-        <button className="buy-stock-btn" onClick={() => setShowSidebar(true)}>
-          Add Stock
-        </button>
+        {isClientVerified ? (
+          <button className="buy-stock-btn" onClick={() => setShowSidebar(true)}>
+            Add Stock
+          </button>
+        ) : (
+          <button
+            className="buy-stock-btn disabled"
+            onClick={handleUnauthorized}
+          >
+            Restricted Action
+          </button>
+        )}
       </section>
 
       <section className="stock-metrics">
-        <div className="metric">
-          <span>SYMBOL</span>
-          <p>{stockInfo.symbol}</p>
-        </div>
-        <div className="metric">
-          <span>LAST PRICE</span>
-          <p>Q{stockInfo.lastPrice.toFixed(2)}</p>
-        </div>
+        <div className="metric"><span>SYMBOL</span><p>{stock.symbol}</p></div>
+        <div className="metric"><span>LAST PRICE</span><p>$.{stock.last_price}</p></div>
         <div className="metric">
           <span>VARIATION</span>
           <p className={isPositive ? "positive" : "negative"}>
             {isPositive ? "+" : ""}
-            {stockInfo.variation.toFixed(2)}%
+            {stock.variation}%
           </p>
         </div>
         <div className="metric">
           <span>STATUS</span>
-          <p className={stockInfo.status === "Active" ? "active" : "inactive"}>
-            {stockInfo.status}
+          <p className={stock.is_active ? "active" : "inactive"}>
+            {stock.is_active ? "Active" : "Inactive"}
           </p>
         </div>
       </section>
 
       <div className="stock-chart-section">
-        <StockChart name={stockInfo.symbol} data={stockData} theme="dark" />
+        <StockChart name={stock.symbol} data={history} theme="dark" />
       </div>
 
       <div className="stock-info-section">
         <div className="stock-info-card">
           <h3>Stock Information</h3>
-          <div className="stock-info-row">
-            <span>Symbol</span>
-            <p>{stockInfo.symbol}</p>
-          </div>
-          <div className="stock-info-row">
-            <span>Name</span>
-            <p>{stockInfo.name}</p>
-          </div>
-          <div className="stock-info-row">
-            <span>Category</span>
-            <p>{stockInfo.category}</p>
-          </div>
-          <div className="stock-info-row">
-            <span>Created At</span>
-            <p>{stockInfo.createdAt}</p>
-          </div>
-          <div className="stock-info-row">
-            <span>Last Updated</span>
-            <p>{stockInfo.updatedAt}</p>
-          </div>
+          <div className="stock-info-row"><span>Symbol</span><p>{stock.symbol}</p></div>
+          <div className="stock-info-row"><span>Name</span><p>{stock.name}</p></div>
+          <div className="stock-info-row"><span>Category</span><p>{stock.category}</p></div>
+          <div className="stock-info-row"><span>Created At</span><p>{stock.created_at}</p></div>
+          <div className="stock-info-row"><span>Last Updated</span><p>{stock.updated_at}</p></div>
           <div className="stock-info-row">
             <span>Status</span>
-            <div
-              className={`status-badge ${
-                stockInfo.status === "Active" ? "active" : "inactive"
-              }`}
-            >
-              {stockInfo.status}
+            <div className={`status-badge ${stock.is_active ? "active" : "inactive"}`}>
+              {stock.is_active ? "Active" : "Inactive"}
             </div>
           </div>
         </div>
 
         <div className="stock-info-card">
           <h3>Market Data</h3>
-          <div className="stock-info-row">
-            <span>Last Price</span>
-            <p className="stock-price">Q{stockInfo.lastPrice.toFixed(2)}</p>
-          </div>
+          <div className="stock-info-row"><span>Last Price</span><p className="stock-price">Q{stock.last_price.toFixed(2)}</p></div>
           <div className="stock-info-row">
             <span>Variation</span>
-            <p
-              className={`stock-variation ${
-                isPositive ? "positive" : "negative"
-              }`}
-            >
+            <p className={`stock-variation ${isPositive ? "positive" : "negative"}`}>
               {isPositive ? "+" : ""}
-              {stockInfo.variation.toFixed(2)}%
+              {stock.variation}%
             </p>
           </div>
           <div className="stock-info-row">
@@ -181,28 +242,30 @@ export default function StockOverviewPage() {
         </div>
       </div>
 
-      <BuyStockSidebar
-        isOpen={showSidebar}
-        onClose={() => setShowSidebar(false)}
-        stockName={stockInfo.name}
-        stockSymbol={stockInfo.symbol}
-        stockPrice={stockInfo.lastPrice}
-        portfolios={["Main Portfolio", "Growth Fund", "Tech Picks"]}
-        onConfirm={(data) => {
-          const newCartItem: CartItem = {
-            portfolio: data.portfolio,
-            stockName: stockInfo.name,
-            stockSymbol: stockInfo.symbol,
-            stockPrice: stockInfo.lastPrice,
-            quantity: data.quantity,
-            total: stockInfo.lastPrice * data.quantity,
-            date: new Date().toLocaleString(),
-          };
 
-          handleAddToCart(newCartItem);
-          setShowSidebar(false);
-        }}
-      />
+      {isClientVerified && (
+        <BuyStockSidebar
+          isOpen={showSidebar}
+          onClose={() => setShowSidebar(false)}
+          stockName={stock.name}
+          stockSymbol={stock.symbol}
+          stockPrice={stock.last_price}
+          portfolios={["Main Portfolio", "Growth Fund", "Tech Picks"]}
+          onConfirm={(data) => {
+            const newCartItem: CartItem = {
+              portfolio: data.portfolio,
+              stockName: stock.name,
+              stockSymbol: stock.symbol,
+              stockPrice: stock.last_price,
+              quantity: data.quantity,
+              total: stock.last_price * data.quantity,
+              date: new Date().toLocaleString(),
+            };
+            handleAddToCart(newCartItem);
+            setShowSidebar(false);
+          }}
+        />
+      )}
     </div>
   );
 }

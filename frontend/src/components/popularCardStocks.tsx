@@ -73,7 +73,7 @@ export default function PopularStocksCard({ items, loading = false }: Props) {
                     }
                   >
                     {it.changePct >= 0 ? "+" : ""}
-                    {it.changePct.toFixed(2)}%
+                    {it.changePct}%
                   </span>
                 )}
               </div>
