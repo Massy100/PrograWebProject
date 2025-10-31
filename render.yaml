@@ -31,7 +31,7 @@ services:
       - key: ALLOWED_HOSTS
         value: "django-backend.onrender.com,.onrender.com,localhost,127.0.0.1"
       - key: DJANGO_SETTINGS_MODULE
-        value: "api.settings.production"
+        value: "api.settings"
       
       # CORS
       - key: CORS_ALLOWED_ORIGINS
