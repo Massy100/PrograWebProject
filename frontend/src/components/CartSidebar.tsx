@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import "../styles/CartSidebar.css";
 
-// Tipo actualizado para que coincida con los datos guardados en localStorage
 type CartItem = {
   portfolio: string;
   stockName: string;
@@ -25,13 +24,15 @@ export default function CartSidebar({ onClose, show = false }: Props) {
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<CartItem | null>(null);
+  const [showToast, setShowToast] = useState(false);
 
-  useEffect(() => {
+  const loadCart = () => {
     const storedCart = localStorage.getItem("shoppingCart");
     if (storedCart) {
       try {
         const parsedCart: CartItem[] = JSON.parse(storedCart);
 
+        // Evitar duplicados por portafolio + símbolo
         const uniqueMap = new Map<string, CartItem>();
         parsedCart.forEach((item) => {
           const key = `${item.portfolio}_${item.stockSymbol}`;
@@ -41,12 +42,25 @@ export default function CartSidebar({ onClose, show = false }: Props) {
         const cleanedCart = Array.from(uniqueMap.values());
         setCart(cleanedCart);
         localStorage.setItem("shoppingCart", JSON.stringify(cleanedCart));
-
-        console.log("🛒 Datos cargados y limpiados desde localStorage:", cleanedCart);
       } catch (error) {
         console.error("Error leyendo localStorage:", error);
       }
+    } else {
+      setCart([]);
     }
+  };
+
+  useEffect(() => {
+    loadCart();
+
+    const handleStorageChange = () => {
+      loadCart();
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2500);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const incrementQuantity = (stockSymbol: string, portfolio: string) => {
@@ -64,7 +78,6 @@ export default function CartSidebar({ onClose, show = false }: Props) {
       return updated;
     });
   };
-
 
   const decrementQuantity = (stockSymbol: string, portfolio: string) => {
     setCart((prev) => {
@@ -174,14 +187,14 @@ export default function CartSidebar({ onClose, show = false }: Props) {
                         <p className="cartCardQty">Qty: {item.quantity}</p>
                       </div>
                     </div>
-                    <p className="cartCardPrice">Q.{item.total.toFixed(2)}</p>
+                    <p className="cartCardPrice">$.{item.total}</p>
                   </div>
                 ))
               )}
             </div>
 
             <div className="cartFooter">
-              <div className="cartTotal">Total: Q.{total.toFixed(2)}</div>
+              <div className="cartTotal">Total: $.{total}</div>
               <button
                 className="cartFinishBtn"
                 onClick={handleFinishPurchase}
@@ -203,8 +216,8 @@ export default function CartSidebar({ onClose, show = false }: Props) {
                 <p className="cartDetailCompany">{selectedItem.stockSymbol}</p>
               </div>
               <p className="cartDetailPrice">
-                Q.
-                {(selectedItem.stockPrice * selectedItem.quantity).toFixed(2)}
+                $.
+                {(selectedItem.stockPrice * selectedItem.quantity)}
               </p>
             </div>
 
@@ -216,8 +229,8 @@ export default function CartSidebar({ onClose, show = false }: Props) {
                 <strong>Portfolio:</strong> {selectedItem.portfolio}
               </p>
               <p>
-                <strong>Individual Price:</strong> Q.
-                {selectedItem.stockPrice.toFixed(2)}
+                <strong>Individual Price:</strong> $.
+                {selectedItem.stockPrice}
               </p>
             </div>
 

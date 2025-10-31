@@ -80,7 +80,7 @@ export default function TransactionsTable({ rows }: { rows: TxRow[] }) {
 
                 <td>{r.quantity ?? '—'}</td>
                 <td>Q.{r.unit_price != null ? r.unit_price : '—'}</td>
-                <td className={`${gain ? 'is-gain' : 'is-loss'}`}>Q.{r.total_amount}</td>
+                <td className={`${gain ? 'is-gain' : 'is-loss'}`}>$.{r.total_amount}</td>
 
                 <td>
                   <i className={`tx__dot ${r.is_active ? 'ok' : 'off'}`} />

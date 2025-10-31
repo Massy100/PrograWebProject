@@ -88,6 +88,7 @@ export default function PurchasePage() {
         return;
       }
 
+      // ✅ 1️⃣ Obtener client profile id
       const userRes = await fetch(
         `http://localhost:8000/api/users/${currentUser.id}/`,
         {
@@ -114,19 +115,65 @@ export default function PurchasePage() {
         return;
       }
 
+      // ✅ 2️⃣ Obtener los IDs de cada acción y portafolio antes de enviar
+      const enrichedDetails = await Promise.all(
+        filteredCart.map(async (item) => {
+          let stock_id = null;
+          let portfolio_id = null;
+
+          try {
+            // Buscar el stock por nombre o símbolo
+            const stockRes = await fetch(
+              `http://localhost:8000/api/stocks/by-name/?name=${encodeURIComponent(
+                item.stockName
+              )}`
+            );
+            if (stockRes.ok) {
+              const stockData = await stockRes.json();
+              stock_id = stockData?.id || null;
+            }
+          } catch (err) {
+            console.error(`⚠️ Could not fetch stock id for ${item.stockName}`);
+          }
+
+          try {
+            // Buscar el portafolio
+            const portfolioRes = await fetch(
+              `http://localhost:8000/api/portfolio/portfolios/?search=${encodeURIComponent(
+                item.portfolio
+              )}`
+            );
+            if (portfolioRes.ok) {
+              const portfolioData = await portfolioRes.json();
+              portfolio_id = portfolioData?.[0]?.id || null;
+            }
+          } catch (err) {
+            console.error(`⚠️ Could not fetch portfolio id for ${item.portfolio}`);
+          }
+
+          if (!stock_id || !portfolio_id) {
+            console.warn(`Missing IDs for ${item.stockName} / ${item.portfolio}`);
+          }
+
+          return {
+            stock_id,
+            portfolio_id,
+            quantity: item.quantity,
+            unit_price: item.stockPrice,
+          };
+        })
+      );
+
+      // ✅ 3️⃣ Armar el payload final
       const transactionPayload = {
         client_id: clientProfileId,
         total_amount: total,
-        details: filteredCart.map((item) => ({
-          stock_id: item.stock_id,
-          quantity: item.quantity,
-          unit_price: item.stockPrice,
-          portfolio_id: item.portfolio_id,
-        })),
+        details: enrichedDetails,
       };
 
       console.log('📦 Payload to send:', transactionPayload);
 
+      // ✅ 4️⃣ Enviar la transacción al backend
       const res = await fetch('http://localhost:8000/api/transactions/buy/', {
         method: 'POST',
         headers: {
@@ -144,6 +191,8 @@ export default function PurchasePage() {
 
       const result = await res.json();
       console.log('✅ Transaction success:', result);
+
+      // ✅ 5️⃣ Limpiar el carrito
       const remaining = cart.filter(
         (item) =>
           !filteredCart.some(
@@ -154,6 +203,7 @@ export default function PurchasePage() {
       );
       localStorage.setItem('shoppingCart', JSON.stringify(remaining));
 
+      // ✅ 6️⃣ Mostrar modal de éxito
       setShowModal(true);
       setTimeout(() => {
         setShowModal(false);

@@ -3,10 +3,11 @@ import React, { useEffect, useState } from "react";
 import "../styles/StockTrends.css";
 
 interface StockTransaction {
-  stock: string;
-  amount: number;
+  symbol: string;
+  name: string;
+  currentPrice: number;
   is_active: boolean;
-  change_percentage: number;
+  changePct: number;
 }
 
 interface StockTrendsProps {
@@ -15,29 +16,60 @@ interface StockTrendsProps {
 
 const StockTrends: React.FC<StockTrendsProps> = ({ loading = false }) => {
   const [offset, setOffset] = useState(0);
+  const [stocks, setStocks] = useState<StockTransaction[]>([]);
+  const [fetching, setFetching] = useState(true);
 
-  const stockData: StockTransaction[] = [
-    { is_active: true, stock: "MSFT", amount: 1200, change_percentage: 1.2 },
-    { is_active: true, stock: "AAPL", amount: 980, change_percentage: -0.8 },
-    { is_active: false, stock: "TSLA", amount: 1500, change_percentage: 2.3 },
-    { is_active: true, stock: "AMZN", amount: 2100, change_percentage: 0.9 },
-    { is_active: true, stock: "GOOG", amount: 1400, change_percentage: -1.5 },
-    { is_active: true, stock: "NVDA", amount: 1800, change_percentage: 1.8 },
-    { is_active: true, stock: "META", amount: 1300, change_percentage: 2.1 },
-    { is_active: true, stock: "NFLX", amount: 1100, change_percentage: -0.6 },
-  ];
+  const fetchStocks = async () => {
+    try {
+      setFetching(true);
+
+      const response = await fetch("http://localhost:8000/api/stocks/active/");
+      if (!response.ok) throw new Error("Failed to fetch active stocks");
+
+      const data = await response.json();
+
+      const parsed: StockTransaction[] = data.map((s: any) => ({
+        symbol: s.symbol,
+        name: s.name,
+        currentPrice: s.last_price ?? 0,
+        is_active: s.is_active ?? true,
+        changePct: s.variation ?? 0,
+      }));
+
+      setStocks(parsed);
+    } catch (error) {
+      console.error("Error loading stocks:", error);
+      setStocks([]);
+    } finally {
+      setFetching(false);
+    }
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setOffset((prev) => (prev - 1) % (stockData.length * 240));
-    }, 20);
+    fetchStocks();
+    const interval = setInterval(fetchStocks, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) {
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setOffset((prev) => (prev - 1) % ((stocks.length || 1) * 240));
+    }, 20);
+    return () => clearInterval(interval);
+  }, [stocks.length]);
+
+  if (loading || fetching) {
     return (
       <div className="carousel-container">
         <div className="loading-spinner">Loading market trends...</div>
+      </div>
+    );
+  }
+
+  if (stocks.length === 0) {
+    return (
+      <div className="carousel-container">
+        <p>No stocks available right now.</p>
       </div>
     );
   }
@@ -49,31 +81,27 @@ const StockTrends: React.FC<StockTrendsProps> = ({ loading = false }) => {
           className="carousel-track"
           style={{ transform: `translateX(${offset}px)` }}
         >
-          {[...stockData, ...stockData].map((tx, idx) => (
-            <a
-              key={idx}
-              href={`/stocks/${tx.stock}`}
-              className="stock-link"
-            >
+          {[...stocks, ...stocks].map((tx, idx) => (
+            <a key={idx} href={`/stocks/${tx.symbol}`} className="stock-link">
               <div className="stock-card">
                 <div className="stock-card-header">
-                  <h3>{tx.stock}</h3>
+                  <h3>{tx.symbol}</h3>
                   <span className={tx.is_active ? "active" : "inactive"}>
                     {tx.is_active ? "Active" : "Inactive"}
                   </span>
                 </div>
 
                 <div className="stock-amount">
-                  <h4>Q.{tx.amount}</h4>
+                  <h4>$.{tx.currentPrice}</h4>
                 </div>
 
                 <p
                   className={`stock-change ${
-                    tx.change_percentage >= 0 ? "positive" : "negative"
+                    tx.changePct >= 0 ? "positive" : "negative"
                   }`}
                 >
-                  {tx.change_percentage >= 0 ? "+" : ""}
-                  {tx.change_percentage}%
+                  {tx.changePct >= 0 ? "+" : ""}
+                  {tx.changePct}%
                 </p>
               </div>
             </a>

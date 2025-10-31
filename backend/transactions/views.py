@@ -75,6 +75,18 @@ class TransactionViewSet(viewsets.ModelViewSet):
             "earned_total": earned_total,
             "transactions": transactions.data
         })
+    
+
+    @action(detail=False, methods=['get'], url_path='user/latest')
+    def user_latest(self, request):
+        client_id = request.query_params.get('client_id')
+
+        if not client_id:
+            return Response({"error": "Missing client_id"}, status=400)
+
+        qs = Transaction.objects.filter(client_id=client_id).order_by('-created_at')[:5]
+        serializer = FullTransactionSerializer(qs, many=True)
+        return Response(serializer.data)
 
 
 

@@ -80,7 +80,7 @@ export default function AddStocksTable({ rows }: Props) {
               <div className="stocks-table-cell">
                 <div className="stocks-table-price">
                   <span className="stocks-table-price-value">
-                    Q.{s.currentPrice}
+                    $.{s.currentPrice}
                   </span>
                   <span
                     className={
@@ -106,7 +106,7 @@ export default function AddStocksTable({ rows }: Props) {
 
               <div className="stocks-table-cell">
                 <span className="stocks-table-target-price">
-                  Q.{s.targetPrice}
+                  $.{s.targetPrice}
                 </span>
               </div>
 

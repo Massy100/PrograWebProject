@@ -26,7 +26,6 @@ export default function Wallet({ open, onClose }: WalletProps) {
     user: number;
   } | null>(null);
 
-  // 🔹 Cargar balance y bancos cuando se abre la wallet
   useEffect(() => {
     if (!open) return;
 
@@ -43,7 +42,6 @@ export default function Wallet({ open, onClose }: WalletProps) {
           return;
         }
 
-        // ✅ Llamada al endpoint de usuario
         const balanceRes = await fetch(`http://localhost:8000/users/${userId}/`, {
           method: 'GET',
           headers: {
@@ -53,7 +51,6 @@ export default function Wallet({ open, onClose }: WalletProps) {
           cache: 'no-store',
         });
 
-        // ✅ Llamada correcta al endpoint de bancos (usa /api/banks/banks/)
         const banksRes = await fetch('http://localhost:8000/api/banks/banks/', {
           method: 'GET',
           headers: {
@@ -71,7 +68,6 @@ export default function Wallet({ open, onClose }: WalletProps) {
 
         console.log('📊 Banks response from backend:', banksData);
 
-        // Si tu backend usa paginación DRF, maneja ambos casos:
         if (Array.isArray(banksData)) {
           setBanks(banksData);
         } else if (banksData.results) {
@@ -89,7 +85,6 @@ export default function Wallet({ open, onClose }: WalletProps) {
     })();
   }, [open, getAccessTokenSilently]);
 
-  // 🔹 Manejador de depósito
   const handleDeposit = () => {
     if (!selectedBank || !amount || !referenceCode) {
       return alert('Please complete all fields');
@@ -107,7 +102,6 @@ export default function Wallet({ open, onClose }: WalletProps) {
     setShowConfirm(true);
   };
 
-  // 🔹 Confirmar depósito
   const confirmDeposit = async () => {
     if (!pendingDeposit) return;
 
@@ -144,10 +138,8 @@ export default function Wallet({ open, onClose }: WalletProps) {
 
   return (
     <>
-      {/* Fondo oscuro */}
       <div className="wallet-overlay" onClick={onClose} />
 
-      {/* Modal de confirmación */}
       {showConfirm && pendingDeposit && (
         <div className="wallet-modal">
           <div className="wallet-modal-content">
@@ -163,7 +155,6 @@ export default function Wallet({ open, onClose }: WalletProps) {
         </div>
       )}
 
-      {/* Sidebar principal */}
       <div className={`wallet-sidebar open`}>
         <button className="wallet-close" onClick={onClose}>✕</button>
 
@@ -174,7 +165,6 @@ export default function Wallet({ open, onClose }: WalletProps) {
           </div>
         </header>
 
-        {/* Selector de bancos */}
         <div className="wallet-section">
           <label className="wallet-label">Select bank:</label>
           <select
@@ -192,7 +182,6 @@ export default function Wallet({ open, onClose }: WalletProps) {
           </select>
         </div>
 
-        {/* Código de referencia */}
         <div className="wallet-section wallet-group">
           <label className="wallet-label">Reference code:</label>
           <input
@@ -204,7 +193,6 @@ export default function Wallet({ open, onClose }: WalletProps) {
           />
         </div>
 
-        {/* Monto y botón de depósito */}
         <div className="wallet-section wallet-group">
           <label className="wallet-label">Amount to deposit:</label>
           <input
