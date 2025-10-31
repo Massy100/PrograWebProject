@@ -1,0 +1,35 @@
+# render.yaml
+services:
+  # Backend Django
+  - type: web
+    name: django-backend
+    env: python
+    region: ohio
+    plan: free
+    rootDir: backend
+    
+    # Build commands
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate
+      
+    # Start command
+    startCommand: gunicorn api.wsgi:application --bind 0.0.0.0:$PORT
+    
+    # Variables de entorno
+    envVars:
+      - key: DATABASE_URL
+        value: psql 'postgresql://neondb_owner:npg_sMkq4Z9iuyhO@ep-empty-tooth-ad8oe3x3-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
+      
+      - key: SECRET_KEY
+        generateValue: true
+      
+      - key: DEBUG
+        value: "False"
+      
+      - key: ALLOWED_HOSTS
+        value: "django-backend.onrender.com,.onrender.com,localhost,127.0.0.1"
+      
+      - key: DJANGO_SETTINGS_MODULE
+        value: api.settings.production
