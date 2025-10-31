@@ -13,6 +13,8 @@ from .services.mgm_token_service import ManagementService
 from .services.dto_service import DtoService
 import os
 
+from django.db import close_old_connections
+
 try:
     from .services.email_service import EmailService
 except ImportError:
@@ -60,6 +62,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['PATCH'])
     def deactivate(self, request, pk=None):
+        close_old_connections()
         """
         Endpoint para desactivar un usuario
         """
@@ -91,6 +94,7 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['PATCH'])
     def activate(self, request, pk=None):
+        close_old_connections()
         """
         Endpoint para activar un usuario
         """
@@ -122,6 +126,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'], url_path="sync")
     def sync_user(self, request):
+        close_old_connections()
         payload = getattr(request, 'auth0_payload', None)
         if not payload:
             return Response({'error': 'Invalid or missing token'}, status=401)
@@ -159,6 +164,7 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['POST'], url_path='create-admin')
     def create_admin(self, request):
+        close_old_connections()
         service = ManagementService()
         dto_service = DtoService()
 
