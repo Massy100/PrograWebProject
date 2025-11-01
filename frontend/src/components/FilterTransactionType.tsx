@@ -87,7 +87,7 @@ export default function FilterTransactionType({
   };
 
   return (
-    <div className="filter-date-div" style={{ position: 'relative' }}>
+    <div className="filter-date-div" >
       {/* Button */}
       <button
         className="filterBtn"

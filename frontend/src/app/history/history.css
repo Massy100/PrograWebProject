@@ -57,7 +57,12 @@
 .div-filter {
   position: absolute;
   top: 600px;
-  right: 45px;
+  right: 700px;
   width: 50%;
-  margin-top: 1.5rem;
+  margin-top: 19rem;
+}
+
+.transactions-header {
+    display: flex;
+    flex-direction: row;
 }

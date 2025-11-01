@@ -101,6 +101,5 @@ class PortfolioValueUpdatesViewSet(viewsets.ModelViewSet):
           return Response({"error": "Missing parameters"}, status=400)
 
       gain_data = PortfolioService.get_portfolio_gain(portfolio_id, start_date, end_date)
-      print(gain_data)
       return Response(gain_data)
 
