@@ -15,7 +15,7 @@ export default function MarketClosedModal({ show, onClose }: MarketClosedModalPr
         <h2>Market Closed</h2>
         <p>You cannot buy or sell stocks while the market is closed. 
           Please try again once the market opens.</p>
-        <button onClick={onClose}>Acept</button>
+        <button onClick={onClose}>Accept</button>
       </div>
     </div>
   );

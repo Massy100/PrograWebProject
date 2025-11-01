@@ -114,6 +114,7 @@ export default function Home() {
   const callApi = async () => {
     try {
       const token = await getAccessTokenSilently();
+      console.log("Token obtenido:", token);
       const response = await fetch("http://localhost:8000/api/users/sync/", {
         method: "POST",
         body: JSON.stringify(user),
@@ -127,12 +128,14 @@ export default function Home() {
         throw new Error("No se obtuvo respuesta del backend.");
       }
       const dbUser = data.user;
+      console.log("Usuario sincronizado:", dbUser);
       localStorage.setItem("auth", JSON.stringify({
         id: dbUser.id, 
         verified: dbUser.verified, 
         role: dbUser.user_type, 
         completed: dbUser.is_completed,
         name: dbUser.full_name,
+        client_id: dbUser.client_profile.id || null
       }));
 
       document.cookie = `auth=${encodeURIComponent(JSON.stringify({

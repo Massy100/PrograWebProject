@@ -16,7 +16,7 @@ from django.db import models
 class PortfolioViewSet(viewsets.ModelViewSet):
   queryset = Portfolio.objects.all()
   filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-  filterset_fields = ['client']
+  filterset_fields = ['client_id']
   ordering_fields = ['name', 'created_at']
   order = ['name']
   http_method_names = ['get', 'post']
@@ -25,6 +25,13 @@ class PortfolioViewSet(viewsets.ModelViewSet):
     if self.action == "create":
       return PortfolioCreateSerializer
     return PortfolioSerializer
+  
+  def perform_create(self, serializer):
+     portfolio = serializer.save()
+     PortfolioValueUpdates.objects.create(
+        portfolio=portfolio,
+        value=0
+     )
 
 class InvestmentViewSet(viewsets.ModelViewSet):
   queryset = Investment.objects.all()
@@ -59,4 +66,41 @@ class PortfolioValueUpdatesViewSet(viewsets.ModelViewSet):
       )
       raw = PortfolioService.format_portfolio_values(res)
       return Response(raw)
+  
+  @action(detail=False, methods=['get'], url_path='date-range-value')
+  def date_range_value(self, request):
+      client_id = request.query_params.get("client_id")
+      start_date = request.query_params.get("start_date")
+      end_date = request.query_params.get("end_date")
+
+      if not client_id or not start_date or not end_date:
+          return Response({"error": "Missing parameters"}, status=400)
+
+      res = (
+          PortfolioValueUpdates.objects
+          .filter(
+              portfolio__client_id=client_id,
+              update_date__date__gte=start_date,
+              update_date__date__lte=end_date
+          )
+          .annotate(month=TruncMonth('update_date'))
+          .values('portfolio_id', 'portfolio__name', 'month')
+          .annotate(total_value=models.Sum('value'))
+          .order_by('portfolio_id', 'month')
+      )
+      raw = PortfolioService.format_portfolio_values(res)
+      return Response(raw)
+  
+  @action(detail=False, methods=['get'], url_path='gain')
+  def portfolio_gain(self, request):
+      portfolio_id = request.query_params.get("portfolio_id")
+      start_date = request.query_params.get("start_date")
+      end_date = request.query_params.get("end_date")
+
+      if not portfolio_id or not start_date or not end_date:
+          return Response({"error": "Missing parameters"}, status=400)
+
+      gain_data = PortfolioService.get_portfolio_gain(portfolio_id, start_date, end_date)
+      print(gain_data)
+      return Response(gain_data)
 

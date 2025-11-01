@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import './report.css';
+import { useAuth0, User } from '@auth0/auth0-react';
 
 type TxType = 'buy' | 'sell';
 
@@ -20,42 +21,128 @@ type TxRow = {
 
 type PortfolioData = {
   balance: number;
-  sales: number;
-  referral: number;
-  estimated: number;
-  transactions: TxRow[];
+  gain: number;
+  gain_percentage: number;
+  currently_invested: number;
 };
 
-const mockPortfolios = ['Alpha', 'Beta', 'Gamma'];
-const mockProfile = 'analyst';
+type PortfolioBasic = {
+  id: number;
+  name: string;
+}
+
 
 export default function DashboardOverview() {
-  const [portfolio, setPortfolio] = useState<string>('Alpha');
+  const [portfolio, setPortfolio] = useState<number>(0);
+  const [portfolios, setPortfolios] = useState<PortfolioBasic[]>();
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const [data, setData] = useState<PortfolioData | null>(null);
+  const [transactionData, setTransactionData] = useState<TxRow[]>([]);
+  const { getAccessTokenSilently } = useAuth0();
+
+  const fetchUserPortfolios = async () => {
+    // Placeholder for fetching user portfolios if needed
+    const auth = localStorage.getItem('auth');
+    if (!auth) return;
+    const user = JSON.parse(auth);
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+
+    const token = await getAccessTokenSilently();
+
+    const res = await fetch(baseUrl + `/portfolio/portfolios/?client_id=${user.client_id}`,
+        {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },}
+      );
+
+     const data = res.json();
+     const portfolioNames = (await data).map((p: PortfolioBasic) => ({ id: p.id, name: p.name }));
+     setPortfolios(portfolioNames);
+     if (portfolioNames.length > 0) {
+       setPortfolio(portfolioNames[0].id);
+     }
+  };
+
+  useEffect(() => {
+    fetchUserPortfolios();
+  }, []);
 
   useEffect(() => {
     const fetchPortfolioData = async () => {
       try {
-        const params = new URLSearchParams({
-          name: portfolio,
-          from: dateRange.from || '',
-          to: dateRange.to || '',
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+        const token = await getAccessTokenSilently();
+        const response = await fetch(baseUrl + 
+          `/portfolio/value/gain/?start_date=${dateRange.from}&end_date=${dateRange.to}&portfolio_id=${portfolio}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
         });
+        if (!response.ok) throw new Error('Failed to fetch data');
 
-        const response = await fetch(`/api/portfolio?${params.toString()}`);
-        if (!response.ok) throw new Error('Error al obtener los datos');
-
-        const result: PortfolioData = await response.json();
-        setData(result);
+        const result = response.json();
+        setData({
+          balance: (await result).balance,
+          gain: (await result).gain,
+          gain_percentage: (await result).gain_percent,
+          currently_invested: (await result).total_invested,
+        });
       } catch (error) {
-        console.error('Error al conectar con el backend:', error);
+        console.error('Error connecting to backend:', error);
         setData(null);
       }
     };
 
-    fetchPortfolioData();
-  }, [portfolio, dateRange]);
+    const fetchTransactions = async () => {
+      try {
+
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+        const token = await getAccessTokenSilently();
+
+        const auth = localStorage.getItem('auth');
+        if (!auth) return;
+        const user = JSON.parse(auth);
+
+        const response = await fetch(baseUrl + 
+          `/transactions/summary/?start-date=${dateRange.from}&end-date=${dateRange.to}&client_id=${user.client_id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch transactions');
+        const result = await response.json();
+        const transactions = result.transactions;
+        const formattedResult = transactions.flatMap((tx: any )=> tx.details.map((detail: any) => ({
+          code: tx.code,
+          stock: detail.stock,
+          transaction_type: tx.transaction_type,
+          total_amount: detail.total_amount,
+          created_at: tx.created_at,
+          is_active: tx.is_active,
+          quantity: detail.quantity,
+          unit_price: detail.unit_price,
+        })));
+        setTransactionData(formattedResult);
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+        setTransactionData([]);
+      }
+    }
+    if (dateRange.from !== '' && dateRange.to !== '' && portfolio !== 0) {
+      fetchPortfolioData();
+      fetchTransactions();
+    }
+
+  }, [dateRange]);
 
   const exportPDF = async () => {
     const element = document.getElementById('dashboard-pdf');
@@ -80,13 +167,19 @@ export default function DashboardOverview() {
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(18);
     pdf.setTextColor('#021631');
-    pdf.text('Resumen del portafolio', margin, margin);
+    pdf.text('Portfolio Summary', margin, margin);
+
+    const portfolioName = portfolios!.map((p: PortfolioBasic) => {
+      if (p.id == portfolio) {
+        return p.name;
+      }
+    });
 
     pdf.setFontSize(11);
     pdf.setTextColor('#6b7280');
-    pdf.text(`Portafolio: ${portfolio}`, margin, margin + 20);
-    pdf.text(`Perfil: ${mockProfile}`, margin, margin + 35);
-    pdf.text(`Rango de fechas: ${dateRange.from || '—'} a ${dateRange.to || '—'}`, margin, margin + 50);
+    pdf.text(`Portfolio: ${portfolioName}`, margin, margin + 20);
+    pdf.text(`Profile: Client`, margin, margin + 35);
+    pdf.text(`Date range: ${dateRange.from || '—'} to ${dateRange.to || '—'}`, margin, margin + 50);
 
     const imgWidth = pageWidth - margin * 2;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -99,25 +192,25 @@ export default function DashboardOverview() {
       pdf.addImage(imgData, 'PNG', margin, imgY, imgWidth, imgHeight);
     }
 
-    pdf.save(`resumen-${portfolio}.pdf`);
+    pdf.save(`summary-${portfolio}.pdf`);
   };
 
   return (
     <main className="panel">
-      <h1 className="panel__title">Resumen</h1>
+      <h1 className="panel__title">Summary by date</h1>
 
       <div className="dashboard__controls">
         <label>
-          <strong>Seleccionar portafolio:</strong><br />
-          <select value={portfolio} onChange={e => setPortfolio(e.target.value)}>
-            {mockPortfolios.map(p => (
-              <option key={p} value={p}>{p}</option>
+          <strong>Select portfolio:</strong><br />
+          <select value={portfolio} onChange={e => setPortfolio(Number(e.target.value))}>
+            {portfolios && portfolios.map(p => (
+              <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
         </label>
 
         <label>
-          <strong>Desde:</strong><br />
+          <strong>From:</strong><br />
           <input
             type="date"
             value={dateRange.from}
@@ -126,7 +219,7 @@ export default function DashboardOverview() {
         </label>
 
         <label>
-          <strong>Hasta:</strong><br />
+          <strong>To:</strong><br />
           <input
             type="date"
             value={dateRange.to}
@@ -134,45 +227,41 @@ export default function DashboardOverview() {
           />
         </label>
 
-        <button className="alertBtn" onClick={exportPDF}>⬇ Exportar PDF</button>
+        {
+          portfolio !== 0 && (<button className="alertBtn" onClick={exportPDF}>⬇ Export PDF</button>)
+        }
+        
       </div>
 
       <div id="dashboard-pdf" className="dashboard__wrap">
         {data && (
           <>
+            <h2>Portfolio Summary</h2>
             <section className="fc__grid">
-              <Card title="Balance" value={data.balance} warranty={48} positive />
-              <Card title="Ventas" value={data.sales} warranty={48} positive={false} />
-              <Card title="Referidos" value={data.referral} warranty={48} positive={false} />
-              <Card title="Estimado" value={data.estimated} warranty={48} positive />
+              <Card title="Balance" value={data.balance} />
+              <Card title="Gain" value={data.gain} warranty={data.gain_percentage} positive={data.gain_percentage >= 0} />
+              <Card title="Currently invested" value={data.currently_invested} />
             </section>
 
+            <h2>Transactions Summary</h2>
             <section className="tx__wrap">
               <table className="tx__table">
-                <colgroup>
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                </colgroup>
+                <colgroup><col /><col /><col /><col /><col /><col /><col /></colgroup>
 
                 <thead>
                   <tr>
-                    <th>Tipo</th>
-                    <th>Activo</th>
-                    <th>Fecha</th>
-                    <th>Cantidad</th>
-                    <th>Precio Unitario</th>
+                    <th>Type</th>
+                    <th>Asset</th>
+                    <th>Date</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
                     <th>Total</th>
-                    <th>Estado</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {data.transactions
+                  {transactionData
                     .filter(r => {
                       const txDate = new Date(r.created_at).getTime();
                       const fromDate = dateRange.from ? new Date(dateRange.from).getTime() : -Infinity;
@@ -190,13 +279,10 @@ export default function DashboardOverview() {
                             <span className={`tx__pill ${pillClass}`}>{pill}</span>
                           </td>
                           <td className="td-action-name">
-                            <div className="tx__asset">
-                              {r.stock && <div className="tx__assetTitle" title={r.stock}>{r.stock}</div>}
-                              {r.code && <div className="tx__assetCode" title={String(r.code)}>{r.code}</div>}
-                            </div>
+                              {r.stock}
                           </td>
                           <td>
-                            {new Date(r.created_at).toLocaleDateString('es-ES', {
+                            {new Date(r.created_at).toLocaleDateString('en-US', {
                               year: 'numeric',
                               month: 'short',
                               day: 'numeric',
@@ -224,21 +310,26 @@ export default function DashboardOverview() {
 function Card({
   title,
   value,
-  warranty,
   positive = true,
+  warranty,
 }: {
   title: string;
   value: number;
-  warranty: number;
+  warranty?: number;
   positive?: boolean;
 }) {
   return (
     <div className="fc__card">
       <div className="fc__title">{title.toUpperCase()}</div>
-      <div className="fc__value">${value.toLocaleString()}</div>
-      <div className={`fc__warranty ${positive ? 'green' : 'red'}`}>
-        {warranty}% garantía
+      <div className="fc__value">${value.toLocaleString('en-US')}</div>
+      {
+        warranty !== undefined && (
+          <div className={`fc__warranty ${positive ? 'green' : 'red'}`}>
+        {warranty}% percentage
       </div>
+        )
+      }
+      
     </div>
   );
 }

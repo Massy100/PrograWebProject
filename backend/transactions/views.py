@@ -19,9 +19,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post']
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return FullTransactionSerializer
-        return TransactionSerializer
+        return FullTransactionSerializer
 
     @transaction.atomic
     @action(detail=False, methods=['post'], url_path='buy')
@@ -55,17 +53,18 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
         start_date = request.query_params.get('start-date')
         end_date = request.query_params.get('end-date')
+        client_id = request.query_params.get('client_id')
 
         if start_date and end_date:
-            qs = qs.filter(created_at__date__gte=start_date, created_at__date__lte=end_date)
+            qs = qs.filter(created_at__date__gte=start_date, created_at__date__lte=end_date, client_id=client_id)
         
         transactions_count = qs.count()
-        buy_count = qs.filter(transaction_type='buy').count()
-        sell_count = qs.filter(transaction_type='sell').count()
-        invested_total = qs.filter(transaction_type='buy').aggregate(total=Sum('total_amount'))['total'] or 0
-        earned_total = qs.filter(transaction_type='sell').aggregate(total=Sum('total_amount'))['total'] or 0
+        buy_count = qs.filter(transaction_type='buy', client_id=client_id).count()
+        sell_count = qs.filter(transaction_type='sell', client_id=client_id).count()
+        invested_total = qs.filter(transaction_type='buy', client_id=client_id).aggregate(total=Sum('total_amount'))['total'] or 0
+        earned_total = qs.filter(transaction_type='sell', client_id=client_id).aggregate(total=Sum('total_amount'))['total'] or 0
 
-        transactions = TransactionSerializer(qs, many=True)
+        transactions = FullTransactionSerializer(qs, many=True)
 
         return Response({
             "transactions_count": transactions_count,
@@ -75,6 +74,5 @@ class TransactionViewSet(viewsets.ModelViewSet):
             "earned_total": earned_total,
             "transactions": transactions.data
         })
-
 
 
