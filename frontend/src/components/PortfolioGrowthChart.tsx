@@ -58,10 +58,15 @@ export default function PortfolioGrowthChart({ portfolios, growthData }: Props) 
     const grouped: Record<string, any> = {};
 
     growthData.forEach((item) => {
-      const month = new Date(item.month).toLocaleString("en-US", { month: "short" });
-      if (!grouped[month]) grouped[month] = { month };
-      grouped[month][item.portfolio__name] = Number(item.total_value || 0);
+      item.values.forEach((ob: any) => {
+        const month = new Date(ob.month).toLocaleString("en-US", { month: "short" });
+
+        if (!grouped[month]) grouped[month] = { month };
+
+        grouped[month][item.portfolio_name] = Number(ob.total_value || 0);
+      });
     });
+    
 
     const transformed = Object.values(grouped);
     setProcessedData(transformed);

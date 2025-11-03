@@ -11,8 +11,8 @@
     id: number;
     name: string;
     created_at: string;
-    avg_price: number;
-    total_invested: number;
+    average_price: string;
+    total_inversion: string;
     current_value: number;
     is_active: boolean;
   }
@@ -56,7 +56,7 @@
           });
 
           const growthRes = await fetch(
-            process.env.NEXT_PUBLIC_API_URL + `/portfolio/value/year-summary/?client_id=${userId}`,
+            process.env.NEXT_PUBLIC_API_URL + `/portfolio/value/year-summary/?client_id=${clientId}`,
             {
               method: "GET",
               headers: {
@@ -77,10 +77,9 @@
             ? portfoliosData
             : portfoliosData.results || [];
           setPortfolios(finalPortfolios);
-
           setGrowthData(Array.isArray(growthDataJson) ? growthDataJson : []);
         } catch (err) {
-          console.error("❌ Error loading portfolios:", err);
+          console.error("Error loading portfolios:", err);
         }
       })();
     }, [getAccessTokenSilently]);
