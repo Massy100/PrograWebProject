@@ -5,7 +5,8 @@
   height: 100vh;
   /* width: 80px */
   width: 60px;
-  background: #232733;
+  /* background: #232733; */
+  background-color: #fff;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,7 +25,7 @@
   justify-content: center;
   width: 45px;
   height: 40px;
-  color: white;
+  color: #232733;
   /* font-size: 32; */
   font-size: 26px;
   cursor: pointer;
@@ -32,7 +33,7 @@
 }
 
 .iconWrapper:hover {
-  color: #ededf2;
+  /* color: #ededf2; */
   transform: scale(1.05);
 }
 .tooltip {

@@ -167,7 +167,7 @@
 }
 
 
-/* ✅ Toast visual al agregar al carrito */
+
 .cart-toast {
   position: fixed;
   bottom: 30px;
@@ -180,6 +180,27 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   animation: fadeInUp 0.3s ease, fadeOut 0.3s ease 1.7s forwards;
   z-index: 1200;
+}
+
+.toast-success {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #02c23e;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 2000;
+  animation: fadeInOut 3s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-20px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-20px); }
 }
 
 @keyframes fadeInUp {

@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import '../styles/header.css';
+import { useAuth0 } from "@auth0/auth0-react";
+import { useEffect, useRef, useState } from "react";
+import "../styles/header.css";
 
-const CATEGORIES = ['', 'Technology', 'Finance', 'Health'];
+const CATEGORIES = ["", "Technology", "Finance", "Health"];
 
 type HeaderProps = {
   isLoggedIn: boolean;
   marketOpen: boolean;
-  totalAmount?: number;
   onSearch?: (params: {
     name: string;
     activeOnly: boolean;
@@ -16,6 +16,8 @@ type HeaderProps = {
     priceMin?: string;
     priceMax?: string;
   }) => void;
+  role?: string;
+  onCartClick?: () => void;
 };
 
 type Filters = {
@@ -28,20 +30,59 @@ type Filters = {
 export default function Header({
   isLoggedIn,
   marketOpen,
-  totalAmount = 0,
   onSearch,
+  role,
+  onCartClick,
 }: HeaderProps) {
-  const [name, setName] = useState('');
+  const { getAccessTokenSilently } = useAuth0();
+
+  const [name, setName] = useState("");
   const [showTotal, setShowTotal] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     activeOnly: false,
-    category: '',
-    priceMin: '',
-    priceMax: '',
+    category: "",
+    priceMin: "",
+    priceMax: "",
   });
+  const [balance, setBalance] = useState<number | null>(null); // 💰 balance actual del usuario
   const popRef = useRef<HTMLDivElement | null>(null);
 
+  // 🔹 Obtener el balance del usuario
+  useEffect(() => {
+    if (!isLoggedIn || role !== "client") return;
+
+    (async () => {
+      try {
+        const token = await getAccessTokenSilently();
+
+        const currentUser = localStorage.getItem("auth");
+        const userId = currentUser ? JSON.parse(currentUser).id : null;
+        if (!userId) {
+          console.error("❌ No user ID found in localStorage");
+          return;
+        }
+
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}/`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          cache: "no-store",
+        });
+
+        if (!res.ok) throw new Error(`Error fetching balance: ${res.status}`);
+
+        const data = await res.json();
+        const floatBalance = parseFloat(data.client_profile.balance_available);
+        setBalance(floatBalance);
+      } catch (error) {
+        console.error("Error fetching balance:", error);
+      }
+    })();
+  }, [isLoggedIn, role, getAccessTokenSilently]);
+
+  // 🔹 Cerrar filtros cuando se hace clic fuera o se presiona Escape
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
       if (!popRef.current) return;
@@ -49,15 +90,16 @@ export default function Header({
         setFiltersOpen(false);
       }
     };
-    const onEsc = (e: KeyboardEvent) => e.key === 'Escape' && setFiltersOpen(false);
-    document.addEventListener('mousedown', onDocClick);
-    document.addEventListener('keydown', onEsc);
+    const onEsc = (e: KeyboardEvent) => e.key === "Escape" && setFiltersOpen(false);
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onEsc);
     return () => {
-      document.removeEventListener('mousedown', onDocClick);
-      document.removeEventListener('keydown', onEsc);
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onEsc);
     };
   }, [filtersOpen]);
 
+  // 🔹 Aplicar filtros
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     onSearch?.({
@@ -68,18 +110,20 @@ export default function Header({
       priceMax: filters.priceMax || undefined,
     });
     setFiltersOpen(false);
-    console.log('Search:', { name, ...filters });
   };
 
   const clearAll = () =>
-    setFilters({ activeOnly: false, category: '', priceMin: '', priceMax: '' });
+    setFilters({ activeOnly: false, category: "", priceMin: "", priceMax: "" });
 
   const hasActiveFilters =
-    filters.activeOnly || !!filters.category || !!filters.priceMin || !!filters.priceMax;
+    filters.activeOnly ||
+    !!filters.category ||
+    !!filters.priceMin ||
+    !!filters.priceMax;
 
   return (
     <header className="header">
-      {/* user icon */}
+      {/* 👤 User icon */}
       <div className="header-userRegister" title="Account">
         <span className="header-userIcon">
           <svg
@@ -105,6 +149,7 @@ export default function Header({
         </span>
       </div>
 
+      {/* 🔍 Search section */}
       <div className="header-centerStack">
         <div className="header-searchRow">
           <form className="header-searchBox" onSubmit={handleSubmit}>
@@ -147,49 +192,68 @@ export default function Header({
             {hasActiveFilters && <span className="header-filtersBadge" />}
           </button>
         </div>
+      </div>
 
-        {hasActiveFilters && (
-          <div className="header-activeChips">
-            {filters.activeOnly && (
+      {/* 💼 Right section */}
+      <div className="header-rightSection">
+        <div
+          className={`header-marketStatus ${
+            marketOpen
+              ? "header-marketStatus--open"
+              : "header-marketStatus--closed"
+          }`}
+        >
+          <span className="header-marketDot" />
+          <span className="header-marketText">
+            Market {marketOpen ? "Open" : "Closed"}
+          </span>
+        </div>
+
+        {isLoggedIn && role === "client" && (
+          <div className="header-rightGroup">
+            {/* 💰 Mostrar balance en el botón “Total” */}
+            <div className="header-totalContainer">
               <button
                 type="button"
-                className="chip"
-                onClick={() => setFilters((f) => ({ ...f, activeOnly: false }))}
+                className="header-totalButton"
+                onClick={() => setShowTotal((v) => !v)}
               >
-                Active only <span className="chip-x">×</span>
+                Balance
               </button>
-            )}
-            {filters.category && (
-              <button
-                type="button"
-                className="chip"
-                onClick={() => setFilters((f) => ({ ...f, category: '' }))}
+              {showTotal && (
+                <div className="header-totalPopover">
+                  <strong>Current Balance: </strong>{" "}
+                  Q.{balance !== null ? balance.toFixed(2) : "Loading..."}
+                </div>
+              )}
+            </div>
+
+            {/* 🛒 Carrito */}
+            <button
+              type="button"
+              className="header-cartButton"
+              onClick={onCartClick}
+              title="View cart"
+            >
+              <svg
+                stroke="currentColor"
+                fill="currentColor"
+                strokeWidth="0"
+                viewBox="0 0 20 20"
+                height="1.2em"
+                width="1.2em"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                Category: {filters.category} <span className="chip-x">×</span>
-              </button>
-            )}
-            {(filters.priceMin || filters.priceMax) && (
-              <button
-                type="button"
-                className="chip"
-                onClick={() =>
-                  setFilters((f) => ({ ...f, priceMin: '', priceMax: '' }))
-                }
-              >
-                Price: {filters.priceMin || '0'}–{filters.priceMax || '∞'}{' '}
-                <span className="chip-x">×</span>
-              </button>
-            )}
+                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
+              </svg>
+            </button>
           </div>
         )}
       </div>
 
+      {/* 🔧 Filters popover */}
       {filtersOpen && (
-        <div
-          className="header-filtersPopover"
-          id="filters-popover"
-          ref={popRef}
-        >
+        <div className="header-filtersPopover" id="filters-popover" ref={popRef}>
           <div className="f-row switch">
             <label className="f-label">Active only</label>
             <label className="switch-wrap">
@@ -214,8 +278,8 @@ export default function Header({
               }
             >
               {CATEGORIES.map((c) => (
-                <option key={c || 'all'} value={c}>
-                  {c ? c : 'All'}
+                <option key={c || "all"} value={c}>
+                  {c ? c : "All"}
                 </option>
               ))}
             </select>
@@ -264,38 +328,6 @@ export default function Header({
           </div>
         </div>
       )}
-
-      <div className="header-rightSection">
-        <div
-          className={`header-marketStatus ${
-            marketOpen
-              ? 'header-marketStatus--open'
-              : 'header-marketStatus--closed'
-          }`}
-        >
-          <span className="header-marketDot" />
-          <span className="header-marketText">
-            Market {marketOpen ? 'Open' : 'Closed'}
-          </span>
-        </div>
-
-        {isLoggedIn && (
-          <div className="header-totalContainer">
-            <button
-              type="button"
-              className="header-totalButton"
-              onClick={() => setShowTotal((v) => !v)}
-            >
-              Total
-            </button>
-            {showTotal && (
-              <div className="header-totalPopover">
-                <strong>Total: </strong> Q.{totalAmount}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
     </header>
   );
 }

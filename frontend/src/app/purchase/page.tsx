@@ -89,7 +89,7 @@ export default function PurchasePage() {
       }
 
       const userRes = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + `/users/${currentUser.id}/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/users/${currentUser.id}/`,
         {
           method: 'GET',
           headers: {
@@ -114,20 +114,64 @@ export default function PurchasePage() {
         return;
       }
 
+      const enrichedDetails = await Promise.all(
+        filteredCart.map(async (item) => {
+          let stock_id = null;
+          let portfolio_id = null;
+
+          try {
+            // Buscar el stock por nombre o símbolo
+            const stockRes = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/stocks/by-name/?name=${encodeURIComponent(
+                item.stockName
+              )}`
+            );
+            if (stockRes.ok) {
+              const stockData = await stockRes.json();
+              stock_id = stockData?.id || null;
+            }
+          } catch (err) {
+            console.error(`⚠️ Could not fetch stock id for ${item.stockName}`);
+          }
+
+          try {
+            // Buscar el portafolio
+            const portfolioRes = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/portfolio/portfolios/?search=${encodeURIComponent(
+                item.portfolio
+              )}`
+            );
+            if (portfolioRes.ok) {
+              const portfolioData = await portfolioRes.json();
+              portfolio_id = portfolioData?.[0]?.id || null;
+            }
+          } catch (err) {
+            console.error(`⚠️ Could not fetch portfolio id for ${item.portfolio}`);
+          }
+
+          if (!stock_id || !portfolio_id) {
+            console.warn(`Missing IDs for ${item.stockName} / ${item.portfolio}`);
+          }
+
+          return {
+            stock_id,
+            portfolio_id,
+            quantity: item.quantity,
+            unit_price: item.stockPrice,
+          };
+        })
+      );
+
+
       const transactionPayload = {
         client_id: clientProfileId,
         total_amount: total,
-        details: filteredCart.map((item) => ({
-          stock_id: item.stock_id,
-          quantity: item.quantity,
-          unit_price: item.stockPrice,
-          portfolio_id: item.portfolio_id,
-        })),
+        details: enrichedDetails,
       };
 
       console.log('📦 Payload to send:', transactionPayload);
 
-      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/transactions/buy/', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/buy/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,6 +188,7 @@ export default function PurchasePage() {
 
       const result = await res.json();
       console.log('✅ Transaction success:', result);
+
       const remaining = cart.filter(
         (item) =>
           !filteredCart.some(

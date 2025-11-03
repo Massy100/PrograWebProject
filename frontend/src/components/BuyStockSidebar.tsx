@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/BuyStockSidebar.css";
 
 interface BuyStockSidebarProps {
@@ -9,7 +9,6 @@ interface BuyStockSidebarProps {
   stockName: string;
   stockSymbol: string;
   stockPrice: number;
-  portfolios: string[];
   onConfirm: (data: { portfolio: string; quantity: number; total: number }) => void;
 }
 
@@ -19,17 +18,38 @@ export const BuyStockSidebar: React.FC<BuyStockSidebarProps> = ({
   stockName,
   stockSymbol,
   stockPrice,
-  portfolios,
   onConfirm,
 }) => {
   const [quantity, setQuantity] = useState(1);
   const [selectedPortfolio, setSelectedPortfolio] = useState("");
+  const [portfolios, setPortfolios] = useState<string[]>([]);
+  const [loadingPortfolios, setLoadingPortfolios] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const total = stockPrice * quantity;
 
+  const fetchPortfolios = async () => {
+    try {
+      setLoadingPortfolios(true);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/portfolio/portfolios/`);
+      if (!res.ok) throw new Error("Failed to fetch portfolios");
+      const data = await res.json();
+      const names = data.map((p: any) => p.name);
+      setPortfolios(names);
+    } catch (error) {
+      console.error("Error fetching portfolios:", error);
+    } finally {
+      setLoadingPortfolios(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOpen) fetchPortfolios();
+  }, [isOpen]);
+
   const handleConfirm = () => {
     if (!selectedPortfolio) {
-      alert("Please select a portfolio.");
+      alert("Please select a portfolio first.");
       return;
     }
 
@@ -43,24 +63,43 @@ export const BuyStockSidebar: React.FC<BuyStockSidebarProps> = ({
       date: new Date().toLocaleString(),
     };
 
+    let cart = JSON.parse(localStorage.getItem("shoppingCart") || "[]");
 
-    const existingData = JSON.parse(localStorage.getItem("shoppingCart") || "[]");
+    const existingIndex = cart.findIndex(
+      (item: any) =>
+        item.stockSymbol === stockSymbol &&
+        item.portfolio === selectedPortfolio
+    );
 
+    if (existingIndex !== -1) {
+      cart[existingIndex].quantity += quantity;
+      cart[existingIndex].total =
+        cart[existingIndex].stockPrice * cart[existingIndex].quantity;
+      cart[existingIndex].date = new Date().toLocaleString();
+    } else {
+      cart.push(purchaseData);
+    }
 
-    existingData.push(purchaseData);
-
-    localStorage.setItem("shoppingCart", JSON.stringify(existingData));
+    localStorage.setItem("shoppingCart", JSON.stringify(cart));
+    window.dispatchEvent(new Event("storage"));
 
     onConfirm({ portfolio: selectedPortfolio, quantity, total });
 
-    console.log("lo que se guardo en el localstorage")
-    console.log(JSON.parse(localStorage.getItem("shoppingCart") || "[]"));
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
 
+    console.log("🛍️ Updated Cart:", cart);
     onClose();
   };
 
   return (
     <>
+      {showToast && (
+        <div className="toast-success">
+          ✅ Added <strong>{stockSymbol}</strong> to your cart!
+        </div>
+      )}
+
       {isOpen && <div className="wallet-overlay" onClick={onClose}></div>}
 
       <aside className={`cartSidebar ${isOpen ? "show" : ""}`}>
@@ -81,18 +120,26 @@ export const BuyStockSidebar: React.FC<BuyStockSidebarProps> = ({
 
           <div className="cartDetailQuantity">
             <label>Portfolio</label>
-            <select
-              className="buy-sidebar-select"
-              value={selectedPortfolio}
-              onChange={(e) => setSelectedPortfolio(e.target.value)}
-            >
-              <option value="">-- Choose one --</option>
-              {portfolios.map((p, idx) => (
-                <option key={idx} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
+            {loadingPortfolios ? (
+              <p>Loading portfolios...</p>
+            ) : (
+              <select
+                className="buy-sidebar-select"
+                value={selectedPortfolio}
+                onChange={(e) => setSelectedPortfolio(e.target.value)}
+              >
+                <option value="">-- Choose one --</option>
+                {portfolios.length > 0 ? (
+                  portfolios.map((p, idx) => (
+                    <option key={idx} value={p}>
+                      {p}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No portfolios available</option>
+                )}
+              </select>
+            )}
           </div>
 
           <div className="cartDetailQuantity">
@@ -105,19 +152,18 @@ export const BuyStockSidebar: React.FC<BuyStockSidebarProps> = ({
               onWheel={(e) => e.currentTarget.blur()}
             />
           </div>
-
           <div className="cartDetailInfo">
             <p>
               <strong>Total:</strong>{" "}
               <span style={{ color: "#021631", fontWeight: "600" }}>
-                Q{total.toFixed(2)}
+                ${total}
               </span>
             </p>
           </div>
 
           <div className="cartDetailActions">
             <button className="cartFinishBtn" onClick={handleConfirm}>
-              Add to Shopping Car
+              Add to Cart
             </button>
           </div>
         </div>
