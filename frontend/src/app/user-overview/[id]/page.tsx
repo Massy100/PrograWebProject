@@ -26,7 +26,7 @@ type BackendUser = {
   };
 };
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const mockTxRows: TxRow[] = [
   {
@@ -87,7 +87,7 @@ export default function UserOverviewPage() {
         setLoading(true);
         console.log('Fetching user with ID:', userId);
         
-        const res = await fetch(`${API_BASE_URL}/api/users/${userId}/`, {
+        const res = await fetch(`${API_BASE_URL}/users/${userId}/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

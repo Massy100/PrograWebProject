@@ -89,7 +89,7 @@ export default function PurchasePage() {
       }
 
       const userRes = await fetch(
-        `http://localhost:8000/api/users/${currentUser.id}/`,
+        process.env.NEXT_PUBLIC_API_URL + `/users/${currentUser.id}/`,
         {
           method: 'GET',
           headers: {
@@ -127,7 +127,7 @@ export default function PurchasePage() {
 
       console.log('📦 Payload to send:', transactionPayload);
 
-      const res = await fetch('http://localhost:8000/api/transactions/buy/', {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/transactions/buy/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

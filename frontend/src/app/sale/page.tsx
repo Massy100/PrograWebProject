@@ -47,7 +47,7 @@ export default function SaleProcess() {
           return;
         }
 
-        const userRes = await fetch(`http://localhost:8000/api/users/${currentUser.id}/`, {
+        const userRes = await fetch(process.env.NEXT_PUBLIC_API_URL + `/users/${currentUser.id}/`, {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
@@ -56,7 +56,7 @@ export default function SaleProcess() {
         const userData = await userRes.json();
         setClientProfileId(userData.client_profile?.id);
 
-        const portfoliosRes = await fetch('http://localhost:8000/api/portfolio/portfolios/', {
+        const portfoliosRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/portfolio/portfolios/', {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
@@ -65,7 +65,7 @@ export default function SaleProcess() {
         const portfoliosData = await portfoliosRes.json();
         setPortfolios(portfoliosData);
 
-        const stocksRes = await fetch('http://localhost:8000/api/stocks/', {
+        const stocksRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/stocks/', {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
@@ -112,7 +112,7 @@ export default function SaleProcess() {
 
       console.log('📦 SELL payload:', transactionPayload);
 
-      const res = await fetch('http://localhost:8000/api/transactions/sell/', {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/transactions/sell/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -44,7 +44,7 @@ export default function RequestsTable() {
   const fetchPendingRequests = async () => {
     const token = await getAccessTokenSilently();
     try {
-      const res = await fetch('http://localhost:8000/api/users/admin-requests/pending/', {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/users/admin-requests/pending/', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ export default function RequestsTable() {
   const fetchApprovalHistory = async () => {
     const token = await getAccessTokenSilently();
     try {
-      const res = await fetch('http://localhost:8000/api/users/admin-requests/approved/', {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/users/admin-requests/approved/', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ export default function RequestsTable() {
   const fetchRejectionHistory = async () => {
     const token = await getAccessTokenSilently();
     try {
-      const res = await fetch('http://localhost:8000/api/users/admin-requests/rejected/', {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/users/admin-requests/rejected/', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

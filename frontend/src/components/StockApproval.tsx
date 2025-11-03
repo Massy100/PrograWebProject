@@ -25,7 +25,7 @@ export default function StockManager() {
   const fetchApprovedStocks = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8000/api/stocks/approved/');
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/stocks/approved/');
       
       if (!response.ok) {
         throw new Error('Failed to fetch approved stocks');
@@ -60,7 +60,7 @@ export default function StockManager() {
   // Función para aprobar stocks (guardar en BD)
   const approveStocks = async (stocksToApprove: StockItem[]) => {
     try {
-      const response = await fetch('http://localhost:8000/api/stocks/approve/', {
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/stocks/approve/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ export default function StockManager() {
   // Función para eliminar stocks del sistema
   const removeStocks = async (symbolsToRemove: string[]) => {
     try {
-      const response = await fetch('http://localhost:8000/api/stocks/remove/', {
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/stocks/remove/', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

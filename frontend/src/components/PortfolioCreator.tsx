@@ -35,7 +35,7 @@ export default function PortfolioCreator({ open, onClose }: PortfolioCreatorProp
         return;
       }
 
-      const userRes = await fetch(`http://localhost:8000/api/users/${currentUser.id}/`, {
+      const userRes = await fetch(process.env.NEXT_PUBLIC_API_URL + `/users/${currentUser.id}/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export default function PortfolioCreator({ open, onClose }: PortfolioCreatorProp
     try {
       const token = await getAccessTokenSilently();
 
-      const res = await fetch('http://localhost:8000/api/portfolio/portfolios/', {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/portfolio/portfolios/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

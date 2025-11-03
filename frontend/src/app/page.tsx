@@ -28,7 +28,7 @@ export default function Home() {
     try {
       setLoading(true);
       // CAMBIO: Usar stocks aprobados en lugar de todos los de Alpha Vantage
-      const response = await fetch('http://localhost:8000/api/stocks/approved/');
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/stocks/approved/');
       
       if (!response.ok) {
         throw new Error('Failed to fetch stock data');
@@ -115,7 +115,7 @@ export default function Home() {
     try {
       const token = await getAccessTokenSilently();
       console.log("Token obtenido:", token);
-      const response = await fetch("http://localhost:8000/api/users/sync/", {
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + "/users/sync/", {
         method: "POST",
         body: JSON.stringify(user),
         headers: {

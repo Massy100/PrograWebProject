@@ -22,7 +22,7 @@ export default function DashboardUser() {
     try {
       setLoading(true);
       // CAMBIO: Usar endpoint de stocks aprobados
-      const response = await fetch('http://localhost:8000/api/stocks/approved/');
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/stocks/approved/');
       
       if (!response.ok) {
         throw new Error('Failed to fetch approved stocks');
@@ -82,7 +82,7 @@ export default function DashboardUser() {
   const fetchUserTransactions = async () => {
     try {
       const token = await getAccessTokenSilently();
-      const response = await fetch('http://localhost:8000/api/transactions/user/latest/', {
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/transactions/user/latest/', {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           useRefreshTokens={true}
           cacheLocation="localstorage"
           authorizationParams={{
-            redirect_uri: "http://localhost:3000/",
+            redirect_uri: window.location.origin,
             audience: apiIdentifier,
             scope: "openid profile email",
           }}
