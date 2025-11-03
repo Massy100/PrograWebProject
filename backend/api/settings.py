@@ -155,12 +155,23 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 
 FRONTEND_DOMAIN_NAME = os.getenv("PUBLIC_FRONTEND_DOMAIN_NAME")
 
-# CORS configuration
+# CORS configuration - FILTRAR None
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    FRONTEND_DOMAIN_NAME
+    origin for origin in [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000", 
+        FRONTEND_DOMAIN_NAME
+    ] if origin is not None
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    origin for origin in [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        FRONTEND_DOMAIN_NAME
+    ] if origin is not None
+]
+
 
 CORS_ALLOW_CREDENTIALS = True
 
