@@ -29,7 +29,7 @@ class EmailService:
                 logger.error("SendGrid FROM EMAIL not found in environment variables")
                 return False
 
-            subject = "Welcome to Our Trading Platform!"
+            subject = "Welcome to Finova Trading Platform!"
             
             html_content = f"""
             <!DOCTYPE html>
@@ -71,7 +71,7 @@ class EmailService:
             """
             
             plain_content = f"""
-            Welcome to Our Trading Platform!
+            Welcome to Finova!
             
             Hello {username},
             
@@ -88,9 +88,9 @@ class EmailService:
             If you have any questions or need assistance, our support team is here to help.
             
             Happy trading!
-            The Trading Platform Team
+            The Finova Team
             
-            © 2024 Trading Platform. All rights reserved.
+            © 2025 FINOVA. All rights reserved.
             """
             
             message = Mail(
@@ -156,7 +156,7 @@ class EmailService:
                     </div>
                     <div class="content">
                         <p>Hello <strong>{username}</strong>,</p>
-                        <p>Great news! Your account has been <strong>approved</strong> by our administration team.</p>
+                        <p>Great news! Your account has been <strong>approved</strong> by our Finova team.</p>
                         
                         <div class="features">
                             <p><strong>You now have access to:</strong></p>
