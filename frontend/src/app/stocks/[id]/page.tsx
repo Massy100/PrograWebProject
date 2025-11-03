@@ -3,13 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import "./StockPage.css";
-import dynamic from "next/dynamic";
+import { StockChart } from "@/components/StockChart";
 import { BuyStockSidebar } from "@/components/BuyStockSidebar";
-
-const StockChart = dynamic(() => import("@/components/StockChart") as any, {
-  ssr: false,
-  loading: () => <div className="chart-loading">Loading chart...</div>,
-});
 
 type CartItem = {
   portfolio: string;

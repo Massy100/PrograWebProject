@@ -2,9 +2,12 @@
 import React, { useState, useMemo } from 'react';
 import '../styles/chartSwitcher.css';
 
-import HeatmapActivity from '@/components/HeatmapActivity';
-import PerformanceChart from '@/components/PerformanceChart';
-import CumulativeChart from '@/components/CumulativeChart';
+import dynamic from 'next/dynamic';
+
+const HeatmapActivity = dynamic(() => import('@/components/HeatmapActivity'), { ssr: false });
+const PerformanceChart = dynamic(() => import('@/components/PerformanceChart'), { ssr: false });
+const CumulativeChart = dynamic(() => import('@/components/CumulativeChart'), { ssr: false });
+
 
 type TxType = 'buy' | 'sell';
 

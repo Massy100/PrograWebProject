@@ -1,12 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic"; // ⬅️ AÑADE ESTA IMPORT
+import StockTrendCard from "./StockTrendCard";
 import "../styles/StockGraphCarousel.css";
-
-const StockTrendCard = dynamic(() => import("./StockTrendCard") as any, {
-  ssr: false,
-  loading: () => <div>Loading trend card...</div>,
-});
 
 interface StockItem {
   id?: number;
