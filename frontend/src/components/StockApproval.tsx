@@ -25,7 +25,7 @@ export default function StockManager() {
   const fetchApprovedStocks = async () => {
     try {
       setLoading(true);
-      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/stocks/approved/');
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/alpha-vantage/stocks/approved/');
       
       if (!response.ok) {
         throw new Error('Failed to fetch approved stocks');
@@ -60,7 +60,7 @@ export default function StockManager() {
   // Función para aprobar stocks (guardar en BD)
   const approveStocks = async (stocksToApprove: StockItem[]) => {
     try {
-      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/stocks/approve/', {
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/alpha-vantage/stocks/approve/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -28,7 +28,7 @@ export default function Home() {
     try {
       setLoading(true);
       // CAMBIO: Usar stocks aprobados en lugar de todos los de Alpha Vantage
-      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/stocks/approved/');
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/alpha-vantage/stocks/approved/');
       
       if (!response.ok) {
         throw new Error('Failed to fetch stock data');

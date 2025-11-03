@@ -21,7 +21,7 @@ export default function ReferralCard() {
       try {
         const token = await getAccessTokenSilently();
 
-        const response = await fetch(process.env.NEXT_PUBLIC_API_URL + `/referral`, {
+        const response = await fetch(process.env.NEXT_PUBLIC_API_URL + `/referrals/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

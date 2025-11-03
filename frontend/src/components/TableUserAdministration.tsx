@@ -57,7 +57,7 @@ export default function TableUserAdministration() {
 
   const deactivateUser = async (id: number) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/users/${id}/deactivate/`, {
+      const res = await fetch(`${API_BASE_URL}/users/${id}/deactivate/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

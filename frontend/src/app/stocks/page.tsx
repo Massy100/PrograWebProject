@@ -22,7 +22,7 @@ export default function StocksPage() {
     try {
       setLoading(true);
       // CAMBIO: Usar endpoint de stocks aprobados
-      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/stocks/approved/');
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/alpha-vantage/stocks/approved/');
       
       if (!response.ok) {
         throw new Error('Failed to fetch approved stocks');

@@ -15,7 +15,7 @@ export default function PendingAlert() {
     const fetchPending = async () => {
       try {
         const token = await getAccessTokenSilently();
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/requests/pending', {
+        const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/requests/pending/', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
