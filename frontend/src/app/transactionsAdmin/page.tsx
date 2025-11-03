@@ -32,10 +32,16 @@ export default function TransactionsAdmin() {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
+        const auth = localStorage.getItem("auth") || null;
+        if (!auth) {
+          throw new Error("No client set in localstorage");
+        }
+        const parsedAuth = JSON.parse(auth);
+
         setLoading(true);
         const token = await getAccessTokenSilently();
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/summary/`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/summary/?client_id=${parsedAuth.client_id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
