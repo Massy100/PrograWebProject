@@ -1,5 +1,6 @@
 "use client";
 
+import Footer from "@/components/Footer";
 import SidebarOptions from "@/components/navAdmin";
 import OptionsUser from "@/components/navUsers";
 import SearchResults from "@/components/searchResults";
@@ -58,6 +59,8 @@ export default function ClientShell({ children }: { children: React.ReactNode })
       </div>
 
       <Wallet open={walletOpen} onClose={() => setWalletOpen(false)} />
+
+      <Footer/>
     </div>
   );
 }
