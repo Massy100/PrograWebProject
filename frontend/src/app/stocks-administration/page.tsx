@@ -2,13 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import "./stocksAdministration.css";
-import dynamic from 'next/dynamic';
-import type { StockItem } from '@/components/AddStocksTable';
-
-const AddStocksTable = dynamic(() => import('@/components/AddStocksTable'), {
-  ssr: false, 
-});
-
+import AddStocksTable, { StockItem } from '@/components/AddStocksTable';
 
 interface AlphaVantageStock {
   symbol: string;
