@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           useRefreshTokens={true}
           cacheLocation="localstorage"
           authorizationParams={{
-            redirect_uri: window.location.origin,
+            redirect_uri: "https://front.g5.atenea.lat"
             audience: apiIdentifier,
             scope: "openid profile email",
           }}
