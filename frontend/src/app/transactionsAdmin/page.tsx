@@ -1,52 +1,110 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import AdminTransactionsTable from "@/components/AdminTransactionsTable";
-import AdminTransactionsMoneyTable from "@/components/AdminTrasactionsMoneyTable";
 import FilterTransactionType from "@/components/FilterTransactionType";
 import "./transactionsAdmin.css";
 
-type FilterTxType = 'purchase' | 'sale' | 'money_movement' | null;
+type FilterTxType = 'purchase' | 'sale' | null;
+
+type TradeRow = {
+  id: number;
+  transaction_type: 'buy' | 'sell';
+  user: string;
+  stock: string;
+  code: string;
+  total_amount: number;
+  created_at: string;
+  is_active: boolean;
+  quantity: number;
+  unit_price: number;
+};
 
 export default function TransactionsAdmin() {
+  const { getAccessTokenSilently } = useAuth0();
   const [selectedType, setSelectedType] = useState<FilterTxType>(null);
+  const [trades, setTrades] = useState<TradeRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Tus mocks (sin cambios)
-  const mockRows = [
-    { transaction_type: 'buy',  user: 'Grecia Fuentes', stock: 'AAPL', code: 'TX123', total_amount: 1500, created_at: new Date(), is_active: true,  quantity: 10, unit_price: 150 },
-    { transaction_type: 'sell', user: 'Grecia Fuentes', stock: 'TSLA', code: 'TX124', total_amount: 900,  created_at: new Date(), is_active: false, quantity: 3,  unit_price: 300 },
-    { transaction_type: 'buy',  user: 'Grecia Fuentes', stock: 'AAPL', code: 'TX125', total_amount: 1200, created_at: new Date(), is_active: true,  quantity: 8,  unit_price: 150 },
-    { transaction_type: 'sell', user: 'Grecia Fuentes', stock: 'TSLA', code: 'TX126', total_amount: 600,  created_at: new Date(), is_active: true,  quantity: 2,  unit_price: 300 },
-  ];
+  // 🔹 Cargar transacciones desde el backend
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const auth = localStorage.getItem("auth") || null;
+        if (!auth) {
+          throw new Error("No client set in localstorage");
+        }
+        const parsedAuth = JSON.parse(auth);
 
-  const moneyMove = [
-    { transaction_type: 'moneyMovement', user: 'Grecia Fuentes', code: '4585F6', total_amount: 1500, created_at: new Date(), bank: "Banrural" },
-  ];
+        setLoading(true);
+        const token = await getAccessTokenSilently();
 
-  // Filtrado SOLO para la tabla de compras/ventas cuando elijas purchase o sale
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/summary/?client_id=${parsedAuth.client_id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch transactions");
+        }
+
+        const data = await res.json();
+
+        if (data?.transactions) {
+          const parsedTrades = data.transactions.map((tx: any) => ({
+            id: tx.id,
+            transaction_type: tx.transaction_type,
+            user: tx.client_name || "Unknown",
+            stock: tx.stock_symbol || "—",
+            code: tx.code || `TX-${tx.id}`,
+            total_amount: tx.total_amount || 0,
+            created_at: tx.created_at,
+            is_active: tx.is_active,
+            quantity: tx.quantity,
+            unit_price: tx.unit_price,
+          }));
+          setTrades(parsedTrades);
+        }
+
+        setError(null);
+      } catch (err) {
+        console.error("❌ Error fetching transactions:", err);
+        setError("Could not load transactions. Showing mock data.");
+        setTrades([
+          { id: 1, transaction_type: 'buy', user: 'Grecia Fuentes', stock: 'AAPL', code: 'TX123', total_amount: 1500, created_at: new Date().toISOString(), is_active: true, quantity: 10, unit_price: 150 },
+          { id: 2, transaction_type: 'sell', user: 'Grecia Fuentes', stock: 'TSLA', code: 'TX124', total_amount: 900, created_at: new Date().toISOString(), is_active: false, quantity: 3, unit_price: 300 },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, [getAccessTokenSilently]);
+
   const filteredTradeRows = useMemo(() => {
-    if (selectedType === 'purchase') return mockRows.filter(r => r.transaction_type === 'buy');
-    if (selectedType === 'sale')     return mockRows.filter(r => r.transaction_type === 'sell');
-    // null (todas) o money_movement: devolvemos todas (para null)
-    return mockRows;
-  }, [selectedType, mockRows]);
-
-  const showMoneyTable  = selectedType === 'money_movement';
-  const showTradesTable = !showMoneyTable; // null | purchase | sale
+    if (selectedType === 'purchase') return trades.filter((r) => r.transaction_type === 'buy');
+    if (selectedType === 'sale') return trades.filter((r) => r.transaction_type === 'sell');
+    return trades;
+  }, [selectedType, trades]);
 
   return (
     <div className="div-trasactionAdmin">
       <h3 className="title-trasaction-admin">Transactions</h3>
 
+      {error && <p className="error-message">{error}</p>}
+
       <div className="div-filter">
         <FilterTransactionType
-          initial={null}           // ver compras+ventas al inicio
-          includeAll={true}        // agrega opción "All"
+          initial={null}
+          includeAll={true}
           labels={{
             all: 'Purchases & Sales',
             purchase: 'Only Purchases',
             sale: 'Only Sales',
-            money_movement: 'Only Money Movements',
             button: 'Transaction Type',
           }}
           onTypeChange={(value) => setSelectedType(value)}
@@ -54,11 +112,12 @@ export default function TransactionsAdmin() {
       </div>
 
       <div className="div-all-trasactions">
-        {showTradesTable && <AdminTransactionsTable rows={filteredTradeRows} />}
-        {showMoneyTable  && <AdminTransactionsMoneyTable rows={moneyMove} />}
+        {loading ? (
+          <p className="loading-text">Loading transactions...</p>
+        ) : (
+          <AdminTransactionsTable rows={filteredTradeRows} />
+        )}
       </div>
-
-
     </div>
   );
 }

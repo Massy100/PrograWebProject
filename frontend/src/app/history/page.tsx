@@ -1,5 +1,5 @@
 'use client';
-
+import { useAuth0 } from '@auth0/auth0-react';
 import { useState, useEffect, useMemo } from 'react';
 import './history.css';
 import ChartSwitcher from "@/components/ChartSwitcher";
@@ -31,60 +31,6 @@ type Summary = {
 };
 
 
-function generateMockData(): Summary {
-  const stocks = ['AAPL', 'TSLA', 'AMZN', 'MSFT', 'NVDA', 'META', 'GOOGL', 'NFLX'];
-  const transactions: TxRow[] = [];
-  let invested = 0;
-  let earned = 0;
-  let buys = 0;
-  let sells = 0;
-
-  const today = new Date();
-  for (let i = 0; i < 90; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
-    const numTx = Math.floor(Math.random() * 4) + 1;
-
-    for (let j = 0; j < numTx; j++) {
-      const type = Math.random() > 0.45 ? 'buy' : 'sell';
-      const hour = Math.floor(Math.random() * 24);
-      const minute = Math.floor(Math.random() * 60);
-      const amount = Math.floor(Math.random() * 3000 + 100);
-      const stock = stocks[Math.floor(Math.random() * stocks.length)];
-
-      const txDate = new Date(date);
-      txDate.setHours(hour, minute, 0, 0);
-
-      transactions.push({
-        code: `TX-${i}-${j}`,
-        stock,
-        transaction_type: type,
-        total_amount: amount,
-        created_at: txDate.toISOString(),
-        is_active: true,
-        quantity: Math.floor(Math.random() * 10 + 1),
-        unit_price: (amount / (Math.random() * 8 + 1)).toFixed(2),
-      });
-
-      if (type === 'buy') {
-        invested += amount;
-        buys++;
-      } else {
-        earned += amount;
-        sells++;
-      }
-    }
-  }
-
-  return {
-    earned_total: earned,
-    invested_total: invested,
-    buy_count: buys,
-    sell_count: sells,
-    transactions_count: transactions.length,
-    transactions,
-  };
-}
 
 export default function History() {
   const [rows, setRows] = useState<TxRow[]>([]);
@@ -96,10 +42,58 @@ export default function History() {
 
   const [selectedType, setSelectedType] = useState<'purchase' | 'sale' | null>(null);
 
+  const { getAccessTokenSilently } = useAuth0();
+
+  const fetchTransactions = async () => {
+      try {
+
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+        const token = await getAccessTokenSilently();
+
+        const auth = localStorage.getItem('auth');
+        if (!auth) return;
+        const user = JSON.parse(auth);
+
+        const response = await fetch(baseUrl + 
+          `/transactions/summary/?client_id=${user.client_id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch transactions');
+        const result = await response.json();
+        const transactions = result.transactions;
+        const formattedResult = transactions.flatMap((tx: any )=> tx.details.map((detail: any) => ({
+          code: tx.code,
+          stock: detail.stock,
+          transaction_type: tx.transaction_type,
+          total_amount: detail.total_amount,
+          created_at: tx.created_at,
+          is_active: tx.is_active,
+          quantity: detail.quantity,
+          unit_price: detail.unit_price,
+        })));
+        setRows(formattedResult);
+        const dataSummary: Summary = {
+          transactions_count: result.transactions_count,
+          buy_count: result.buy_count,
+          sell_count: result.sell_count,
+          invested_total: result.invested_total,
+          earned_total: result.earned_total,
+          transactions: result.transactions
+        }; 
+        setSummary(dataSummary);
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+        return [];
+      }
+    }
+
   useEffect(() => {
-    const mock = generateMockData();
-    setSummary(mock);
-    setRows(mock.transactions);
+    fetchTransactions();
     setLoading(false);
   }, []);
 
@@ -165,20 +159,21 @@ export default function History() {
         {/* 
           Aquí se muestran todas las transacciones filtradas por tipo.
         */}
-        <h3 className="title_transactions">Transactions</h3>
-
-        <div className="div-filter">
-          <FilterTransactionType
-            initial={null}            
-            includeAll={true}         
-            labels={{
-              all: 'All Transactions',
-              purchase: 'Only Purchases',
-              sale: 'Only Sales',
-              button: 'Transaction Type',
-            }}
-            onTypeChange={(value) => setSelectedType(value)}
-          />
+        <div className='transactions-header'>  
+          <h3 className="title_transactions">Transactions</h3>
+            <div className="div-filter">
+              <FilterTransactionType
+                initial={null}            
+                includeAll={true}         
+                labels={{
+                  all: 'All Transactions',
+                  purchase: 'Only Purchases',
+                  sale: 'Only Sales',
+                  button: 'Transaction Type',
+                }}
+                onTypeChange={(value) => setSelectedType(value)}
+              />
+            </div>
         </div>
 
         <div className="div-transactions">

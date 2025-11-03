@@ -44,9 +44,10 @@ export default function TransactionsTable({ rows }: { rows: TxRow[] }) {
 
         <tbody>
           {rows.map((r, i) => {
+            const total_amount =parseFloat((Number(r.unit_price) * Number(r.quantity)).toFixed(2));
             const pill = r.transaction_type === 'sell' ? 'S' : 'P';
             const pillClass = r.transaction_type === 'sell' ? 'is-sell' : 'is-buy';
-            const gain = Number(r.total_amount) >= 0;
+            const gain = total_amount >= 0;
 
             return (
               <tr key={i} 
@@ -80,7 +81,7 @@ export default function TransactionsTable({ rows }: { rows: TxRow[] }) {
 
                 <td>{r.quantity ?? '—'}</td>
                 <td>Q.{r.unit_price != null ? r.unit_price : '—'}</td>
-                <td className={`${gain ? 'is-gain' : 'is-loss'}`}>Q.{r.total_amount}</td>
+                <td className={`${gain ? 'is-gain' : 'is-loss'}`}>Q.{total_amount}</td>
 
                 <td>
                   <i className={`tx__dot ${r.is_active ? 'ok' : 'off'}`} />

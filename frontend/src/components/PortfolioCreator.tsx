@@ -10,66 +10,108 @@ type PortfolioCreatorProps = {
 };
 
 export default function PortfolioCreator({ open, onClose }: PortfolioCreatorProps) {
-  const {getAccessTokenSilently} = useAuth0();
+  const { getAccessTokenSilently } = useAuth0();
   const [portfolioName, setPortfolioName] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingPortfolio, setPendingPortfolio] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
   if (!open) return null;
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!portfolioName.trim()) {
       alert('Please enter a portfolio name.');
       return;
     }
 
-    // la estructura que le mandamos al back
-    const payload = {
-      name: portfolioName.trim(),
-      creation_date: new Date().toISOString(),
-      average_price: 0,
-      total_investment: 0,
-      is_active: true,
-      client: JSON.parse(localStorage.getItem('auth') || '{}').id, 
-    };
+    try {
+      setLoading(true);
 
-    setPendingPortfolio(payload);
-    setShowConfirm(true);
+      const token = await getAccessTokenSilently();
+      const currentUser = JSON.parse(localStorage.getItem('auth') || '{}');
+
+      if (!currentUser.id) {
+        alert('User not found in localStorage. Please log in again.');
+        return;
+      }
+
+      const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${currentUser.id}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        cache: 'no-store',
+      });
+
+      if (!userRes.ok) {
+        const txt = await userRes.text();
+        console.error('❌ Error fetching user:', txt);
+        throw new Error('Failed to get user profile');
+      }
+
+      const userData = await userRes.json();
+      const clientProfileId = userData.client_profile?.id;
+
+      if (!clientProfileId) {
+        alert('⚠️ No client profile found for this user.');
+        return;
+      }
+
+      const payload = {
+        name: portfolioName.trim(),
+        average_price: 0,
+        total_inversion: 0,
+        current_value: 0,
+        is_active: true,
+        client: clientProfileId, 
+      };
+
+      console.log('📦 Portfolio payload:', payload);
+
+      setPendingPortfolio(payload);
+      setShowConfirm(true);
+    } catch (err) {
+      console.error('❌ Error preparing portfolio:', err);
+      alert('Error loading user info. Try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const confirmCreation = async () => {
     if (!pendingPortfolio) return;
 
-    console.log('📦 Portfolio payload to send:', pendingPortfolio);
-
     try {
-      // para el back
-      /*
       const token = await getAccessTokenSilently();
-      const res = await fetch('http://localhost:8000/api/portfolios/', {
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/portfolio/portfolios/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token)}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(pendingPortfolio),
       });
 
-      if (!res.ok) throw new Error('Error creating portfolio');
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('❌ Backend error:', errText);
+        throw new Error(`Error ${res.status}`);
+      }
+
       const result = await res.json();
       alert(`✅ Portfolio "${result.name}" created successfully!`);
-      */
-
-      // eliminar cuando este el back solo es para hacer la simulacion sin el back
-      alert(`✅ Portfolio "${pendingPortfolio.name}" created successfully!`);
 
       setPortfolioName('');
       setPendingPortfolio(null);
       setShowConfirm(false);
       onClose();
+      window.location.reload();
+
     } catch (err) {
-      console.error(err);
-      alert('❌ There was a problem creating the portfolio.');
+      console.error('❌ Error creating portfolio:', err);
+      alert('There was a problem creating the portfolio.');
     }
   };
 
@@ -112,8 +154,12 @@ export default function PortfolioCreator({ open, onClose }: PortfolioCreatorProp
             onChange={(e) => setPortfolioName(e.target.value)}
           />
 
-          <button className="portfolio-btn full create" onClick={handleCreate}>
-            Create Portfolio
+          <button
+            className="portfolio-btn full create"
+            onClick={handleCreate}
+            disabled={loading}
+          >
+            {loading ? 'Loading...' : 'Create Portfolio'}
           </button>
         </div>
       </div>

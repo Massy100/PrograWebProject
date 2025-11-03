@@ -17,10 +17,10 @@ class InvestmentSerializer(serializers.ModelSerializer):
         ]
 
     def get_current_value(self, obj):
-        return obj.quantity * obj.stock.current_price
+        return obj.quantity * obj.stock.last_price
 
     def get_gain_loss(self, obj):
-        current_value = obj.quantity * obj.stock.current_price
+        current_value = obj.quantity * obj.stock.last_price
         invested = obj.quantity * obj.purchase_price
         return current_value - invested
 
@@ -56,6 +56,13 @@ class PortfolioCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Portfolio
         fields = ['name', 'client']
+
+    def create(self, validated_data):
+        validated_data['average_price'] = 0
+        validated_data['total_inversion'] = 0
+        validated_data['current_value'] = 0
+        return super().create(validated_data)
+
 
 class PortfolioUpdatesSerializer(serializers.ModelSerializer):
     class Meta:

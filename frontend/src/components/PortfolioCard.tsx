@@ -8,9 +8,9 @@ interface Portfolio {
   id: number;
   name: string;
   created_at: string;
-  avg_price: number;
-  total_invested: number;
-  current_value: number;
+  average_price: string;
+  total_inversion: string;
+  current_value: string;
   is_active: boolean;
 }
 
@@ -25,15 +25,19 @@ const PortfolioCard: React.FC<Props> = ({ data }) => {
     id,
     name,
     created_at,
-    avg_price,
-    total_invested,
+    average_price,
+    total_inversion,
     current_value,
     is_active,
   } = data;
 
-  const gain = current_value - total_invested;
-  const gainPercent = ((gain / total_invested) * 100).toFixed(2);
+  const gain = parseFloat(current_value) - parseFloat(total_inversion);
+  const gainPercent =
+    total_inversion && parseFloat(total_inversion) !== 0
+      ? ((gain / parseFloat(total_inversion)) * 100).toFixed(2)
+      : "0.00";
   const gainColor = gain >= 0 ? "#51AE6E" : "#ff4033";
+
 
   const handleClick = () => {
     sessionStorage.setItem("selectedPortfolio", JSON.stringify(data));
@@ -59,13 +63,13 @@ const PortfolioCard: React.FC<Props> = ({ data }) => {
 
       <div className="portfolio-stats">
         <div>
-          <strong>Avg:</strong> ${avg_price.toLocaleString()}
+          <strong>Avg:</strong> ${average_price}
         </div>
         <div>
-          <strong>Invested:</strong> ${total_invested.toLocaleString()}
+          <strong>Invested:</strong> ${total_inversion}
         </div>
         <div>
-          <strong>Current:</strong> ${current_value.toLocaleString()}
+          <strong>Current:</strong> ${current_value}
         </div>
         <div style={{ color: gainColor }}>
           <strong>{gain >= 0 ? "Gain" : "Loss"}:</strong> {gainPercent}%
@@ -93,7 +97,7 @@ const PortfolioCard: React.FC<Props> = ({ data }) => {
               stroke={`url(#grad-${id})`}
               strokeWidth="3"
               strokeDasharray={`${Math.min(
-                (current_value / total_invested) * 100,
+                parseFloat(total_inversion) > 0 ? (parseFloat(current_value) / parseFloat(total_inversion)) * 100 : 0,
                 100
               )}, 100`}
               strokeLinecap="round"
@@ -128,7 +132,10 @@ const PortfolioCard: React.FC<Props> = ({ data }) => {
             <p style={{ marginBottom: "4px" }}>
               It's now at{" "}
               <strong>
-                {((current_value / total_invested) * 100).toFixed(1)}%
+                {parseFloat(total_inversion) > 0
+                  ? ((parseFloat(current_value) / parseFloat(total_inversion)) * 100).toFixed(1)
+                  : "0.0"}
+                %
               </strong>{" "}
               of your total investment.
             </p>

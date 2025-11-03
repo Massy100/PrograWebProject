@@ -1,7 +1,9 @@
-"use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import "./PurchasePage.css";
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth0 } from '@auth0/auth0-react';
+import './PurchasePage.css';
 
 type CartItem = {
   portfolio: string;
@@ -17,12 +19,15 @@ type CartItem = {
 
 export default function PurchasePage() {
   const router = useRouter();
+  const { getAccessTokenSilently } = useAuth0();
+
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [selectedPortfolio, setSelectedPortfolio] = useState<string>("");
+  const [selectedPortfolio, setSelectedPortfolio] = useState<string>('');
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const storedCart = localStorage.getItem("shoppingCart");
+    const storedCart = localStorage.getItem('shoppingCart');
     if (storedCart) {
       const parsed = JSON.parse(storedCart);
       setCart(parsed);
@@ -46,7 +51,7 @@ export default function PurchasePage() {
         )
     );
     setCart(updated);
-    localStorage.setItem("shoppingCart", JSON.stringify(updated));
+    localStorage.setItem('shoppingCart', JSON.stringify(updated));
   };
 
   const updateQuantity = (
@@ -63,62 +68,148 @@ export default function PurchasePage() {
         : i
     );
     setCart(updated);
-    localStorage.setItem("shoppingCart", JSON.stringify(updated));
+    localStorage.setItem('shoppingCart', JSON.stringify(updated));
   };
-
-// AQUI ES DONDE SE ESTA ARMANDO EL JSON PARA MANDARLE AL BACK
-// FIJOOO SE LE TIENE QUE MANDAR ESTOS DATOS
-// LOS DATOS QUE SE ESTA MANDANDO AHORA ESTA INCORRECTOS YA QUE NO SE OBTIENE EL ID CORRECTO DE USER, AL IGUAL QUE EL DE LA STOCK Y LA DEL PORTAFOLIO
-//  {
-//      "client_id": number,             // required → ID of the logged-in client (must come from auth)
-//      "total_amount": number,          // required → total amount of this purchase
-//      "details": [                     // required → list of all stock purchases in this transaction
-//        {
-//          "stock_id": number,          // required → ID of the stock being purchased
-//          "quantity": number,          // required → number of shares purchased
-//          "unit_price": number,        // required → price per share at the time of purchase
-//          "portfolio_id": number       // required → ID of the portfolio where this stock is being stored
-//        },
-//        ...
-//      ]
-//    }
-
-// OTRA COSA CUANDO YA ESTE CONECTADO EL BACK ASEGURARSE DE MANEJAR EL ESCENARIO SI ALGO SALIO MAL YA QUE AQUI SIEMPRE EL RESULTADO ES CORRECTO
 
   const handleCheckout = async () => {
     if (filteredCart.length === 0) {
-      alert("⚠️ No stocks to purchase in this portfolio.");
+      alert('⚠️ No stocks to purchase in this portfolio.');
       return;
     }
 
-    const transactionPayload = {
-      client_id: 1,
-      total_amount: total,
-      details: filteredCart.map((item) => ({
-        stock_id: item.stock_id ?? Math.floor(Math.random() * 1000),
-        quantity: item.quantity,
-        unit_price: item.stockPrice,
-        portfolio_id:
-          item.portfolio_id ?? portfolios.indexOf(item.portfolio) + 1,
-      })),
-    };
+    try {
+      setLoading(true);
 
-    console.log("📦 Payload to send (filtered):", transactionPayload);
+      const token = await getAccessTokenSilently();
+      const currentUser = JSON.parse(localStorage.getItem('auth') || '{}');
+
+      if (!currentUser.id) {
+        alert('User not found in localStorage. Please log in again.');
+        return;
+      }
+
+      const userRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/users/${currentUser.id}/`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          cache: 'no-store',
+        }
+      );
+
+      if (!userRes.ok) {
+        const txt = await userRes.text();
+        console.error('❌ Error fetching user:', txt);
+        throw new Error('Failed to get user profile');
+      }
+
+      const userData = await userRes.json();
+      const clientProfileId = userData.client_profile?.id;
+
+      if (!clientProfileId) {
+        alert('⚠️ No client profile found for this user.');
+        return;
+      }
+
+      const enrichedDetails = await Promise.all(
+        filteredCart.map(async (item) => {
+          let stock_id = null;
+          let portfolio_id = null;
+
+          try {
+            // Buscar el stock por nombre o símbolo
+            const stockRes = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/stocks/by-name/?name=${encodeURIComponent(
+                item.stockName
+              )}`
+            );
+            if (stockRes.ok) {
+              const stockData = await stockRes.json();
+              stock_id = stockData?.id || null;
+            }
+          } catch (err) {
+            console.error(`⚠️ Could not fetch stock id for ${item.stockName}`);
+          }
+
+          try {
+            // Buscar el portafolio
+            const portfolioRes = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/portfolio/portfolios/?search=${encodeURIComponent(
+                item.portfolio
+              )}`
+            );
+            if (portfolioRes.ok) {
+              const portfolioData = await portfolioRes.json();
+              portfolio_id = portfolioData?.[0]?.id || null;
+            }
+          } catch (err) {
+            console.error(`⚠️ Could not fetch portfolio id for ${item.portfolio}`);
+          }
+
+          if (!stock_id || !portfolio_id) {
+            console.warn(`Missing IDs for ${item.stockName} / ${item.portfolio}`);
+          }
+
+          return {
+            stock_id,
+            portfolio_id,
+            quantity: item.quantity,
+            unit_price: item.stockPrice,
+          };
+        })
+      );
 
 
-    const remaining = cart.filter(
-      (item) =>
-        !filteredCart.some(
-          (f) =>
-            f.stockSymbol === item.stockSymbol && f.portfolio === item.portfolio
-        )
-    );
-    localStorage.setItem("shoppingCart", JSON.stringify(remaining));
+      const transactionPayload = {
+        client_id: clientProfileId,
+        total_amount: total,
+        details: enrichedDetails,
+      };
 
-    setShowModal(true);
-    setTimeout(() => {
-      router.push("/dashboard-user");
-    }, 2500);
+      console.log('📦 Payload to send:', transactionPayload);
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/buy/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(transactionPayload),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('❌ Backend error:', errText);
+        throw new Error(`Error ${res.status}`);
+      }
+
+      const result = await res.json();
+      console.log('✅ Transaction success:', result);
+
+      const remaining = cart.filter(
+        (item) =>
+          !filteredCart.some(
+            (f) =>
+              f.stockSymbol === item.stockSymbol &&
+              f.portfolio === item.portfolio
+          )
+      );
+      localStorage.setItem('shoppingCart', JSON.stringify(remaining));
+
+      setShowModal(true);
+      setTimeout(() => {
+        setShowModal(false);
+        router.push('/dashboard-user');
+      }, 2500);
+    } catch (err) {
+      console.error('❌ Error creating transaction:', err);
+      alert('There was a problem processing the purchase.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -149,7 +240,6 @@ export default function PurchasePage() {
           <span className="col-action"></span>
         </div>
       )}
-
 
       <div className="cart-list">
         {filteredCart.length === 0 ? (
@@ -200,9 +290,9 @@ export default function PurchasePage() {
         <button
           className="checkout-btn"
           onClick={handleCheckout}
-          disabled={filteredCart.length === 0}
+          disabled={filteredCart.length === 0 || loading}
         >
-          Confirm Purchase
+          {loading ? 'Processing...' : 'Confirm Purchase'}
         </button>
       </div>
 

@@ -7,8 +7,8 @@ interface Portfolio {
   id: number;
   name: string;
   created_at: string;
-  avg_price: number;
-  total_invested: number;
+  average_price: number;
+  total_inversion: number;
   current_value: number;
   is_active: boolean;
 }
@@ -18,13 +18,20 @@ interface Props {
 }
 
 const InfoPortfolioIndividual: React.FC<Props> = ({ data }) => {
-  const { id, name, created_at, avg_price, total_invested, current_value, is_active } = data;
+  const {
+    id,
+    name,
+    created_at,
+    average_price,
+    total_inversion,
+    current_value,
+    is_active,
+  } = data;
 
-  const gain = current_value - total_invested;
+  const gain = current_value - total_inversion;
   const gainPercent =
-    total_invested > 0 ? ((gain / total_invested) * 100).toFixed(2) : "0.00";
+    total_inversion > 0 ? ((gain / total_inversion) * 100).toFixed(2) : "0.00";
   const gainColor = gain >= 0 ? "#51AE6E" : "#FF4033";
-
   const gradientId = `grad-${id}-unique`;
 
   return (
@@ -44,14 +51,19 @@ const InfoPortfolioIndividual: React.FC<Props> = ({ data }) => {
       </p>
 
       <div className="portfolio-stats">
-        <div><strong>Avg:</strong> ${Number(avg_price ?? 0).toLocaleString()}</div>
-        <div><strong>Invested:</strong> ${Number(total_invested ?? 0).toLocaleString()}</div>
-        <div><strong>Current:</strong> ${Number(current_value ?? 0).toLocaleString()}</div>
+        <div>
+          <strong>Avg:</strong> ${Number(average_price ?? 0).toLocaleString()}
+        </div>
+        <div>
+          <strong>Invested:</strong> ${Number(total_inversion ?? 0).toLocaleString()}
+        </div>
+        <div>
+          <strong>Current:</strong> ${Number(current_value ?? 0).toLocaleString()}
+        </div>
         <div style={{ color: gainColor }}>
-            <strong>{gain >= 0 ? "Gain" : "Loss"}:</strong> {gainPercent}%
+          <strong>{gain >= 0 ? "Gain" : "Loss"}:</strong> {gainPercent}%
         </div>
       </div>
-
 
       <div className="mini-chart">
         <div className="chart-container">
@@ -74,8 +86,8 @@ const InfoPortfolioIndividual: React.FC<Props> = ({ data }) => {
               stroke={`url(#${gradientId})`}
               strokeWidth="3"
               strokeDasharray={`${Math.min(
-                total_invested > 0
-                  ? (current_value / total_invested) * 100
+                total_inversion > 0
+                  ? (current_value / total_inversion) * 100
                   : 0,
                 100
               )}, 100`}
@@ -85,22 +97,30 @@ const InfoPortfolioIndividual: React.FC<Props> = ({ data }) => {
 
             <defs>
               <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor={gain >= 0 ? "#51AE6E" : "#FF4033"} />
-                <stop offset="100%" stopColor={gain >= 0 ? "#2779F5" : "#EFAE3C"} />
+                <stop
+                  offset="0%"
+                  stopColor={gain >= 0 ? "#51AE6E" : "#FF4033"}
+                />
+                <stop
+                  offset="100%"
+                  stopColor={gain >= 0 ? "#2779F5" : "#EFAE3C"}
+                />
               </linearGradient>
             </defs>
           </svg>
 
           <div className="chart-hover">
-            <p style={{ fontWeight: 600, color: gainColor, marginBottom: "4px" }}>
+            <p
+              style={{ fontWeight: 600, color: gainColor, marginBottom: "4px" }}
+            >
               {gain >= 0 ? "Portfolio growing" : "Portfolio decreasing"}
             </p>
 
             <p style={{ marginBottom: "4px" }}>
               It's now at{" "}
               <strong>
-                {total_invested > 0
-                  ? ((current_value / total_invested) * 100).toFixed(1)
+                {total_inversion > 0
+                  ? ((current_value / total_inversion) * 100).toFixed(1)
                   : "0.0"}
                 %
               </strong>{" "}

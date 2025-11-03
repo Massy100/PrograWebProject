@@ -1,10 +1,10 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import StockTrendCard from "./StockTrendCard";
 import "../styles/StockGraphCarousel.css";
 
-// Define la interfaz para los stocks que recibe
-export interface StockItem {
+interface StockItem {
+  id?: number;
   symbol: string;
   name: string;
   currentPrice: number;
@@ -14,78 +14,53 @@ export interface StockItem {
   recommendation: string;
 }
 
-interface StockGraphCarouselProps {
-  stocks?: StockItem[];
-  loading?: boolean;
-}
-
-const StockGraphCarousel: React.FC<StockGraphCarouselProps> = ({ 
-  stocks = [], 
-  loading = false 
-}) => {
-  // Datos de demo como fallback
-  const mockStocks = stocks.length > 0 ? stocks.map(stock => ({
-    name: stock.name,
-    symbol: stock.symbol,
-    currentPrice: stock.currentPrice,
-    changePercent: stock.changePct,
-    history: stock.last30d.length > 0 ? stock.last30d : [stock.currentPrice * 0.9, stock.currentPrice * 0.95, stock.currentPrice],
-    status: stock.changePct >= 0 ? "up" : "down" as "up" | "down",
-  })) : [
-    {
-      name: "Apple Inc.",
-      symbol: "AAPL",
-      currentPrice: 185.12,
-      changePercent: 2.34,
-      history: [180, 181, 183, 184, 185],
-      status: "up" as const,
-    },
-    {
-      name: "Tesla Motors",
-      symbol: "TSLA",
-      currentPrice: 240.76,
-      changePercent: -1.8,
-      history: [250, 248, 246, 243, 240],
-      status: "down" as const,
-    },
-    {
-      name: "Microsoft Corp.",
-      symbol: "MSFT",
-      currentPrice: 330.56,
-      changePercent: 1.12,
-      history: [320, 323, 326, 328, 330],
-      status: "up" as const,
-    },
-    {
-      name: "Amazon Inc.",
-      symbol: "AMZN",
-      currentPrice: 129.87,
-      changePercent: 3.25,
-      history: [123, 125, 127, 128, 129],
-      status: "up" as const,
-    },
-    {
-      name: "NVIDIA",
-      symbol: "NVDA",
-      currentPrice: 410.44,
-      changePercent: -0.65,
-      history: [420, 417, 415, 412, 410],
-      status: "down" as const,
-    },
-    {
-      name: "Meta Platforms",
-      symbol: "META",
-      currentPrice: 280.34,
-      changePercent: -2.1,
-      history: [290, 288, 285, 283, 280],
-      status: "down" as const,
-    },
-  ];
-
+const StockGraphCarousel: React.FC = () => {
+  const [stocks, setStocks] = useState<StockItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const trackRef = useRef<HTMLDivElement | null>(null);
 
-  // Duplicamos los stocks para crear efecto de loop
-  const loopedStocks = [...mockStocks, ...mockStocks];
+  const fetchStocks = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/stocks/active/`);
+      if (!res.ok) throw new Error("Failed to fetch active stocks");
+
+      const data = await res.json();
+
+      const parsed: StockItem[] = data.map((s: any) => ({
+        id: s.id,
+        symbol: s.symbol,
+        name: s.name,
+        currentPrice: s.last_price ?? 0,
+        changePct: s.variation ?? 0,
+        last30d: [],
+        targetPrice: s.last_price ?? 0,
+        recommendation:
+          s.variation > 5
+            ? "STRONG BUY"
+            : s.variation > 2
+            ? "BUY"
+            : s.variation < -5
+            ? "STRONG SELL"
+            : s.variation < -2
+            ? "SELL"
+            : "HOLD",
+      }));
+
+      setStocks(parsed);
+    } catch (error) {
+      console.error("Error fetching stocks:", error);
+      setStocks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStocks();
+    const interval = setInterval(fetchStocks, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -105,8 +80,9 @@ const StockGraphCarousel: React.FC<StockGraphCarouselProps> = ({
 
     animationFrame = requestAnimationFrame(move);
     return () => cancelAnimationFrame(animationFrame);
-  }, []);
+  }, [stocks.length]);
 
+  // 🟡 Estado de carga
   if (loading) {
     return (
       <div className="loop-carousel-container">
@@ -115,6 +91,31 @@ const StockGraphCarousel: React.FC<StockGraphCarouselProps> = ({
       </div>
     );
   }
+
+  if (stocks.length === 0) {
+    return (
+      <div className="loop-carousel-container">
+        <h2 className="loop-carousel-title">Live Market Trends</h2>
+        <p>No stock data available.</p>
+      </div>
+    );
+  }
+
+  const loopedStocks = [...stocks, ...stocks].map((stock) => ({
+    name: stock.name,
+    symbol: stock.symbol,
+    currentPrice: stock.currentPrice,
+    changePercent: stock.changePct,
+    history:
+      stock.last30d.length > 0
+        ? stock.last30d
+        : [
+            stock.currentPrice * 0.9,
+            stock.currentPrice * 0.95,
+            stock.currentPrice,
+          ],
+    status: stock.changePct >= 0 ? "up" : "down" as "up" | "down",
+  }));
 
   return (
     <div className="loop-carousel-container">

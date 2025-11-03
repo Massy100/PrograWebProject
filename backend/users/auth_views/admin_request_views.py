@@ -1,12 +1,13 @@
-from datetime import timezone
+from django.utils import timezone
 from django.http import JsonResponse
 from rest_framework.decorators import action
 from rest_framework import viewsets
 import threading
 
-from ..models import AdminPermissionsRequest
+from ..models import AdminPermissionsRequest, ClientProfile, User
 from ..serializers import AdminPermissionsRequestSerialzer
 from ..mixins import ClientRequiredMixin, AdminRequiredMixin
+from ..auth_views.permit_grantor import PermitGrantor
 
 # Importar el servicio de email
 try:
@@ -37,6 +38,8 @@ class AdminPermsReqViewSet(viewsets.ModelViewSet):
     queryset = AdminPermissionsRequest.objects.all()
     serializer_class = AdminPermissionsRequestSerialzer
 
+    http_method_names = ['get', 'post']
+
     @action(detail=False, methods=['get'], url_path='pending')
     def list_pending(self, request):
         queryset = AdminPermissionsRequest.objects.filter(status=AdminPermissionsRequest.STATUS_PENDING).order_by('-issued_at')
@@ -55,25 +58,27 @@ class AdminPermsReqViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return JsonResponse(serializer.data, safe=False)
 
-    @action(detail=True, methods=['post'], url_path='approve')
-    def approve(self, request, pk=None):
+    @action(detail=False, methods=['post'], url_path='approve')
+    def approve(self, request):
         try:
-            admin_request = self.get_object()
+            data = request.data
+            params = request.query_params
+            admin_request = AdminPermissionsRequest.objects.get(id=params.get('id'))
             admin_request.status = AdminPermissionsRequest.STATUS_APPROVED
-            admin_request.reviewer = request.user
+            admin_request.reviewer = User.objects.get(id=data.get('reviewer_id'))
             admin_request.reviewed_at = timezone.now()
             admin_request.save()
 
-            # Enviar email de aprobación de forma asíncrona
+            PermitGrantor(admin_request.user)
+
             try:
                 EmailThread(
                     user_email=admin_request.user.email,
                     username=admin_request.user.username
                 ).start()
-                print(f"🔄 Proceso de email iniciado para: {admin_request.user.email}")
+                print(f"Proceso de email iniciado para: {admin_request.user.email}")
             except Exception as e:
-                print(f"⚠️ No se pudo iniciar el hilo de email: {str(e)}")
-                # No fallar la aprobación si el email falla
+                print(f"No se pudo iniciar el hilo de email: {str(e)}")
 
             return JsonResponse({
                 'status': 'approved',
@@ -89,11 +94,13 @@ class AdminPermsReqViewSet(viewsets.ModelViewSet):
                 'error': 'Internal server error'
             }, status=500)
   
-    @action(detail=True, methods=['post'])
-    def reject(self, request, pk=None):
-        admin_request = self.get_object()
+    @action(detail=False, methods=['post'])
+    def reject(self, request):
+        data = request.data
+        params = request.query_params
+        admin_request = AdminPermissionsRequest.objects.get(id=params.get('id'))
         admin_request.status = AdminPermissionsRequest.STATUS_REJECTED
-        admin_request.reviewer = request.user
+        admin_request.reviewer = User.objects.get(id=data.get('reviewer_id'))
         admin_request.reviewed_at = timezone.now()
         admin_request.save()
         return JsonResponse({'status': 'rejected'})
@@ -108,32 +115,3 @@ class AdminPermsReqViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(admin_request)
         return JsonResponse(serializer.data, status=201)
       
-    @action(detail=False, methods=['post'], url_path='test-email')
-    def test_email(self, request):
-        """
-        Endpoint temporal para probar el envío de emails
-        """
-        try:
-            # Datos de prueba - cambia por tu email real
-            test_email = "tu_email@dominio.com"  # ← CAMBIA ESTO
-            test_username = "Usuario de Prueba"
-            
-            print(f"🧪 Probando envío de email a: {test_email}")
-            
-            # Enviar email de prueba
-            EmailThread(
-                user_email=test_email,
-                username=test_username
-            ).start()
-            
-            return JsonResponse({
-                'status': 'success',
-                'message': f'Email de prueba enviado a {test_email}',
-                'test_email': test_email
-            })
-            
-        except Exception as e:
-            print(f"❌ Error en test email: {str(e)}")
-            return JsonResponse({
-                'error': f'Error enviando email de prueba: {str(e)}'
-            }, status=500)

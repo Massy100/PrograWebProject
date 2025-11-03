@@ -1,4 +1,5 @@
 'use client';
+
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect, useState } from 'react';
 import '../styles/wallet.css';
@@ -10,8 +11,9 @@ type WalletProps = {
 
 export default function Wallet({ open, onClose }: WalletProps) {
   const { getAccessTokenSilently } = useAuth0();
+
   const [balance, setBalance] = useState<number | null>(null);
-  const [banks, setBanks] = useState<{id: number; name:string; address: string; established_date: string}[]>([]);
+  const [banks, setBanks] = useState<{ id: number; name: string; address: string; established_date: string }[]>([]);
   const [selectedBank, setSelectedBank] = useState<number | undefined>();
   const [sBankName, setSBankName] = useState<string>('');
   const [amount, setAmount] = useState('');
@@ -24,58 +26,77 @@ export default function Wallet({ open, onClose }: WalletProps) {
     user: number;
   } | null>(null);
 
-  // Obtener balance y bancos desde el backend
   useEffect(() => {
-  if (!open) return;
+    if (!open) return;
 
-  (async () => {
-    try {
-      const token = await getAccessTokenSilently();
-      const currentUser = localStorage.getItem('auth');
-      const userId = currentUser ? JSON.parse(currentUser).id : null;
-      const balanceRes = await fetch('http://localhost:8000/users/' + userId.toString(), {
+    (async () => {
+      try {
+        const token = await getAccessTokenSilently();
 
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-      });
+        // Obtener ID de usuario desde localStorage
+        const currentUser = localStorage.getItem('auth');
+        const userId = currentUser ? JSON.parse(currentUser).id : null;
 
+        if (!userId) {
+          console.error('User ID not found in localStorage');
+          return;
+        }
 
-      const banksRes = await fetch('http://localhost:8000/api/banks/banks/', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-      });
+        const balanceRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          cache: 'no-store',
+        });
 
-      const balanceData = await balanceRes.json();
-      const banksData = await banksRes.json();
+        const banksRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/banks/banks/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          cache: 'no-store',
+        });
 
-      const floatBalance = parseFloat(balanceData.client_profile.balance_available);
-      setBalance(floatBalance);
-      setBanks(banksData);
+        if (!balanceRes.ok) throw new Error(`Error fetching balance: ${balanceRes.status}`);
+        if (!banksRes.ok) throw new Error(`Error fetching banks: ${banksRes.status}`);
 
-    } catch (err) {
-      console.error(err);
-    }
-  })();
-}, [open]);
+        const balanceData = await balanceRes.json();
+        const banksData = await banksRes.json();
 
+        console.log('📊 Banks response from backend:', banksData);
+
+        if (Array.isArray(banksData)) {
+          setBanks(banksData);
+        } else if (banksData.results) {
+          setBanks(banksData.results);
+        } else {
+          console.warn('Unexpected banks format:', banksData);
+          setBanks([]);
+        }
+
+        const floatBalance = parseFloat(balanceData.client_profile.balance_available);
+        setBalance(floatBalance);
+      } catch (err) {
+        console.error('❌ Error loading wallet data:', err);
+      }
+    })();
+  }, [open, getAccessTokenSilently]);
 
   const handleDeposit = () => {
     if (!selectedBank || !amount || !referenceCode) {
       return alert('Please complete all fields');
     }
 
+    const currentUser = JSON.parse(localStorage.getItem('auth') || '{}');
+
     setPendingDeposit({
       bank: selectedBank,
       amount: parseFloat(amount),
       reference_code: referenceCode,
-      user: JSON.parse(localStorage.getItem('auth') || '{}').id
+      user: currentUser.id,
     });
 
     setShowConfirm(true);
@@ -86,7 +107,7 @@ export default function Wallet({ open, onClose }: WalletProps) {
 
     try {
       const token = await getAccessTokenSilently();
-      const res = await fetch('http://localhost:8000/api/banks/fundstransfers/', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/banks/fundstransfers/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -129,7 +150,7 @@ export default function Wallet({ open, onClose }: WalletProps) {
             <div className="wallet-modal-actions">
               <button className="wallet-button" onClick={() => setShowConfirm(false)}>Cancel</button>
               <button className="wallet-button deposit" onClick={confirmDeposit}>Confirm deposit</button>
-            </div> 
+            </div>
           </div>
         </div>
       )}
@@ -140,7 +161,7 @@ export default function Wallet({ open, onClose }: WalletProps) {
         <header className="wallet-header">
           <h2 className="wallet-title">Your Wallet</h2>
           <div className="wallet-balance">
-            Current balance: {balance !== null ? `Q${balance.toFixed(2)}` : 'Loading...'}
+            Current balance: {balance !== null ? `Q${balance}` : 'Loading...'}
           </div>
         </header>
 
@@ -148,15 +169,14 @@ export default function Wallet({ open, onClose }: WalletProps) {
           <label className="wallet-label">Select bank:</label>
           <select
             className="wallet-select"
-            value={selectedBank}
+            value={selectedBank ?? ''}
             onChange={(e) => {
-              setSelectedBank(e.target.value ? parseInt(e.target.value) : undefined)
-              setSBankName(e.target.options[e.target.selectedIndex].text)
-            } 
-              }
+              setSelectedBank(e.target.value ? parseInt(e.target.value) : undefined);
+              setSBankName(e.target.options[e.target.selectedIndex].text);
+            }}
           >
             <option value="">-- Choose one --</option>
-            {banks.map((bank, idx) => (
+            {banks.map((bank) => (
               <option key={bank.id} value={bank.id}>{bank.name}</option>
             ))}
           </select>

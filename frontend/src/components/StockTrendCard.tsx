@@ -75,10 +75,10 @@ export default function StockTrendCard({ stocks }: Props) {
           </span> */}
         </div>
         <p className="trendSub">{stock.symbol}</p>
-        <p className="trendPrice">Q{stock.currentPrice.toFixed(2)}</p>
+        <p className="trendPrice">${stock.currentPrice}</p>
         <p className={`trendPercent ${isUp ? "up" : "down"}`}>
           {stock.changePercent > 0 ? "+" : ""}
-          {stock.changePercent.toFixed(2)}%
+          {stock.changePercent}%
         </p>
       </div>
     </div>

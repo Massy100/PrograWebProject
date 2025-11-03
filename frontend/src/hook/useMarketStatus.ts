@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 const OPEN_HOUR = 7;   
 const OPEN_MIN = 0;
-const CLOSE_HOUR = 17;  
+const CLOSE_HOUR = 19;  
 const CLOSE_MIN = 0;
 
 export function useMarketStatus() {

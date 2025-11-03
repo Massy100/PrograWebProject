@@ -1,7 +1,5 @@
 'use client';
-
-import { useEffect } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth0 } from '@auth0/auth0-react';
 import SearchResults from '@/components/searchResults';
@@ -11,96 +9,128 @@ import CompleteUserRegister from '@/components/CompleteUserRegister';
 import Wallet from '@/components/wallet';
 import StocksRecommendationsTable, { StockItem } from '@/components/stocksTable';
 import PopularStocksCard, { PopularStock } from '@/components/popularCardStocks';
+import Footer from '@/components/Footer';
 import '@/app/page.css';
 
-export default function Home() {
+export default function FinovaHome() {
   const router = useRouter();
   const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
   const [completeRegisterOpen, setCompleteRegisterOpen] = useState(false);
 
-  // REEMPLAZADO: Datos en tiempo real desde la API
   const [realStocks, setRealStocks] = useState<StockItem[]>([]);
   const [popularStocks, setPopularStocks] = useState<PopularStock[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // NUEVO: Función para obtener datos reales del scheduler
-  const fetchRealStockData = async () => {
+  const generateLastDays = (currentPrice: number, variationPct: number): number[] => {
+    const days = 30;
+    const data: number[] = [];
+    const volatility = Math.abs(variationPct) / 2 + 0.5;
+    let price = currentPrice;
+
+    for (let i = days - 1; i >= 0; i--) {
+      const randomChange = 1 + (Math.random() - 0.5) * (volatility / 100);
+      price = Math.max(price * randomChange, 0.1);
+      data.unshift(parseFloat(price.toFixed(2)));
+    }
+    return data;
+  };
+
+  const fetchActiveStocks = async () => {
     try {
       setLoading(true);
-      // CAMBIO: Usar stocks aprobados en lugar de todos los de Alpha Vantage
-      const response = await fetch('http://localhost:8000/api/stocks/approved/');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch stock data');
-      }
-      
-      const data = await response.json();
-      
-      // Convertir datos de la API al formato de tu frontend
-      const formattedStocks: StockItem[] = data.data.map((stockData: any) => {
-        // Convertir variation de string a número
-        const variation = parseFloat(stockData.variation) || 0;
-        
-        // Calcular recomendación basada en la variación
-        let recommendation = 'HOLD';
-        if (variation > 5) recommendation = 'STRONG BUY';
-        else if (variation > 2) recommendation = 'BUY';
-        else if (variation < -5) recommendation = 'STRONG SELL';
-        else if (variation < -2) recommendation = 'SELL';
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/stocks/active/`);
+      if (!res.ok) throw new Error("Failed to fetch active stocks");
+      const data = await res.json();
+
+      const parsed: StockItem[] = data.map((s: any) => {
+        const variation = parseFloat(s.variation ?? 0);
+        const price = parseFloat(s.last_price ?? 0);
+        const last30d = generateLastDays(price, variation);
+
+        let recommendation = "HOLD";
+        if (variation > 5) recommendation = "STRONG BUY";
+        else if (variation > 2) recommendation = "BUY";
+        else if (variation < -5) recommendation = "STRONG SELL";
+        else if (variation < -2) recommendation = "SELL";
+
+        const avg = last30d.reduce((a, b) => a + b, 0) / last30d.length;
+        const targetPrice = parseFloat((avg * 1.05).toFixed(2));
 
         return {
-          symbol: stockData.symbol,
-          name: stockData.name || stockData.symbol,
-          currentPrice: parseFloat(stockData.last_price) || 0,
+          symbol: s.symbol,
+          name: s.name || s.symbol,
+          currentPrice: price,
           changePct: variation,
-          last30d: [],
-          targetPrice: 0,
-          recommendation: recommendation
+          last30d,
+          targetPrice,
+          recommendation,
         };
       });
 
-      setRealStocks(formattedStocks);
-      
-      // Crear popular stocks (primeros 7)
-      const popularItems: PopularStock[] = formattedStocks.slice(0, 7).map(stock => ({
-        symbol: stock.symbol,
-        name: stock.name,
-        price: stock.currentPrice,
-        changePct: stock.changePct,
+      setRealStocks(parsed);
+      const popular: PopularStock[] = parsed.slice(0, 7).map((s) => ({
+        symbol: s.symbol,
+        name: s.name,
+        price: s.currentPrice,
+        changePct: s.changePct,
       }));
-      
-      setPopularStocks(popularItems);
-      
+      setPopularStocks(popular);
     } catch (error) {
-      console.error('Error fetching real stock data:', error);
-      // FALLBACK: Usar datos de demo si la API falla
+      console.error("Error fetching stocks:", error);
       setRealStocks(getDemoStocks());
-      setPopularStocks(getDemoStocks().slice(0, 7).map(stock => ({
-        symbol: stock.symbol,
-        name: stock.name,
-        price: stock.currentPrice,
-        changePct: stock.changePct,
+      setPopularStocks(getDemoStocks().slice(0, 7).map((s) => ({
+        symbol: s.symbol,
+        name: s.name,
+        price: s.currentPrice,
+        changePct: s.changePct,
       })));
     } finally {
       setLoading(false);
     }
   };
 
-  // Datos de demo como fallback
   const getDemoStocks = (): StockItem[] => [
-    { symbol: 'NIO',  name: 'Nio Inc.-ADR', currentPrice: 6.04,  changePct: -0.48, last30d: [9,8,7,6.5,6.7,6.6], targetPrice: 61.75,  recommendation: 'STRONG BUY' },
-    { symbol: 'BP', name: 'BP PLC', currentPrice: 423.61, changePct: 0.31, last30d: [4,5.2,4.7,4.5,4.6], targetPrice: 5.45, recommendation: 'BUY' },
-    { symbol: 'PEN',  name: 'Penumbra Inc', currentPrice: 275.87, changePct: 1.63, last30d: [2,3,4,4.5,3.8], targetPrice: 299.00, recommendation: 'HOLD' },
-    { symbol: 'MPWR', name: 'Monolithic Power Systems', currentPrice: 838.89, changePct: -1.73, last30d: [9,8,7.5,7.8,7.3], targetPrice: 533.75, recommendation: 'SELL' },
+    {
+      symbol: 'AAPL',
+      name: 'Apple Inc',
+      currentPrice: 270.37,
+      changePct: 0.83,
+      last30d: generateLastDays(270.37, 0.83),
+      targetPrice: 285.00,
+      recommendation: 'BUY',
+    },
+    {
+      symbol: 'MSFT',
+      name: 'Microsoft Corp',
+      currentPrice: 520.45,
+      changePct: 1.25,
+      last30d: generateLastDays(520.45, 1.25),
+      targetPrice: 545.00,
+      recommendation: 'STRONG BUY',
+    },
+    {
+      symbol: 'TSLA',
+      name: 'Tesla Inc',
+      currentPrice: 250.75,
+      changePct: -2.05,
+      last30d: generateLastDays(250.75, -2.05),
+      targetPrice: 265.00,
+      recommendation: 'HOLD',
+    },
+    {
+      symbol: 'GOOGL',
+      name: 'Alphabet Inc',
+      currentPrice: 180.12,
+      changePct: 0.45,
+      last30d: generateLastDays(180.12, 0.45),
+      targetPrice: 190.00,
+      recommendation: 'BUY',
+    },
   ];
 
-  // NUEVO: Cargar datos reales al montar el componente
   useEffect(() => {
-    fetchRealStockData();
-    
-    // OPCIONAL: Actualizar cada 30 segundos para datos más frescos
-    const interval = setInterval(fetchRealStockData, 30000);
-    
+    fetchActiveStocks();
+    const interval = setInterval(fetchActiveStocks, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -114,7 +144,7 @@ export default function Home() {
   const callApi = async () => {
     try {
       const token = await getAccessTokenSilently();
-      const response = await fetch("http://localhost:8000/api/users/sync/", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/sync/`, {
         method: "POST",
         body: JSON.stringify(user),
         headers: {
@@ -123,47 +153,43 @@ export default function Home() {
         }
       });
       const data = await response.json();
-      if (!data) {
-        throw new Error("No se obtuvo respuesta del backend.");
-      }
+      if (!data) throw new Error("No backend response.");
       const dbUser = data.user;
+
       localStorage.setItem("auth", JSON.stringify({
         id: dbUser.id, 
         verified: dbUser.verified, 
         role: dbUser.user_type, 
-        completed: dbUser.is_completed
+        completed: dbUser.is_completed,
+        name: dbUser.full_name,
+        client_id: dbUser.client_profile?.id || null
       }));
 
       document.cookie = `auth=${encodeURIComponent(JSON.stringify({
-      role: dbUser.user_type,
-      verified: dbUser.verified,
-      completed: dbUser.is_completed
-    }))}; path=/; max-age=86400; samesite=lax`;
+        role: dbUser.user_type,
+        verified: dbUser.verified,
+        completed: dbUser.is_completed
+      }))}; path=/; max-age=86400; samesite=lax`;
 
-      
       setVerifiedUser(dbUser.verified);
       setCompletedUser(dbUser.is_completed);
       setRole(dbUser.user_type);
       setLoad(false);
-
     } catch (e) {
       console.error(e);
     }
-  
-  
   };
 
   useEffect(() => {
-    if (user) {
-      callApi();
-    }
+    if (user) callApi();
   }, [user, isAuthenticated]);
 
   return (
     <>
       <SearchResults
-        headerProps={{ marketOpen: true, totalAmount: 100 }}
-        title="Resultados de la búsqueda"
+        headerProps={{ marketOpen: true, totalAmount: 100, isLoggedIn: false }}
+        title="Search Results"
+        alwaysShowHeader={true} 
       />
 
       {role === 'client' && verifiedUser && (
@@ -173,6 +199,7 @@ export default function Home() {
       {role === 'admin' && <SidebarOptions />}
 
       <Wallet open={walletOpen} onClose={() => setWalletOpen(false)} />
+
       {completeRegisterOpen && (
         <CompleteUserRegister 
           onClose={() => setCompleteRegisterOpen(false)} 
@@ -183,25 +210,16 @@ export default function Home() {
       <main className="landingPage">
         <section className="div-initial">
           <div className="info">
-            <h1 className="home-title">Welcome!</h1>
+            <h1 className="home-title">Welcome to Finova</h1>
             <p className="home-text">
-              {loading ? 'Loading real-time market data...' : 'Real-time market pulse and recommended stocks.'}
+              {loading 
+                ? 'Loading real-time financial data powered by Finova...' 
+                : 'Empowering you with data-driven insights and smarter investment decisions.'}
             </p>
+            {loading && <div className="loading-indicator"><span>Loading live stock data...</span></div>}
 
-            {/* Mostrar estado de carga */}
-            {loading && (
-              <div className="loading-indicator">
-                <span>Loading live stock data...</span>
-              </div>
-            )}
-
-            {/* If there is no session, show login button */}
             {!isAuthenticated && (
-              <button
-                type="button"
-                className="see-more-btn"
-                onClick={() => loginWithRedirect()}
-              >
+              <button type="button" className="see-more-btn" onClick={() => loginWithRedirect()}>
                 Login
               </button>
             )}
@@ -218,8 +236,8 @@ export default function Home() {
               )}
 
               {isAuthenticated && completedUser && !verifiedUser && !load && (
-                <p>Your access request was successfully sent to the administration team.
-                   We will send you a confirmation email as soon as it gets reviewed.</p>
+                <p>Your access request has been successfully sent to the Finova administration team.
+                   You’ll receive an email confirmation once your account is verified.</p>
               )}
 
               {isAuthenticated && !verifiedUser && !load && (
@@ -234,6 +252,7 @@ export default function Home() {
             </div>
           </div>
 
+
           <div className="stocks-card">
             <PopularStocksCard 
               items={popularStocks.length > 0 ? popularStocks : getDemoStocks().slice(0, 7).map(stock => ({
@@ -246,11 +265,51 @@ export default function Home() {
             />
           </div>
         </section>
+            
+        <section className="section-container">
+          <h2 className="section-title">How Finova Works</h2>
+          <p className="section-text">
+            Finova stands at the intersection of <strong>finance</strong> and <strong>innovation</strong>.  
+            Our mission is to make the financial world more transparent, intelligent, and accessible for everyone.  
+            <br /><br />
+            With Finova, you can create your account in minutes, fund your digital wallet securely,
+            and start exploring real-time stock data.
+            <br /><br />
+            We combine advanced analytics with a clean, intuitive interface so that whether you're a beginner
+            or an experienced trader, you always have access to the tools that empower smart decisions.
+            <br /><br />
+            Welcome to the future of investing. Welcome to <strong>Finova</strong>.
+          </p>
+        </section>
 
         <StocksRecommendationsTable 
           rows={realStocks.length > 0 ? realStocks : getDemoStocks()} 
           loading={loading}
         />
+
+        <section className="div-initial div-reverse">
+          <div className="stocks-card">
+            <PopularStocksCard 
+              items={popularStocks.length > 0 ? popularStocks : getDemoStocks().slice(0, 7).map(stock => ({
+                symbol: stock.symbol,
+                name: stock.name,
+                price: stock.currentPrice,
+                changePct: stock.changePct,
+              }))} 
+              loading={loading}
+            />
+          </div>
+
+          <div className="info">
+            <h1 className="section-title">Market Insights</h1>
+            <p className="home-text">
+              Discover the trends that shape the markets. Finova helps you spot opportunities,
+              understand market momentum, and make informed moves that drive your portfolio forward.
+            </p>
+          </div>
+        </section>
+
+        
       </main>
     </>
   );

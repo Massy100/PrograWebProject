@@ -1,9 +1,9 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "../styles/StockApproval.css";
 
 type StockItem = {
+  id?: number;
   symbol: string;
   name: string;
   currentPrice: number;
@@ -11,150 +11,195 @@ type StockItem = {
   last30d: number[];
   targetPrice: number;
   recommendation: string;
+  is_active?: boolean;
 };
 
 export default function StockManager() {
+  const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/alpha-vantage/stocks`;
+  const REFRESH_INTERVAL = 60000;
+
   const [stocks, setStocks] = useState<StockItem[]>([]);
   const [systemStocks, setSystemStocks] = useState<StockItem[]>([]);
+  const [inactiveStocks, setInactiveStocks] = useState<StockItem[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [tab, setTab] = useState<"pending" | "system">("pending");
+  const [tab, setTab] = useState<"pending" | "system" | "inactive">("pending");
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<string | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Función para obtener stocks aprobados de la BD
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2500);
+  };
   const fetchApprovedStocks = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8000/api/stocks/approved/');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch approved stocks');
-      }
-      
-      const data = await response.json();
-      
-      // Transformar datos de la API al formato que necesita el componente
-      const approvedStocks: StockItem[] = data.data.map((stockData: any) => {
-        return {
-          symbol: stockData.symbol,
-          name: stockData.name,
-          currentPrice: stockData.currentPrice,
-          changePct: stockData.changePct,
-          last30d: [], // La API actual no proporciona datos históricos
-          targetPrice: 0, // Podrías calcular esto si tienes más datos
-          recommendation: stockData.recommendation || 'HOLD'
-        };
-      });
 
-      setSystemStocks(approvedStocks);
-      
-    } catch (error) {
-      console.error('Error fetching approved stocks:', error);
-      // Fallback a datos mock si la API falla
-      setSystemStocks(mockSystemStocks);
+      const response = await fetch(`${BASE_URL}/approved/`);
+      if (!response.ok) throw new Error("Error al obtener stocks activas");
+      const data = await response.json();
+
+      const approved: StockItem[] = (data.data || []).map((d: any) => ({
+        id: d.id,
+        symbol: d.symbol,
+        name: d.name,
+        currentPrice: d.currentPrice ?? d.last_price ?? 0,
+        changePct: d.changePct ?? d.variation ?? 0,
+        last30d: [],
+        targetPrice: 0,
+        recommendation: d.recommendation || "HOLD",
+        is_active: d.is_active ?? true,
+      }));
+
+      const localRes = await fetch(`${BASE_URL}/inactive/`);
+      const localData = localRes.ok ? await localRes.json() : { data: [] };
+
+      const localStocks: StockItem[] = (localData.data || []).map((s: any) => ({
+        id: s.id,
+        symbol: s.symbol,
+        name: s.name,
+        currentPrice: s.last_price ?? 0,
+        changePct: s.variation ?? 0,
+        last30d: [],
+        targetPrice: 0,
+        recommendation: s.recommendation || "HOLD",
+        is_active: s.is_active ?? false,
+      }));
+
+      const merged = [
+        ...approved,
+        ...localStocks.filter(
+          (s) => !approved.some((a) => a.symbol === s.symbol)
+        ),
+      ];
+
+      setSystemStocks(merged);
+    } catch (err) {
+      console.error("Error cargando stocks:", err);
+      setSystemStocks([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Función para aprobar stocks (guardar en BD)
+  const fetchInactiveStocks = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${BASE_URL}/inactive/`);
+      if (!response.ok) throw new Error("Error al obtener stocks inactivas");
+      const data = await response.json();
+
+      const inactive: StockItem[] = (data.data || []).map((s: any) => ({
+        id: s.id,
+        symbol: s.symbol,
+        name: s.name,
+        currentPrice: s.last_price || 0,
+        changePct: s.variation || 0,
+        last30d: [],
+        targetPrice: 0,
+        recommendation: s.recommendation || "HOLD",
+        is_active: s.is_active,
+      }));
+
+      setInactiveStocks(inactive);
+    } catch {
+      setInactiveStocks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const approveStocks = async (stocksToApprove: StockItem[]) => {
-    try {
-      const response = await fetch('http://localhost:8000/api/stocks/approve/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          stocks: stocksToApprove.map(stock => ({
-            symbol: stock.symbol,
-            name: stock.name
-          }))
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to approve stocks');
-      }
-
-      const result = await response.json();
-      console.log('Stocks approved:', result);
-      return result;
-      
-    } catch (error) {
-      console.error('Error approving stocks:', error);
-      throw error;
-    }
+    const response = await fetch(`${BASE_URL}/approve/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        stocks: stocksToApprove.map((s) => ({
+          symbol: s.symbol,
+          name: s.name,
+        })),
+      }),
+    });
+    return await response.json();
   };
 
-  // Función para eliminar stocks del sistema
-  const removeStocks = async (symbolsToRemove: string[]) => {
+  const toggleStockStatus = async (ids: number[], activate: boolean) => {
     try {
-      const response = await fetch('http://localhost:8000/api/stocks/remove/', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          symbols: symbolsToRemove
+      const results = await Promise.all(
+        ids.map(async (id) => {
+          const res = await fetch(`${BASE_URL}/${id}/toggle/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          });
+          return res.ok ? await res.json() : null;
         })
-      });
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to remove stocks');
+      const updated = results.filter((r) => r !== null);
+
+      if (activate) {
+        const reactivated = inactiveStocks.filter((s) =>
+          selected.includes(s.symbol)
+        );
+        setInactiveStocks((prev) =>
+          prev.filter((s) => !selected.includes(s.symbol))
+        );
+        setSystemStocks((prev) => [
+          ...prev,
+          ...reactivated.map((s) => ({ ...s, is_active: true })),
+        ]);
+        showToast(`✅ ${updated.length} stock(s) reactivadas`);
+      } else {
+        const removed = systemStocks.filter((s) =>
+          selected.includes(s.symbol)
+        );
+        setSystemStocks((prev) =>
+          prev.filter((s) => !selected.includes(s.symbol))
+        );
+        setInactiveStocks((prev) => [
+          ...prev,
+          ...removed.map((s) => ({ ...s, is_active: false })),
+        ]);
+        showToast(`⚠️ ${updated.length} stock(s) desactivadas`);
       }
-
-      const result = await response.json();
-      console.log('Stocks removed:', result);
-      return result;
-      
-    } catch (error) {
-      console.error('Error removing stocks:', error);
-      throw error;
+    } catch {
+      showToast("Error cambiando estado de stocks");
     }
   };
-
-  // Datos mock de fallback
-  const mockSystemStocks: StockItem[] = [
-    {
-      symbol: "AAPL",
-      name: "Apple Inc.",
-      currentPrice: 262.82,
-      changePct: 1.25,
-      last30d: [250, 255, 260, 258, 262],
-      targetPrice: 280,
-      recommendation: "BUY",
-    },
-    {
-      symbol: "MSFT",
-      name: "Microsoft Corp.",
-      currentPrice: 523.61,
-      changePct: 0.59,
-      last30d: [510, 515, 520, 518, 523],
-      targetPrice: 540,
-      recommendation: "BUY",
-    }
-  ];
 
   useEffect(() => {
     if (tab === "pending") {
       const stored = localStorage.getItem("stocksToTheSystem");
       setStocks(stored ? JSON.parse(stored) : []);
-    } else {
-      // Cargar stocks aprobados de la BD
+      setLoading(false);
+    } else if (tab === "system") {
       fetchApprovedStocks();
+    } else if (tab === "inactive") {
+      fetchInactiveStocks();
     }
   }, [tab]);
 
-  // Función para actualizar stocks aprobados en tiempo real (cada 30 segundos)
   useEffect(() => {
-    if (tab === "system") {
-      const interval = setInterval(() => {
-        fetchApprovedStocks();
-      }, 30000); // Actualizar cada 30 segundos
+    if (tab !== "system") return;
 
-      return () => clearInterval(interval);
-    }
+    if (intervalRef.current) clearInterval(intervalRef.current);
+
+    intervalRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/refresh/`, { method: "POST" });
+        if (res.ok) {
+          console.log("✅ Stocks updated in DB");
+          fetchApprovedStocks();
+        }
+      } catch (err) {
+        console.error("Error refreshing stocks:", err);
+      }
+    }, REFRESH_INTERVAL);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [tab]);
 
   const toggleSelect = (symbol: string) => {
@@ -167,48 +212,35 @@ export default function StockManager() {
 
   const handleConfirm = async () => {
     if (tab === "pending") {
-      // Aprobar stocks seleccionados
-      const stocksToApprove = stocks.filter((s) => selected.includes(s.symbol));
-      
-      try {
-        await approveStocks(stocksToApprove);
-        
-        // Eliminar del localStorage las acciones que fueron aprobadas
-        const remaining = stocks.filter((s) => !selected.includes(s.symbol));
-        localStorage.setItem("stocksToTheSystem", JSON.stringify(remaining));
-        setStocks(remaining);
-        
-        // Recargar stocks del sistema para mostrar los nuevos
-        fetchApprovedStocks();
-        
-      } catch (error) {
-        console.error('Error approving stocks:', error);
-        alert('Error approving stocks. Please try again.');
-      }
-    } else {
-      // Eliminar stocks seleccionados del sistema
-      try {
-        await removeStocks(selected);
-        
-        // Actualizar el estado eliminando las acciones seleccionadas
-        const remaining = systemStocks.filter(
-          (s) => !selected.includes(s.symbol)
-        );
-        setSystemStocks(remaining);
-        
-      } catch (error) {
-        console.error('Error removing stocks:', error);
-        alert('Error removing stocks. Please try again.');
-      }
+      const toApprove = stocks.filter((s) => selected.includes(s.symbol));
+      await approveStocks(toApprove);
+      const remaining = stocks.filter((s) => !selected.includes(s.symbol));
+      localStorage.setItem("stocksToTheSystem", JSON.stringify(remaining));
+      setStocks(remaining);
+      fetchApprovedStocks();
+      showToast("✅ Stocks aprobadas correctamente");
+    } else if (tab === "system") {
+      const ids = systemStocks
+        .filter((s) => selected.includes(s.symbol))
+        .map((s) => s.id!) as number[];
+      await toggleStockStatus(ids, false);
+    } else if (tab === "inactive") {
+      const ids = inactiveStocks
+        .filter((s) => selected.includes(s.symbol))
+        .map((s) => s.id!) as number[];
+      await toggleStockStatus(ids, true);
     }
-
-    // Limpia la selección y cierra el modal
     setSelected([]);
     setShowModal(false);
   };
 
-  const currentStocks = tab === "pending" ? stocks : systemStocks;
-  
+  const currentStocks =
+    tab === "pending"
+      ? stocks
+      : tab === "system"
+      ? systemStocks
+      : inactiveStocks;
+
   return (
     <section className="approval-container">
       <div className="tabs-container">
@@ -216,97 +248,99 @@ export default function StockManager() {
           className={`tab-btn ${tab === "pending" ? "active" : ""}`}
           onClick={() => setTab("pending")}
         >
-          Pending Stocks{" "}
-          <span className="tab-count">
-            ({stocks.length > 0 ? stocks.length : 0})
-          </span>
+          Pending Stocks <span className="tab-count">({stocks.length})</span>
         </button>
         <button
           className={`tab-btn ${tab === "system" ? "active" : ""}`}
           onClick={() => setTab("system")}
         >
-          Approved Stocks{" "}
-          <span className="tab-count">
-            ({systemStocks.length > 0 ? systemStocks.length : 0})
-          </span>
-          {tab === "system" && loading && " 🔄"}
+          All Stocks <span className="tab-count">({systemStocks.length})</span>
+        </button>
+        <button
+          className={`tab-btn ${tab === "inactive" ? "active" : ""}`}
+          onClick={() => setTab("inactive")}
+        >
+          Inactive <span className="tab-count">({inactiveStocks.length})</span>
         </button>
       </div>
-
       <div className="approval-table">
         <div className="approval-header">
           <div></div>
           <div>Symbol</div>
           <div>Name</div>
-          <div>Trend (30d)</div>
           <div>Current Price</div>
           <div>Target Price</div>
           <div>Change %</div>
+          <div>Status</div>
         </div>
 
-        {loading && tab === "system" ? (
+        {loading ? (
           <div className="approval-empty">
             <div className="loading-spinner"></div>
-            <p>Loading approved stocks...</p>
+            <p>Loading data...</p>
           </div>
         ) : currentStocks.length === 0 ? (
           <div className="approval-empty">
             {tab === "pending"
               ? "No pending stocks to review."
-              : "No approved stocks in the system."}
+              : tab === "system"
+              ? "No stocks found in system."
+              : "No inactive stocks."}
           </div>
         ) : (
-          currentStocks.map((s) => {
-            const trendUp = s.last30d[s.last30d.length - 1] >= s.last30d[0];
-            return (
-              <div
-                key={s.symbol}
-                className={`approval-row ${
-                  selected.includes(s.symbol) ? "selected-row" : ""
-                }`}
-              >
-                <div>
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(s.symbol)}
-                    onChange={() => toggleSelect(s.symbol)}
-                  />
-                </div>
-                <div className="symbol-cell">{s.symbol}</div>
-                <div>{s.name}</div>
-                <div>
-                  <Sparkline
-                    data={s.last30d}
-                    positiveColor={trendUp ? "#1AC963" : "#F8191E"}
-                    negativeColor={trendUp ? "#1AC963" : "#F8191E"}
-                  />
-                </div>
-                <div className="price">Q.{s.currentPrice.toFixed(2)}</div>
-                <div className="price">Q.{s.targetPrice.toFixed(2)}</div>
-                <div>
-                  <span
-                    className={`change-badge ${
-                      s.changePct >= 0 ? "positive" : "negative"
-                    }`}
-                  >
-                    {s.changePct >= 0 ? "+" : ""}
-                    {s.changePct.toFixed(2)}%
-                  </span>
-                </div>
+          currentStocks.map((s) => (
+            <div
+              key={s.symbol}
+              className={`approval-row ${
+                selected.includes(s.symbol) ? "selected-row" : ""
+              }`}
+            >
+              <div>
+                <input
+                  type="checkbox"
+                  checked={selected.includes(s.symbol)}
+                  onChange={() => toggleSelect(s.symbol)}
+                />
               </div>
-            );
-          })
+              <div className="symbol-cell">{s.symbol}</div>
+              <div>{s.name}</div>
+              <div className="price">Q.{s.currentPrice?.toFixed(2) || 0}</div>
+              <div className="price">Q.{s.targetPrice?.toFixed(2) || 0}</div>
+              <div>
+                <span
+                  className={`change-badge ${
+                    s.changePct >= 0 ? "positive" : "negative"
+                  }`}
+                >
+                  {s.changePct >= 0 ? "+" : ""}
+                  {s.changePct}%
+                </span>
+              </div>
+              <div>
+                <span
+                  className={`status-dot ${
+                    s.is_active ? "active-dot" : "inactive-dot"
+                  }`}
+                  title={s.is_active ? "Active" : "Inactive"}
+                ></span>
+              </div>
+            </div>
+          ))
         )}
       </div>
 
-      {currentStocks.length > 0 && !loading && (
+      {currentStocks.length > 0 && (
         <div className="approval-footer">
           <button
             className={`confirm-btn ${tab === "system" ? "remove-btn" : ""}`}
             onClick={() => setShowModal(true)}
             disabled={selected.length === 0}
           >
-            {tab === "pending" ? "Confirm Approval" : "Remove Selected"}
+            {tab === "pending"
+              ? "Confirm Approval"
+              : tab === "system"
+              ? "Remove Selected"
+              : "Re-Approve Selected"}
           </button>
         </div>
       )}
@@ -315,11 +349,19 @@ export default function StockManager() {
         <div className="modal-overlay">
           <div className="modal">
             <h3>
-              {tab === "pending" ? "Confirm Approval" : "Remove Stocks"}
+              {tab === "pending"
+                ? "Confirm Approval"
+                : tab === "system"
+                ? "Remove Stocks"
+                : "Re-Activate Stocks"}
             </h3>
             <p>
               Are you sure you want to{" "}
-              {tab === "pending" ? "approve" : "remove"}{" "}
+              {tab === "pending"
+                ? "approve"
+                : tab === "system"
+                ? "remove"
+                : "reactivate"}{" "}
               <strong>{selected.length}</strong> stock(s)?
             </p>
             <div className="modal-actions">
@@ -330,59 +372,19 @@ export default function StockManager() {
                 Cancel
               </button>
               <button className="approve-btn" onClick={handleConfirm}>
-                Yes, {tab === "pending" ? "Approve" : "Remove"}
+                Yes,{" "}
+                {tab === "pending"
+                  ? "Approve"
+                  : tab === "system"
+                  ? "Remove"
+                  : "Reactivate"}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {toast && <div className="toast-notification">{toast}</div>}
     </section>
-  );
-}
-
-function Sparkline({
-  data,
-  positiveColor,
-  negativeColor,
-}: {
-  data: number[];
-  positiveColor: string;
-  negativeColor: string;
-}) {
-  if (!data || data.length < 2) return null;
-
-  const w = 120;
-  const h = 36;
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
-
-  const points = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * (w - 2) + 1;
-    const y = h - 1 - ((v - min) / range) * (h - 2);
-    return `${x},${y}`;
-  });
-
-  const up = data[data.length - 1] >= data[0];
-
-  return (
-    <svg
-      className="stocks-table-sparkline"
-      width={w}
-      height={h}
-      viewBox={`0 0 ${w} ${h}`}
-      aria-hidden="true"
-    >
-      <polyline
-        fill="none"
-        stroke={up ? positiveColor : negativeColor}
-        strokeWidth="2"
-        points={points.join(" ")}
-      />
-      <polygon
-        points={`1,${h - 1} ${points.join(" ")} ${w - 1},${h - 1}`}
-        fill={up ? "rgba(81,174,110,0.12)" : "rgba(197,91,115,0.12)"}
-      />
-    </svg>
   );
 }

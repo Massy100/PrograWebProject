@@ -9,7 +9,7 @@ from .auth_views.admin_request_views import AdminPermsReqViewSet
 
 router = SimpleRouter()
 router.register(r'', UserViewSet, basename='user')
-router.register(r'/admin-requests', AdminPermsReqViewSet, basename='admin-requests')
+router.register(r'admin-requests', AdminPermsReqViewSet, basename='admin-requests')
 
 """
 administrator/admin-requests/pending/  -> Listar solicitudes pendientes

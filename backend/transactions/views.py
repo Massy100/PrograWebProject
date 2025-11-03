@@ -1,8 +1,9 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db.models import Sum
 from django.db import transaction
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Transaction
 
@@ -14,34 +15,14 @@ from .services.transaction_service import TransactionService
 
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['client_id']
     serializer_class = TransactionSerializer
 
+    http_method_names = ['get', 'post']
+
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return FullTransactionSerializer
-        return TransactionSerializer
-    
-    '''
-    json structure for buy/sell:
-    {
-        "client_id": 1,
-        "total_amount": 1000.00,
-        "details": [
-            {
-                "stock_id": 1,
-                "quantity": 10,
-                "unit_price": 100.00,
-                "portfolio_id": 1
-            },
-            {
-                "stock_id": 2,
-                "quantity": 5,
-                "unit_price": 200.00,
-                "portfolio_id": 1
-            }
-        ]
-    }
-    '''
+        return FullTransactionSerializer
 
     @transaction.atomic
     @action(detail=False, methods=['post'], url_path='buy')
@@ -75,9 +56,12 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
         start_date = request.query_params.get('start-date')
         end_date = request.query_params.get('end-date')
+        client_id = request.query_params.get('client_id')
 
         if start_date and end_date:
-            qs = qs.filter(created_at__date__gte=start_date, created_at__date__lte=end_date)
+            qs = qs.filter(created_at__date__gte=start_date, created_at__date__lte=end_date, client_id=client_id)
+        else:
+            qs = qs.filter(client_id=client_id)
         
         transactions_count = qs.count()
         buy_count = qs.filter(transaction_type='buy').count()
@@ -85,7 +69,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
         invested_total = qs.filter(transaction_type='buy').aggregate(total=Sum('total_amount'))['total'] or 0
         earned_total = qs.filter(transaction_type='sell').aggregate(total=Sum('total_amount'))['total'] or 0
 
-        transactions = TransactionSerializer(qs, many=True)
+        transactions = FullTransactionSerializer(qs, many=True)
 
         return Response({
             "transactions_count": transactions_count,
@@ -95,6 +79,17 @@ class TransactionViewSet(viewsets.ModelViewSet):
             "earned_total": earned_total,
             "transactions": transactions.data
         })
+    
 
+    @action(detail=False, methods=['get'], url_path='user/latest')
+    def user_latest(self, request):
+        client_id = request.query_params.get('client_id')
+
+        if not client_id:
+            return Response({"error": "Missing client_id"}, status=400)
+
+        qs = Transaction.objects.filter(client_id=client_id).order_by('-created_at')[:5]
+        serializer = FullTransactionSerializer(qs, many=True)
+        return Response(serializer.data)
 
 
