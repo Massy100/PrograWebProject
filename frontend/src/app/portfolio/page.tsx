@@ -40,12 +40,13 @@
 
           const currentUser = localStorage.getItem("auth");
           const userId = currentUser ? JSON.parse(currentUser).id : null;
+          const clientId = currentUser ? JSON.parse(currentUser).client_id : null;
           if (!userId) {
             console.error("User not found in localStorage");
             return;
           }
 
-          const portfoliosRes = await fetch(process.env.NEXT_PUBLIC_API_URL + "/portfolio/portfolios/", {
+          const portfoliosRes = await fetch(process.env.NEXT_PUBLIC_API_URL + `/portfolio/portfolios/?client_id=${clientId}`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
