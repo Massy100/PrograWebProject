@@ -65,7 +65,7 @@ export default function StockOverviewPage() {
   const fetchStockData = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:8000/api/stocks/${symbol}/`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/stocks/${symbol}/`);
       if (!res.ok) throw new Error("Stock not found");
       const data = await res.json();
 
@@ -89,7 +89,7 @@ export default function StockOverviewPage() {
 
   const fetchStockHistory = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/stocks/${symbol}/history/`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/stocks/${symbol}/history/`);
       if (!res.ok) throw new Error("Failed to fetch price history");
       const data = await res.json();
 

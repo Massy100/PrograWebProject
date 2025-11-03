@@ -22,7 +22,7 @@ const StockGraphCarousel: React.FC = () => {
   const fetchStocks = async () => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:8000/api/stocks/active/");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/stocks/active/`);
       if (!res.ok) throw new Error("Failed to fetch active stocks");
 
       const data = await res.json();

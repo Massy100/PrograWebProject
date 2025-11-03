@@ -32,10 +32,12 @@ export default function SearchResults({
   headerProps,
   title = "Search Results",
   inlineResults = false,
+  alwaysShowHeader = false,
 }: {
   headerProps: HeaderPublicProps;
   title?: string;
   inlineResults?: boolean;
+  alwaysShowHeader?: boolean;
 }) {
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
@@ -43,11 +45,9 @@ export default function SearchResults({
   const [completed, setCompleted] = useState<boolean>(false);
   const [loadingAuth, setLoadingAuth] = useState(true);
 
-  // 👇 nuevo: manejar carrito
   const [showCart, setShowCart] = useState(false);
   const [cartTotal, setCartTotal] = useState<number>(0);
 
-  // 🔹 Leer cookie de autenticación
   useEffect(() => {
     const raw = document.cookie.split("; ").find((c) => c.startsWith("auth="));
     if (raw) {
@@ -155,8 +155,7 @@ export default function SearchResults({
 
   if (loadingAuth) return <div className="loading">Loading...</div>;
 
-  // 🔹 Mostrar header solo si está logueado (cliente o admin)
-  const showHeader = isLoggedIn;
+  const showHeader = alwaysShowHeader || isLoggedIn;
 
   return (
     <>

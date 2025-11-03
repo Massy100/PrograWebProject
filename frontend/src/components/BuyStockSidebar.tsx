@@ -31,7 +31,7 @@ export const BuyStockSidebar: React.FC<BuyStockSidebarProps> = ({
   const fetchPortfolios = async () => {
     try {
       setLoadingPortfolios(true);
-      const res = await fetch("http://localhost:8000/api/portfolio/portfolios/");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/portfolio/portfolios/`);
       if (!res.ok) throw new Error("Failed to fetch portfolios");
       const data = await res.json();
       const names = data.map((p: any) => p.name);

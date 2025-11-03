@@ -35,14 +35,14 @@ export default function SaleProcess() {
         const currentUser = JSON.parse(localStorage.getItem('auth') || '{}');
         if (!currentUser.id) return alert('⚠️ User not found.');
 
-        const userRes = await fetch(`http://localhost:8000/api/users/${currentUser.id}/`, {
+        const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${currentUser.id}/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const userData = await userRes.json();
         setClientProfileId(userData.client_profile?.id);
 
         const portfoliosRes = await fetch(
-          `http://localhost:8000/api/portfolio/portfolios/?client=${userData.client_profile?.id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/portfolio/portfolios/?client=${userData.client_profile?.id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const portfoliosData = await portfoliosRes.json();
@@ -59,7 +59,7 @@ export default function SaleProcess() {
       try {
         const token = await getAccessTokenSilently();
         const res = await fetch(
-          `http://localhost:8000/api/stocks/by-portfolio/?portfolio_id=${selectedPortfolio.id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/stocks/by-portfolio/?portfolio_id=${selectedPortfolio.id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await res.json();
@@ -103,7 +103,7 @@ export default function SaleProcess() {
 
       console.log('📦 SELL payload:', payload);
 
-      const res = await fetch('http://localhost:8000/api/transactions/sell/', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/sell/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
