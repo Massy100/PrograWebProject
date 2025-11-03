@@ -155,7 +155,7 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 
 FRONTEND_DOMAIN_NAME = os.getenv("PUBLIC_FRONTEND_DOMAIN_NAME")
 
-# CORS configuration - FILTRAR None
+# CORS configuration
 CORS_ALLOWED_ORIGINS = [
     origin for origin in [
         "http://localhost:3000",
@@ -181,11 +181,6 @@ CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_USE_SESSIONS = False
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    FRONTEND_DOMAIN_NAME
-]
 ALPHA_VANTAGE_API_KEY = 'SGM4RNK305HEN7ZM'
 
 # SendGrid Configuration
