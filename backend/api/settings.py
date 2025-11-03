@@ -157,19 +157,18 @@ FRONTEND_DOMAIN_NAME = os.getenv("PUBLIC_FRONTEND_DOMAIN_NAME")
 
 # CORS configuration
 CORS_ALLOWED_ORIGINS = [
-    origin for origin in [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000", 
-        FRONTEND_DOMAIN_NAME
-    ] if origin is not None
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://front.g5.atenea.lat", 
+    "https://progra-web-project-delta.vercel.app", 
 ]
 
+# Cookies CSRF
 CSRF_TRUSTED_ORIGINS = [
-    origin for origin in [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        FRONTEND_DOMAIN_NAME
-    ] if origin is not None
+    "http://localhost:3000",
+    "http://127.0.0.1:3000", 
+    "https://front.g5.atenea.lat",  
+    "https://progra-web-project-delta.vercel.app", 
 ]
 
 
