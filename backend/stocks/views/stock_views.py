@@ -14,9 +14,35 @@ from portfolio.models import Investment
 
 @api_view(['GET'])
 def list_active_stocks(request):
-    stocks = get_all_active_stocks()
-    serializer = StockSerializer(stocks, many=True)
-    return Response(serializer.data)
+    try:
+        stocks = get_all_active_stocks()
+        print(f"✅ Stocks encontrados: {stocks.count()}")  # Debug
+        
+        # Probar serialización de UN stock primero
+        if stocks.exists():
+            test_stock = stocks.first()
+            print(f"✅ Primer stock: {test_stock.symbol}")
+            
+            test_serializer = StockSerializer(test_stock)
+            print(f"✅ Serializer test: {test_serializer.data}")  # Debug
+        else:
+            print("⚠️ No hay stocks activos")
+        
+        serializer = StockSerializer(stocks, many=True)
+        return Response(serializer.data)
+        
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"❌ ERROR en list_active_stocks: {str(e)}")
+        print(f"📋 Stack trace: {error_details}")
+        
+        # Devuelve error detallado
+        return Response({
+            "error": str(e),
+            "type": type(e).__name__,
+            "details": "Check Render logs for full traceback"
+        }, status=500)
 
 @api_view(['GET'])
 def stock_detail_by_name(request):
