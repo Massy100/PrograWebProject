@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import './access.css';
 
 type UserRequest = {
+  id: number;
   name: string;
   alias: string;
   email: string;
@@ -22,11 +23,9 @@ export default function RequestsTable() {
   const [pending, setPending] = useState<UserRequest[]>([]);
   const [approved, setApproved] = useState<HistoryItem[]>([]);
   const [rejected, setRejected] = useState<HistoryItem[]>([]);
-  const [currentUser, setCurrentUser] = useState<string>('Josué');
   const [activeTab, setActiveTab] = useState<'Pending' | 'Approved' | 'Rejected'>('Pending');
   const tableRef = useRef<HTMLDivElement>(null);
 
-  // ✅ Detectar si venís desde el botón de alerta
   useEffect(() => {
     const savedTab = localStorage.getItem('accessTab');
     if (savedTab === 'Pending') {
@@ -34,7 +33,7 @@ export default function RequestsTable() {
       setTimeout(() => {
         const target = document.querySelector('.tx__wrap');
         if (target) {
-            const offset = target.getBoundingClientRect().top + window.scrollY - 80; // ajustá 80 según tu header
+            const offset = target.getBoundingClientRect().top + window.scrollY - 80; 
             window.scrollTo({ top: offset, behavior: 'smooth' });
         }
         }, 300);
@@ -42,47 +41,120 @@ export default function RequestsTable() {
     }
   }, []);
 
-  // 🔌 GET /api/requests/pending → obtener solicitudes pendientes
-  useEffect(() => {
-    const fetchPendingRequests = async () => {
-      const token = await getAccessTokenSilently();
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/requests/pending`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  const fetchPendingRequests = async () => {
+    const token = await getAccessTokenSilently();
+    try {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/users/admin-requests/pending/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        const data = await res.json();
-        setPending(data);
-      } catch (error) {
-        console.error('Error fetching pending requests:', error);
-      }
-    };
+      const data = await res.json();
+      const formattedData = data.map((item: any) => ({
+        id: item.id,
+        name: item.user.full_name,
+        alias: item.user.username,
+        email: item.user.email,
+      }));
+
+      setPending(formattedData);
+    } catch (error) {
+      console.error('Error fetching pending requests:', error);
+    }
+  };
+
+  const fetchApprovalHistory = async () => {
+    const token = await getAccessTokenSilently();
+    try {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/users/admin-requests/approved/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      const formattedData = data.map((item: any) => ({
+        name: item.user.full_name,
+        alias: item.user.username,
+        email: item.user.email,
+        status: 'Approved' as 'Approved',
+        decidedBy: item.reviewer.full_name,
+      }));
+      
+      setApproved(formattedData);
+    } catch (error) {
+      console.error('Error fetching approval history:', error);
+    }
+  };
+
+  const fetchRejectionHistory = async () => {
+    const token = await getAccessTokenSilently();
+    try {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/users/admin-requests/rejected/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      const formattedData = data.map((item: any) => ({
+        name: item.user.full_name,
+        alias: item.user.username,
+        email: item.user.email,
+        status: 'Rejected' as 'Rejected',
+        decidedBy: item.reviewer.full_name,
+      }));
+      
+      setRejected(formattedData);
+    } catch (error) {
+      console.error('Error fetching rejection history:', error);
+    }
+  };
+
+  useEffect(() => {
 
     fetchPendingRequests();
+    fetchApprovalHistory();
+    fetchRejectionHistory();
   }, []);
 
-  // 🔌 POST /api/requests/resolve → enviar decisión tomada
   const handleDecision = async (index: number, status: 'Approved' | 'Rejected') => {
+    const authData = localStorage.getItem('auth');
+    if (!authData) {
+      console.error('No reviewer ID found in localStorage');
+      return;
+    }
+
+    const parsedAuth = JSON.parse(authData);
+    const reviewerId = parsedAuth.id;
+    const reviewerName = parsedAuth.name;
+
     const user = pending[index];
     const decision: HistoryItem = {
       ...user,
       status,
-      decidedBy: currentUser,
+      decidedBy: reviewerName,
     };
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+    const urlByStatus = status === 'Approved' ? '/approve/' : '/reject/';
+    const completeUrl = baseUrl + '/users/admin-requests' + urlByStatus + `?id=${index}`;
 
     try {
       const token = await getAccessTokenSilently();
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/requests/resolve`, {
+      const res = await fetch(completeUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(decision),
+        body: JSON.stringify({reviewer_id: reviewerId}),
       });
 
       if (!res.ok) throw new Error('Failed to resolve request');
@@ -120,19 +192,19 @@ export default function RequestsTable() {
             </thead>
             <tbody>
               {activeTab === 'Pending' &&
-                pending.map((user, index) => (
-                  <tr key={index}>
+                pending.map((req) => (
+                  <tr key={req.id}>
                     <td>
-                      <div className="tx__name">{user.name}</div>
-                      <div className="tx__alias">{user.alias}</div>
+                      <div className="tx__name">{req.name}</div>
+                      <div className="tx__alias">{req.alias}</div>
                     </td>
-                    <td><div className="tx__email">{user.email}</div></td>
+                    <td><div className="tx__email">{req.email}</div></td>
                     <td><span className="tx__pill pending">Pending</span></td>
                     <td><span className="tx__badge">—</span></td>
                     <td>
                       <div className="tx__actions">
-                        <button className="tx__actionBtn approve" onClick={() => handleDecision(index, 'Approved')}>✔ Approve</button>
-                        <button className="tx__actionBtn reject" onClick={() => handleDecision(index, 'Rejected')}>✖ Reject</button>
+                        <button className="tx__actionBtn approve" onClick={() => handleDecision(req.id, 'Approved')}>✔ Approve</button>
+                        <button className="tx__actionBtn reject" onClick={() => handleDecision(req.id, 'Rejected')}>✖ Reject</button>
                       </div>
                     </td>
                   </tr>

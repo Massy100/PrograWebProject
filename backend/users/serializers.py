@@ -76,7 +76,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
 class BasicUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email')
+        fields = ('id', 'full_name', 'username', 'email')
 
 class AdminPermissionsRequestSerialzer(serializers.ModelSerializer):
     user = BasicUserSerializer(read_only=True)

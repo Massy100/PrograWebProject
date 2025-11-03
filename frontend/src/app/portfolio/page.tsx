@@ -11,8 +11,8 @@
     id: number;
     name: string;
     created_at: string;
-    avg_price: number;
-    total_invested: number;
+    average_price: string;
+    total_inversion: string;
     current_value: number;
     is_active: boolean;
   }
@@ -40,12 +40,13 @@
 
           const currentUser = localStorage.getItem("auth");
           const userId = currentUser ? JSON.parse(currentUser).id : null;
+          const clientId = currentUser ? JSON.parse(currentUser).client_id : null;
           if (!userId) {
             console.error("User not found in localStorage");
             return;
           }
 
-          const portfoliosRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/portfolio/portfolios/`, {
+          const portfoliosRes = await fetch(process.env.NEXT_PUBLIC_API_URL + `/portfolio/portfolios/?client_id=${clientId}`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -55,7 +56,7 @@
           });
 
           const growthRes = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/portfolio/value/year-summary/?client_id=${userId}`,
+            process.env.NEXT_PUBLIC_API_URL + `/portfolio/value/year-summary/?client_id=${clientId}`,
             {
               method: "GET",
               headers: {
@@ -76,10 +77,9 @@
             ? portfoliosData
             : portfoliosData.results || [];
           setPortfolios(finalPortfolios);
-
           setGrowthData(Array.isArray(growthDataJson) ? growthDataJson : []);
         } catch (err) {
-          console.error("❌ Error loading portfolios:", err);
+          console.error("Error loading portfolios:", err);
         }
       })();
     }, [getAccessTokenSilently]);

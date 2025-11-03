@@ -15,7 +15,7 @@ type UserRow = {
   balance_blocked: number;
 };
 
-const API_BASE_URL = 'http://localhost:8000'; 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL; 
 
 export default function TableUserAdministration() {
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -27,7 +27,7 @@ export default function TableUserAdministration() {
     async function fetchUsers() {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE_URL}/api/users/`, {
+        const res = await fetch(`${API_BASE_URL}/users/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ export default function TableUserAdministration() {
 
   const deactivateUser = async (id: number) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/users/${id}/deactivate/`, {
+      const res = await fetch(`${API_BASE_URL}/users/${id}/deactivate/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

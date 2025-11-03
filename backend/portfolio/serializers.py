@@ -17,10 +17,10 @@ class InvestmentSerializer(serializers.ModelSerializer):
         ]
 
     def get_current_value(self, obj):
-        return obj.quantity * obj.stock.current_price
+        return obj.quantity * obj.stock.last_price
 
     def get_gain_loss(self, obj):
-        current_value = obj.quantity * obj.stock.current_price
+        current_value = obj.quantity * obj.stock.last_price
         invested = obj.quantity * obj.purchase_price
         return current_value - invested
 

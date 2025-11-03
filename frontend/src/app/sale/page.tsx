@@ -35,18 +35,37 @@ export default function SaleProcess() {
         const currentUser = JSON.parse(localStorage.getItem('auth') || '{}');
         if (!currentUser.id) return alert('⚠️ User not found.');
 
-        const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${currentUser.id}/`, {
-          headers: { Authorization: `Bearer ${token}` },
+        if (!currentUser.id) {
+          alert('⚠️ User not found in localStorage.');
+          return;
+        }
+
+        const userRes = await fetch(process.env.NEXT_PUBLIC_API_URL + `/users/${currentUser.id}/`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
         });
         const userData = await userRes.json();
         setClientProfileId(userData.client_profile?.id);
 
-        const portfoliosRes = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/portfolio/portfolios/?client=${userData.client_profile?.id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const portfoliosRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/portfolio/portfolios/', {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const portfoliosData = await portfoliosRes.json();
         setPortfolios(portfoliosData);
+
+        const stocksRes = await fetch(process.env.NEXT_PUBLIC_API_URL + '/stocks/', {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const stocksData = await stocksRes.json();
+        setStocks(stocksData);
       } catch (err) {
         console.error('Error loading portfolios:', err);
       }
@@ -103,7 +122,7 @@ export default function SaleProcess() {
 
       console.log('📦 SELL payload:', payload);
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/sell/`, {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/transactions/sell/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

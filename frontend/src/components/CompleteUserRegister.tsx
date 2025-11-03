@@ -31,7 +31,7 @@ export default function CompleteUserRegister({ onClose, onSuccess }: CompleteUse
       const auth = JSON.parse(strAuth);
       const token = await getAccessTokenSilently();
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${auth.id}/`, {
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + `/users/${auth.id}/`, {
         method: "PATCH",
         body: JSON.stringify(dataToSend),
         headers: {

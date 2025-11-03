@@ -160,7 +160,9 @@ export default function FinovaHome() {
         id: dbUser.id, 
         verified: dbUser.verified, 
         role: dbUser.user_type, 
-        completed: dbUser.is_completed
+        completed: dbUser.is_completed,
+        name: dbUser.full_name,
+        client_id: dbUser.client_profile?.id || null
       }));
 
       document.cookie = `auth=${encodeURIComponent(JSON.stringify({
