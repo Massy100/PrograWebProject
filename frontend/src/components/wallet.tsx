@@ -42,7 +42,7 @@ export default function Wallet({ open, onClose }: WalletProps) {
           return;
         }
 
-        const balanceRes = await fetch(`http://localhost:8000/users/${userId}/`, {
+        const balanceRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ export default function Wallet({ open, onClose }: WalletProps) {
           cache: 'no-store',
         });
 
-        const banksRes = await fetch('http://localhost:8000/api/banks/banks/', {
+        const banksRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/banks/banks/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ export default function Wallet({ open, onClose }: WalletProps) {
 
     try {
       const token = await getAccessTokenSilently();
-      const res = await fetch('http://localhost:8000/api/banks/fundstransfers/', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/banks/fundstransfers/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

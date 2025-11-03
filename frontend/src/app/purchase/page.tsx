@@ -88,9 +88,8 @@ export default function PurchasePage() {
         return;
       }
 
-      // ✅ 1️⃣ Obtener client profile id
       const userRes = await fetch(
-        `http://localhost:8000/api/users/${currentUser.id}/`,
+        `${process.env.NEXT_PUBLIC_API_URL}/users/${currentUser.id}/`,
         {
           method: 'GET',
           headers: {
@@ -115,7 +114,6 @@ export default function PurchasePage() {
         return;
       }
 
-      // ✅ 2️⃣ Obtener los IDs de cada acción y portafolio antes de enviar
       const enrichedDetails = await Promise.all(
         filteredCart.map(async (item) => {
           let stock_id = null;
@@ -124,7 +122,7 @@ export default function PurchasePage() {
           try {
             // Buscar el stock por nombre o símbolo
             const stockRes = await fetch(
-              `http://localhost:8000/api/stocks/by-name/?name=${encodeURIComponent(
+              `${process.env.NEXT_PUBLIC_API_URL}/stocks/by-name/?name=${encodeURIComponent(
                 item.stockName
               )}`
             );
@@ -139,7 +137,7 @@ export default function PurchasePage() {
           try {
             // Buscar el portafolio
             const portfolioRes = await fetch(
-              `http://localhost:8000/api/portfolio/portfolios/?search=${encodeURIComponent(
+              `${process.env.NEXT_PUBLIC_API_URL}/portfolio/portfolios/?search=${encodeURIComponent(
                 item.portfolio
               )}`
             );
@@ -164,7 +162,7 @@ export default function PurchasePage() {
         })
       );
 
-      // ✅ 3️⃣ Armar el payload final
+
       const transactionPayload = {
         client_id: clientProfileId,
         total_amount: total,
@@ -173,8 +171,7 @@ export default function PurchasePage() {
 
       console.log('📦 Payload to send:', transactionPayload);
 
-      // ✅ 4️⃣ Enviar la transacción al backend
-      const res = await fetch('http://localhost:8000/api/transactions/buy/', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/buy/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -192,7 +189,6 @@ export default function PurchasePage() {
       const result = await res.json();
       console.log('✅ Transaction success:', result);
 
-      // ✅ 5️⃣ Limpiar el carrito
       const remaining = cart.filter(
         (item) =>
           !filteredCart.some(
@@ -203,7 +199,6 @@ export default function PurchasePage() {
       );
       localStorage.setItem('shoppingCart', JSON.stringify(remaining));
 
-      // ✅ 6️⃣ Mostrar modal de éxito
       setShowModal(true);
       setTimeout(() => {
         setShowModal(false);

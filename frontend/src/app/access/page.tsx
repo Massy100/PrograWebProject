@@ -47,7 +47,7 @@ export default function RequestsTable() {
     const fetchPendingRequests = async () => {
       const token = await getAccessTokenSilently();
       try {
-        const res = await fetch('http://localhost:8000/api/requests/pending', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/requests/pending`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export default function RequestsTable() {
 
     try {
       const token = await getAccessTokenSilently();
-      const res = await fetch('http://localhost:8000/api/requests/resolve', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/requests/resolve`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

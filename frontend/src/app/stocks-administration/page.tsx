@@ -4,19 +4,17 @@ import { useState, useEffect } from 'react';
 import "./stocksAdministration.css";
 import AddStocksTable, { StockItem } from '@/components/AddStocksTable';
 
-interface ApiStock {
-  id: number;
+interface AlphaVantageStock {
   symbol: string;
-  name: string;
-  last_price: number | string;
-  variation: number | string;
-  updated_at: string;
-  created_at: string;
-  category: any;
+  price: number | string;
+  change: number | string;
+  change_percent: number | string;
+  volume: number;
+  last_updated: string;
 }
 
 interface ApiStockResponse {
-  data: ApiStock[];
+  data: AlphaVantageStock[];
   last_updated: string;
   source: string;
 }
@@ -46,23 +44,23 @@ export default function StocksAdministration() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('http://localhost:8000/api/alpha-vantage/stocks/real-data/');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/alpha-vantage/stocks/real-data/`);
       if (!response.ok) throw new Error(`Error: ${response.status} - ${response.statusText}`);
 
       const apiResponse: ApiStockResponse = await response.json();
       if (!apiResponse.data || apiResponse.data.length === 0)
-        throw new Error('No se recibieron datos de acciones.');
+        throw new Error('');
 
       const transformedData: StockItem[] = apiResponse.data.map(stock => {
         const variation =
-          typeof stock.variation === 'string'
-            ? parseFloat(stock.variation)
-            : stock.variation || 0;
+          typeof stock.change_percent === 'string'
+            ? parseFloat(stock.change_percent)
+            : stock.change_percent || 0;
 
         const price =
-          typeof stock.last_price === 'string'
-            ? parseFloat(stock.last_price)
-            : stock.last_price || 0;
+          typeof stock.price === 'string'
+            ? parseFloat(stock.price)
+            : stock.price || 0;
 
         let recommendation = 'HOLD';
         if (variation > 5) recommendation = 'STRONG BUY';
@@ -76,7 +74,7 @@ export default function StocksAdministration() {
 
         return {
           symbol: stock.symbol,
-          name: stock.name || stock.symbol,
+          name: stock.symbol, 
           currentPrice: price,
           changePct: variation,
           last30d,
@@ -88,7 +86,7 @@ export default function StocksAdministration() {
       setStocksData(transformedData);
     } catch (err) {
       console.error('Error fetching stocks data:', err);
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : 'Unknown error');
       setStocksData(getMockData());
     } finally {
       setLoading(false);
@@ -166,6 +164,7 @@ export default function StocksAdministration() {
         <>
           {error && (
             <div className="error-message">
+              <p>{error}</p>
             </div>
           )}
           <AddStocksTable rows={stocksData} />

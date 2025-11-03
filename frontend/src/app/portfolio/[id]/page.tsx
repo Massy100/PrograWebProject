@@ -35,7 +35,7 @@ export default function PortfolioPage() {
         const token = await getAccessTokenSilently();
 
         const portfolioRes = await fetch(
-          `http://localhost:8000/api/portfolio/portfolios/${portfolioId}/`,
+          `${process.env.NEXT_PUBLIC_API_URL}/portfolio/portfolios/${portfolioId}/`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -49,7 +49,7 @@ export default function PortfolioPage() {
         const portfolioData = await portfolioRes.json();
         setPortfolioInfo(portfolioData);
         const investmentsRes = await fetch(
-          `http://localhost:8000/api/portfolio/investments/?portfolio=${portfolioId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/portfolio/investments/?portfolio=${portfolioId}`,
           {
             headers: {
               "Content-Type": "application/json",

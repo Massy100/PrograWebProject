@@ -23,7 +23,7 @@ const StockTrends: React.FC<StockTrendsProps> = ({ loading = false }) => {
     try {
       setFetching(true);
 
-      const response = await fetch("http://localhost:8000/api/stocks/active/");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/stocks/active/`);
       if (!response.ok) throw new Error("Failed to fetch active stocks");
 
       const data = await response.json();

@@ -15,7 +15,7 @@ type StockItem = {
 };
 
 export default function StockManager() {
-  const BASE_URL = "http://localhost:8000/api/alpha-vantage/stocks";
+  const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/alpha-vantage/stocks`;
   const REFRESH_INTERVAL = 60000;
 
   const [stocks, setStocks] = useState<StockItem[]>([]);

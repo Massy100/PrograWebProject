@@ -32,7 +32,7 @@ export default function DashboardAdmin() {
       setLoading(true);
       const token = await getAccessTokenSilently();
 
-      const res = await fetch('http://localhost:8000/api/stocks/active/', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/stocks/active/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -131,23 +131,7 @@ export default function DashboardAdmin() {
             <TableUserAdministration />
           </div>
         </div>
-
-        <div className="dashboard-section">
-          <div className="section-header">
-            <h2 className="section-title">Stocks Available to Add</h2>
-            <button
-              className="see-all-btn"
-              onClick={() => router.push('/stocks-administration')}
-            >
-              See all
-            </button>
-          </div>
-
-          <div className="section-content special2">
-            <AddStocksTable rows={stocks.slice(0, 10)} loading={loading} />
-          </div>
-        </div>
-
+        
         <div className="dashboard-section">
           <div className="section-header">
             <h2 className="section-title">Stocks Pending Approval</h2>

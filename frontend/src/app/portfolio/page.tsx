@@ -45,7 +45,7 @@
             return;
           }
 
-          const portfoliosRes = await fetch("http://localhost:8000/api/portfolio/portfolios/", {
+          const portfoliosRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/portfolio/portfolios/`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -55,7 +55,7 @@
           });
 
           const growthRes = await fetch(
-            `http://localhost:8000/api/portfolio/value/year-summary/?client_id=${userId}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/portfolio/value/year-summary/?client_id=${userId}`,
             {
               method: "GET",
               headers: {

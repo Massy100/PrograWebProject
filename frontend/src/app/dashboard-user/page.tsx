@@ -18,16 +18,27 @@ export default function DashboardUser() {
   const [userName, setUserName] = useState<string>(''); 
   const [loading, setLoading] = useState(true);
 
+  const generateLastDays = (currentPrice: number, variationPct: number): number[] => {
+    const days = 30;
+    const data: number[] = [];
+    const volatility = Math.abs(variationPct) / 2 + 0.5;
+    let price = currentPrice;
+
+    for (let i = days - 1; i >= 0; i--) {
+      const randomChange = 1 + (Math.random() - 0.5) * (volatility / 100);
+      price = Math.max(price * randomChange, 0.1);
+      data.unshift(parseFloat(price.toFixed(2)));
+    }
+    return data;
+  };
+
   const fetchClientId = async () => {
     try {
       const token = await getAccessTokenSilently();
       const currentUser = JSON.parse(localStorage.getItem('auth') || '{}');
-      if (!currentUser?.id) {
-        console.warn('⚠️ User not found in localStorage');
-        return null;
-      }
+      if (!currentUser?.id) return null;
 
-      const res = await fetch(`http://localhost:8000/api/users/${currentUser.id}/`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${currentUser.id}/`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -35,14 +46,12 @@ export default function DashboardUser() {
       });
 
       if (!res.ok) throw new Error(`Failed to fetch user ${currentUser.id}`);
-
       const userData = await res.json();
       const id = userData.client_profile?.id;
       if (id) setClientId(id);
 
       const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
       setUserName(fullName || userData.username || 'User');
-
       return id;
     } catch (error) {
       console.error('Error fetching client id:', error);
@@ -53,12 +62,15 @@ export default function DashboardUser() {
   const fetchActiveStocks = async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:8000/api/stocks/active/');
-      if (!res.ok) throw new Error('Failed to fetch active stocks');
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/stocks/active/`);
+      if (!res.ok) throw new Error('');
       const data = await res.json();
 
       const parsed: StockItem[] = data.map((s: any) => {
-        const variation = s.variation ?? 0;
+        const variation = parseFloat(s.variation ?? 0);
+        const price = parseFloat(s.last_price ?? 0);
+        const last30d = generateLastDays(price, variation);
+
         let recommendation = 'HOLD';
         if (variation > 5) recommendation = 'STRONG BUY';
         else if (variation > 2) recommendation = 'BUY';
@@ -68,10 +80,10 @@ export default function DashboardUser() {
         return {
           symbol: s.symbol,
           name: s.name || s.symbol,
-          currentPrice: s.last_price ?? 0,
+          currentPrice: price,
           changePct: variation,
-          last30d: [],
-          targetPrice: s.last_price ?? 0,
+          last30d,
+          targetPrice: parseFloat((price * 1.05).toFixed(2)),
           recommendation,
         };
       });
@@ -101,7 +113,7 @@ export default function DashboardUser() {
     try {
       const token = await getAccessTokenSilently();
       const res = await fetch(
-        `http://localhost:8000/api/transactions/user/latest/?client_id=${client_id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/transactions/user/latest/?client_id=${client_id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -129,7 +141,7 @@ export default function DashboardUser() {
       setTransactions(formattedTx.slice(0, 5));
     } catch (error) {
       console.error('Error fetching user transactions:', error);
-      setTransactions(last5Tx);
+      setTransactions([]);
     }
   };
 
@@ -146,18 +158,10 @@ export default function DashboardUser() {
   }, []);
 
   const getDemoStocks = (): StockItem[] => [
-    { symbol: 'NIO', name: 'Nio Inc.-ADR', currentPrice: 6.04, changePct: -0.48, last30d: [9,8,7,6.5,6.7,6.6], targetPrice: 61.75, recommendation: 'STRONG BUY' },
-    { symbol: 'AAPL', name: 'Apple Inc', currentPrice: 262.82, changePct: 1.25, last30d: [250,255,260,258,262], targetPrice: 280.00, recommendation: 'BUY' },
-    { symbol: 'MSFT', name: 'Microsoft', currentPrice: 523.61, changePct: 0.59, last30d: [510,515,520,518,523], targetPrice: 540.00, recommendation: 'BUY' },
-    { symbol: 'TSLA', name: 'Tesla Inc', currentPrice: 245.50, changePct: -2.15, last30d: [260,255,250,248,245], targetPrice: 270.00, recommendation: 'HOLD' },
-  ];
-
-  const last5Tx = [
-    { transaction_type: 'buy', stock: 'AAPL', code: 'TX-1001', total_amount: 1500, created_at: new Date(), is_active: true, quantity: 10, unit_price: 150 },
-    { transaction_type: 'sell', stock: 'TSLA', code: 'TX-1002', total_amount: 900, created_at: new Date(Date.now() - 86400000), is_active: false, quantity: 3, unit_price: 300 },
-    { transaction_type: 'buy', stock: 'MSFT', code: 'TX-1003', total_amount: 1200, created_at: new Date(Date.now() - 2 * 86400000), is_active: true, quantity: 6, unit_price: 200 },
-    { transaction_type: 'sell', stock: 'NVDA', code: 'TX-1004', total_amount: 750, created_at: new Date(Date.now() - 3 * 86400000), is_active: true, quantity: 1, unit_price: 750 },
-    { transaction_type: 'buy', stock: 'AMZN', code: 'TX-1005', total_amount: 480, created_at: new Date(Date.now() - 4 * 86400000), is_active: true, quantity: 3, unit_price: 160 },
+    { symbol: 'AAPL', name: 'Apple Inc', currentPrice: 170.23, changePct: 0.83, last30d: generateLastDays(170.23, 0.83), targetPrice: 180.0, recommendation: 'BUY' },
+    { symbol: 'MSFT', name: 'Microsoft Corp', currentPrice: 520.45, changePct: 1.25, last30d: generateLastDays(520.45, 1.25), targetPrice: 545.0, recommendation: 'STRONG BUY' },
+    { symbol: 'TSLA', name: 'Tesla Inc', currentPrice: 250.75, changePct: -2.05, last30d: generateLastDays(250.75, -2.05), targetPrice: 265.0, recommendation: 'HOLD' },
+    { symbol: 'GOOGL', name: 'Alphabet Inc', currentPrice: 180.12, changePct: 0.45, last30d: generateLastDays(180.12, 0.45), targetPrice: 190.0, recommendation: 'BUY' },
   ];
 
   return (
@@ -191,7 +195,13 @@ export default function DashboardUser() {
       <div className="div-more-info-dashboard-user">
         <div className="div-last-purchase-sale">
           <h3>Your Last 5 Transactions</h3>
-          <TransactionsTable rows={transactions.length > 0 ? transactions : last5Tx} />
+          {transactions.length > 0 ? (
+            <TransactionsTable rows={transactions} />
+          ) : (
+            <p style={{ color: '#6A6C75', fontSize: '16px', marginTop: '1rem' }}>
+              You have no recent transactions yet.
+            </p>
+          )}
         </div>
 
         <StocksRecommendationsTable

@@ -1,0 +1,50 @@
+.footer {
+  width: 100%;
+  background-color: #FFFFFF;
+  border-top: 1px solid #EDEDF2;
+  padding: 2rem 0;
+  text-align: center;
+  color: #828692;
+  font-size: 14px;
+}
+
+.footer-links {
+  margin-top: 0.8rem;
+}
+
+.footer-links a {
+  margin: 0 10px;
+  color: #646C79;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer-links a:hover {
+  color: #021631;
+}
+
+@media (max-width: 900px) {
+  .div-initial {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .info, .stocks-card {
+    min-width: 90%;
+    max-width: 90%;
+    padding: 1rem;
+  }
+
+  .see-more-btn {
+    width: 80%;
+  }
+
+  .section-title {
+    font-size: 26px;
+  }
+
+  .section-text {
+    font-size: 16px;
+    padding: 0 1rem;
+  }
+}

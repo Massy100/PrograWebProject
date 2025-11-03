@@ -35,7 +35,7 @@ export default function TransactionsAdmin() {
         setLoading(true);
         const token = await getAccessTokenSilently();
 
-        const res = await fetch(`http://localhost:8000/api/transactions/summary/`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/transactions/summary/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
