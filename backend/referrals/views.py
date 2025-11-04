@@ -44,7 +44,7 @@ class ValidateReferralCodeView(View):
             data = json.loads(request.body)
             referral_code = data.get('referral_code')
             
-            print(f"🔍 Validating referral code: {referral_code}")
+            print(f"Validating referral code: {referral_code}")
             
             if not referral_code:
                 return JsonResponse({
@@ -65,7 +65,7 @@ class ValidateReferralCodeView(View):
                     is_active=True
                 )
                 
-                print(f"✅ Found code: {referral_code_obj.code} for user: {referral_code_obj.user.username}")
+                print(f"Found code: {referral_code_obj.code} for user: {referral_code_obj.user.username}")
                 
                 # Validar si el código ha expirado
                 if referral_code_obj.is_expired():
@@ -114,7 +114,7 @@ class ProcessReferralView(View):
             data = json.loads(request.body)
             referral_code = data.get('referral_code')
             
-            print(f"🔄 Processing referral: {referral_code}")
+            print(f"Processing referral: {referral_code}")
             
             if not referral_code:
                 return JsonResponse({
@@ -165,7 +165,7 @@ class ProcessReferralView(View):
                     is_active=True
                 )
                 
-                print(f"✅ Referral created: {referral.id}")
+                print(f"Referral created: {referral.id}")
                 
                 return JsonResponse({
                     'success': True,
@@ -180,7 +180,7 @@ class ProcessReferralView(View):
                 }, status=404)
                 
         except Exception as e:
-            print(f"❌ Error processing referral: {str(e)}")
+            print(f"Error processing referral: {str(e)}")
             return JsonResponse({
                 'success': False,
                 'message': f'Error processing referral: {str(e)}'
