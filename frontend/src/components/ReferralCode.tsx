@@ -67,29 +67,6 @@ export default function ReferralCard() {
     setTimeout(() => setCopied(false), 1500);
   };
 
-  const shareLink = () => {
-    if (!referralData?.referralCode) return;
-
-    const message = `Hi there! \n\n` +
-      `I'm inviting you to join ${appName} and enjoy exclusive benefits.\n\n` +
-      `Referral code: ${referralData.referralCode}\n\n` +
-      `Sign up here: ${appLink}\n\n` +
-      `Don't miss this opportunity!`;
-
-    if (navigator.share) {
-      navigator.share({
-        title: `Join ${appName}`,
-        text: message,
-      }).catch(() => {
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
-      });
-    } else {
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-    }
-  };
-
   return (
     <div className="referral-container">
       <div className="referral-card">
@@ -119,16 +96,6 @@ export default function ReferralCard() {
                 </button>
               </div>
               {copied && <p className="referral-copied">Copied!</p>}
-            </div>
-
-            <div className="referral-actions">
-              <button
-                className="referral-share"
-                onClick={shareLink}
-                disabled={!referralData?.referralCode}
-              >
-                <FiShare2 size={18} /> Share
-              </button>
             </div>
 
             {referralData?.referralsCount !== undefined && (
