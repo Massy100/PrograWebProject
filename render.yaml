@@ -45,6 +45,10 @@ services:
         value: "https://api.stockstraderapp.com"
       - key: AUTH0_ALGORITHMS
         value: "RS256"
+      - key: AUTH0_CLIENT_SECRET
+        value: "kFZ7G4cXFGiL2a3FKhhBy06QVDzeuabmV-g1VVed9EySM2H9ew4340h22HcdsFcj"
+      - key: AUTH0_MANAGEMENT_CLIENT_ID
+        value: "lZJgkAYZfIEX5Vk0bIAMaXSmtWHM2QLd"
       
       # Email (SendGrid)
       - key: SENDGRID_API_KEY
