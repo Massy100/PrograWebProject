@@ -68,7 +68,7 @@ export default function History() {
         const transactions = result.transactions;
         const formattedResult = transactions.flatMap((tx: any )=> tx.details.map((detail: any) => ({
           code: tx.code,
-          stock: detail.stock,
+          stock: detail.stock_symbol,
           transaction_type: tx.transaction_type,
           total_amount: detail.total_amount,
           created_at: tx.created_at,

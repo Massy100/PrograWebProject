@@ -18,7 +18,7 @@ export default function ReferralCard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const appName = "Stocks";
+  const appName = "Finova";
   const appLink = "https://stocks.com/signup";
   const rewardAmount = "$5";
 
@@ -29,16 +29,18 @@ export default function ReferralCard() {
       try {
         setLoading(true);
         setError(null);
-
         const token = await getAccessTokenSilently();
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/referrals/`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/referrals/create/`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           const errData = await response.json().catch(() => ({}));
@@ -63,28 +65,6 @@ export default function ReferralCard() {
     navigator.clipboard.writeText(referralData.referralCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
-  };
-
-  const shareLink = () => {
-    if (!referralData?.referralCode) return;
-    const message = `Hi there! \n\n` +
-      `I'm inviting you to join ${appName} and enjoy exclusive benefits.\n\n` +
-      `Referral code: ${referralData.referralCode}\n\n` +
-      `Sign up here: ${appLink}\n\n` +
-      `Don't miss this opportunity!`;
-
-    if (navigator.share) {
-      navigator.share({
-        title: `Join ${appName}`,
-        text: message,
-      }).catch(() => {
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
-      });
-    } else {
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-    }
   };
 
   return (
@@ -118,16 +98,6 @@ export default function ReferralCard() {
               {copied && <p className="referral-copied">Copied!</p>}
             </div>
 
-            <div className="referral-actions">
-              <button
-                className="referral-share"
-                onClick={shareLink}
-                disabled={!referralData?.referralCode}
-              >
-                <FiShare2 size={18} /> Share
-              </button>
-            </div>
-
             {referralData?.referralsCount !== undefined && (
               <p className="referral-stats">
                 You have invited <strong>{referralData.referralsCount}</strong> friends 🎉
@@ -135,7 +105,13 @@ export default function ReferralCard() {
             )}
 
             <div className="referral-note">
-              <p>This code expires on {new Date(referralData?.expiresAt || '').toLocaleDateString()}.</p>
+              <p>
+                This code expires on{' '}
+                {referralData?.expiresAt
+                  ? new Date(referralData.expiresAt).toLocaleDateString()
+                  : '—'}
+                .
+              </p>
               <p>Each referral can use it once.</p>
             </div>
           </>
