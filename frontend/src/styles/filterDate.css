@@ -1,6 +1,5 @@
 .filter-date-div {
-  position: absolute;
-  top: 165;
+  top: 100;
   display: flex;
   flex-direction: row-reverse;
   align-self: flex-end;

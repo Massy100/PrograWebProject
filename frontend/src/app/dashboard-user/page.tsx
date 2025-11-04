@@ -128,7 +128,7 @@ export default function DashboardUser() {
         const firstDetail = tx.details?.[0] || {};
         return {
           transaction_type: tx.transaction_type || 'buy',
-          stock: firstDetail.stock?.symbol || firstDetail.stock || 'N/A',
+          stock: firstDetail.stock_name || firstDetail.stock || 'N/A',
           code: tx.code || `TX-${tx.id}`,
           total_amount: tx.total_amount,
           created_at: new Date(tx.created_at),
