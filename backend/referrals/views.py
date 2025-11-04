@@ -1,4 +1,3 @@
-# referrals/views.py - Versión corregida para Auth0
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -24,10 +23,10 @@ def get_user_from_token(request):
         decoded = jwt.decode(token, options={"verify_signature": False})
         
         # En Auth0, el email suele estar en el token
-        user_email = decoded.get('email')
-        if user_email:
+        user_0id = decoded.get('sub')
+        if user_0id:
             try:
-                return User.objects.get(email=user_email)
+                return User.objects.get(auth0_id=user_0id)
             except User.DoesNotExist:
                 return None
                 
@@ -44,7 +43,7 @@ class ValidateReferralCodeView(View):
             data = json.loads(request.body)
             referral_code = data.get('referral_code')
             
-            print(f"Validating referral code: {referral_code}")
+            print(f"🔍 Validating referral code: {referral_code}")
             
             if not referral_code:
                 return JsonResponse({
@@ -65,7 +64,7 @@ class ValidateReferralCodeView(View):
                     is_active=True
                 )
                 
-                print(f"Found code: {referral_code_obj.code} for user: {referral_code_obj.user.username}")
+                print(f"✅ Found code: {referral_code_obj.code} for user: {referral_code_obj.user.username}")
                 
                 # Validar si el código ha expirado
                 if referral_code_obj.is_expired():
@@ -114,7 +113,7 @@ class ProcessReferralView(View):
             data = json.loads(request.body)
             referral_code = data.get('referral_code')
             
-            print(f"Processing referral: {referral_code}")
+            print(f"🔄 Processing referral: {referral_code}")
             
             if not referral_code:
                 return JsonResponse({
@@ -165,7 +164,7 @@ class ProcessReferralView(View):
                     is_active=True
                 )
                 
-                print(f"Referral created: {referral.id}")
+                print(f"✅ Referral created: {referral.id}")
                 
                 return JsonResponse({
                     'success': True,
@@ -180,8 +179,36 @@ class ProcessReferralView(View):
                 }, status=404)
                 
         except Exception as e:
-            print(f"Error processing referral: {str(e)}")
+            print(f"❌ Error processing referral: {str(e)}")
             return JsonResponse({
                 'success': False,
                 'message': f'Error processing referral: {str(e)}'
             }, status=500)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CreateReferralCodeView(View):
+    def post(self, request):
+        user = get_user_from_token(request)
+        if not user:
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+        if user.referred_code:
+            return JsonResponse({'referralCode': user.referred_code, 'created': False})
+
+        import random
+        code = str(random.randint(10000, 99999))
+
+        from referrals.models import ReferralCode
+        ReferralCode.objects.create(
+            user=user,
+            code=code,
+            is_active=True,
+            expires_at=timezone.now() + timezone.timedelta(days=30)
+        )
+
+        user.referred_code = code
+        user.save()
+
+        return JsonResponse({'referralCode': code, 'created': True})
+    
