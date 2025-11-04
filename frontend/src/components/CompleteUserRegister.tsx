@@ -39,7 +39,7 @@ export default function CompleteUserRegister({ onClose, onSuccess }: CompleteUse
     try {
       const token = await getAccessTokenSilently();
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/referrals/validate/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/referrals/validate-referral/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,7 +65,7 @@ export default function CompleteUserRegister({ onClose, onSuccess }: CompleteUse
     try {
       const token = await getAccessTokenSilently();
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/referrals/process/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/referrals/process-referral/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
